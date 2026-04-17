@@ -806,8 +806,10 @@ button.btn-header { font-family: var(--font-mono); }
   </div>
 </div>
 
-<!-- ── Row 1: DMR Display ── -->
+<!-- ── Row 1: DMR (izq) + YSF (dcha) ── -->
 <div class="display-row">
+
+  <!-- DMR (igual) -->
   <div id="dmrDisplayPanel">
     <div class="panel-label">▸ DMR Display</div>
     <div class="nextion">
@@ -819,21 +821,8 @@ button.btn-header { font-family: var(--font-mono); }
       <div class="nx-botbar"><span class="nx-dmrid" id="nxDmrid">—</span><span>SLOT <span id="nxSlot">—</span></span><span class="nx-source" id="nxSource"></span></div>
     </div>
   </div>
-</div>
 
-<!-- ── Row 2: D-STAR Display (izq) + C4FM Display (dcha) ── -->
-<div class="display-row" style="margin-top:1.2rem;">
-  <div id="dstarDisplayPanel" style="display:none;">
-    <div class="panel-label" style="color:#00e5ff;">▸ DSTAR Display</div>
-    <div class="nextion-dstar">
-      <div class="nx-topbar dstar-bar"><span class="nx-mode">DSTAR · DIGITAL</span><span style="color:#006070" id="dstarStationLabel">EA3EIZ · ADER</span><span style="color:#00b0c0;opacity:.85;min-width:5rem;text-align:right;font-size:.6rem;" id="dstarDest">CQCQCQ</span></div>
-      <div class="nx-infobar nx-infobar-dstar"><span class="nx-info-item"><span class="nx-info-lbl">PORT</span><span class="nx-info-val" id="dstarNxPort">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">FRX</span><span class="nx-info-val" style="color:#00e5ff" id="dstarNxFrx">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">FTX</span><span class="nx-info-val" style="color:#00b0c0" id="dstarNxFtx">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">IP</span><span class="nx-info-val" style="color:#80f0ff" id="dstarNxIp">—</span></span></div>
-      <div class="nx-vu" id="dstarVuLeft"></div><div class="nx-vu right" id="dstarVuRight"></div>
-      <div class="nx-center" id="dstarNxCenter"><div class="nx-clock" id="dstarNxClock" style="color:#00e5ff;">00:00:00</div><div class="nx-date" id="dstarNxDate" style="color:#009090;">—</div></div>
-      <div class="nx-txbar" id="dstarTxBar"></div>
-      <div class="nx-botbar dstar-bar"><span style="color:#006070;font-family:var(--font-mono);font-size:.65rem;">DSTAR · DIGITAL VOICE</span><span style="color:#006070;font-family:var(--font-mono);font-size:.65rem;">XRF266 B</span><span class="nx-source" id="dstarSource"></span></div>
-    </div>
-  </div>
+  <!-- YSF (movido aquí) -->
   <div id="ysfDisplayPanel">
     <div class="panel-label ysf-label">▸ C4FM Display</div>
     <div class="nextion-ysf">
@@ -845,10 +834,26 @@ button.btn-header { font-family: var(--font-mono); }
       <div class="nx-botbar ysf-bar"><span style="color:#5a3a8a;font-family:var(--font-mono);font-size:.65rem;" id="ysfProto">YSF</span><span style="color:#5a3a8a;font-family:var(--font-mono);font-size:.65rem;">C4FM · DIGITAL VOICE</span><span class="nx-source" id="ysfSource"></span></div>
     </div>
   </div>
+
 </div>
 
-<!-- ── Row 3: NXDN Display ── -->
-<div class="display-row" style="margin-top:1.2rem;" id="nxdnDisplayRow" style="display:none;">
+<!-- ── Row 2: D-STAR (izq) + NXDN (dcha) ── -->
+<div class="display-row" style="margin-top:1.2rem;">
+
+  <!-- D-STAR (igual) -->
+  <div id="dstarDisplayPanel" style="display:none;">
+    <div class="panel-label" style="color:#00e5ff;">▸ D-STAR Display</div>
+    <div class="nextion-dstar">
+      <div class="nx-topbar dstar-bar"><span class="nx-mode">D-STAR · DIGITAL</span><span style="color:#006070" id="dstarStationLabel">EA3EIZ · ADER</span><span style="color:#00b0c0;opacity:.85;min-width:5rem;text-align:right;font-size:.6rem;" id="dstarDest">CQCQCQ</span></div>
+      <div class="nx-infobar nx-infobar-dstar"><span class="nx-info-item"><span class="nx-info-lbl">PORT</span><span class="nx-info-val" id="dstarNxPort">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">FRX</span><span class="nx-info-val" style="color:#00e5ff" id="dstarNxFrx">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">FTX</span><span class="nx-info-val" style="color:#00b0c0" id="dstarNxFtx">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">IP</span><span class="nx-info-val" style="color:#80f0ff" id="dstarNxIp">—</span></span></div>
+      <div class="nx-vu" id="dstarVuLeft"></div><div class="nx-vu right" id="dstarVuRight"></div>
+      <div class="nx-center" id="dstarNxCenter"><div class="nx-clock" id="dstarNxClock" style="color:#00e5ff;">00:00:00</div><div class="nx-date" id="dstarNxDate" style="color:#009090;">—</div></div>
+      <div class="nx-txbar" id="dstarTxBar"></div>
+      <div class="nx-botbar dstar-bar"><span style="color:#006070;font-family:var(--font-mono);font-size:.65rem;">D-STAR · DIGITAL VOICE</span><span style="color:#006070;font-family:var(--font-mono);font-size:.65rem;">XRF266 B</span><span class="nx-source" id="dstarSource"></span></div>
+    </div>
+  </div>
+
+  <!-- NXDN (movido aquí) -->
   <div id="nxdnDisplayPanel" style="display:none;">
     <div class="panel-label" style="color:#ffd700;">▸ NXDN Display</div>
     <div class="nextion-nxdn">
@@ -860,50 +865,70 @@ button.btn-header { font-family: var(--font-mono); }
       <div class="nx-botbar nxdn-bar"><span style="color:#707000;font-family:var(--font-mono);font-size:.65rem;">NXDN · DIGITAL VOICE</span><span style="color:#707000;font-family:var(--font-mono);font-size:.65rem;">NXDN REF 21465</span><span class="nx-source" id="nxdnSource"></span></div>
     </div>
   </div>
+
 </div>
 
-<!-- ── Últimos escuchados DMR ── -->
+<!-- ── Últimos escuchados DMR + C4FM ── -->
 <div class="display-row" style="margin-top:1rem;">
+
+  <!-- ── Últimos escuchados DMR ── -->
   <div id="dmrLastHeardPanel">
     <div class="panel-label">▸ Últimos escuchados DMR</div>
     <div class="lh-panel">
-      <div class="lh-header"><span>Indicativo</span><span>Nombre</span><span>TG</span><span>Hora</span><span>Src</span></div>
-      <div class="lh-body" id="lhBody"><div class="lh-empty">Sin actividad reciente</div></div>
+      <div class="lh-header">
+        <span>Indicativo</span><span>Nombre</span><span>TG</span><span>Hora</span><span>Src</span>
+      </div>
+      <div class="lh-body" id="lhBody">
+        <div class="lh-empty">Sin actividad reciente</div>
+      </div>
     </div>
   </div>
+
+  <!-- ── Últimos escuchados C4FM ── -->
+  <div id="ysfLastHeardPanel">
+    <div class="panel-label ysf-label">▸ Últimos escuchados C4FM</div>
+    <div class="lh-panel-ysf">
+      <div class="lh-header-ysf">
+        <span>Indicativo</span><span>Nombre</span><span>Hora</span><span>Src</span>
+      </div>
+      <div class="lh-body" id="ysfLhBody">
+        <div class="lh-empty">Sin actividad C4FM</div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
-<!-- ── Últimos escuchados D-STAR (izq) + C4FM (dcha) ── -->
+<!-- ── Últimos escuchados D-STAR + NXDN ── -->
 <div class="display-row" style="margin-top:1rem;">
+
+  <!-- ── Últimos escuchados D-STAR ── -->
   <div id="dstarLastHeardPanel" style="display:none;">
-    <div class="panel-label" style="color:#00e5ff;">▸ Últimos escuchados DSTAR</div>
+    <div class="panel-label" style="color:#00e5ff;">▸ Últimos escuchados D-STAR</div>
     <div class="lh-panel" style="border-color:#004a4a;">
       <div class="lh-header" style="background:#0a1a1a;border-bottom-color:#004a4a;color:#006070;">
         <span>Indicativo</span><span>Nombre</span><span>Hora</span><span>Src</span>
       </div>
-      <div class="lh-body" id="dstarLhBody"><div class="lh-empty">Sin actividad DSTAR</div></div>
+      <div class="lh-body" id="dstarLhBody">
+        <div class="lh-empty">Sin actividad D-STAR</div>
+      </div>
     </div>
   </div>
-  <div id="ysfLastHeardPanel">
-    <div class="panel-label ysf-label">▸ Últimos escuchados C4FM</div>
-    <div class="lh-panel-ysf">
-      <div class="lh-header-ysf"><span>Indicativo</span><span>Nombre</span><span>Hora</span><span>Src</span></div>
-      <div class="lh-body" id="ysfLhBody"><div class="lh-empty">Sin actividad C4FM</div></div>
-    </div>
-  </div>
-</div>
 
-<!-- ── Últimos escuchados NXDN ── -->
-<div class="display-row" style="margin-top:1rem;" id="nxdnLastHeardRow" style="display:none;">
+  <!-- ── Últimos escuchados NXDN ── -->
   <div id="nxdnLastHeardPanel" style="display:none;">
     <div class="panel-label" style="color:#ffd700;">▸ Últimos escuchados NXDN</div>
     <div class="lh-panel-nxdn">
-      <div class="lh-header-nxdn"><span>Indicativo</span><span>Nombre</span><span>TG</span><span>Hora</span><span>Src</span></div>
-      <div class="lh-body" id="nxdnLhBody"><div class="lh-empty">Sin actividad NXDN</div></div>
+      <div class="lh-header-nxdn">
+        <span>Indicativo</span><span>Nombre</span><span>TG</span><span>Hora</span><span>Src</span>
+      </div>
+      <div class="lh-body" id="nxdnLhBody">
+        <div class="lh-empty">Sin actividad NXDN</div>
+      </div>
     </div>
   </div>
-</div>
 
+</div>
 
 
 <!-- ── Logs ── -->
