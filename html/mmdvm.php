@@ -714,7 +714,7 @@ button.btn-header { font-family: var(--font-mono); }
 <!-- Status bar -->
 <div class="status-bar">
 <div class="status-item"><div class="dot" id="dot-mosquitto"></div><span>Mosquitto</span></div>
-<div class="status-item"><div class="dot" id="dot-mmdvm"></div><span>MMDVMHost</span></div>
+<div class="status-item"><div class="dot" id="dot-mmdvm"></div><span>MMDVMHost Dmr</span></div>
 <div class="status-item"><div class="dot" id="dot-gateway"></div><span>DMRGateway</span></div>
 <!-- <div class="section-divider"></div> -->
 <div class="status-item"><div class="dot" id="dot-mmdvmysf"></div><span style="color:#26c6da">MMDVMHost YSF</span></div>
