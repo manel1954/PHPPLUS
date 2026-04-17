@@ -462,7 +462,7 @@ button.btn-header { font-family: var(--font-mono); }
 .service-card-label.ysf { color: var(--violet); }
 .toggle-row { display: flex; align-items: center; gap: 1rem; padding: .5rem 0; }
 .toggle-label { font-family: var(--font-mono); font-size: .85rem; letter-spacing: .06em; color: var(--text-dim); text-transform: uppercase; flex: 1; transition: color .3s; }
-.toggle-label.on-dmr { color: var(--white); }
+.toggle-label.on-dmr { color: var(--amber); }
 .toggle-label.on-ysf { color: var(--violet); }
 .toggle-status { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .1em; color: var(--text-dim); min-width: 3rem; text-align: right; transition: color .3s; }
 .toggle-status.on { color: var(--green); }
@@ -482,8 +482,8 @@ button.btn-header { font-family: var(--font-mono); }
 .auto-badge.ysf .dot-sm { background: var(--violet); }
 .service-card-btns { display: flex; gap: .6rem; flex-wrap: nowrap; margin-top: 1rem; }
 .ini-btn { font-family: var(--font-mono); font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; padding: .3rem .7rem; border-radius: 3px; border: 1px solid var(--border); background: transparent; cursor: pointer; text-decoration: none; transition: all .2s; display: inline-flex; align-items: center; gap: .3rem; }
-.ini-btn.edit { color: var(--amber); border-color: rgba(255,179,0,.3); }
-.ini-btn.edit:hover { border-color: var(--amber); background: rgba(255,179,0,.08); }
+.ini-btn.edit { color: var(--white); border-color: rgba(255,179,0,.3); }
+.ini-btn.edit:hover { border-color: var(--white); background: rgba(255,179,0,.08); }
 .ini-btn.view { color: var(--cyan); border-color: rgba(0,212,255,.3); }
 .ini-btn.view:hover { border-color: var(--cyan); background: rgba(0,212,255,.08); }
 .ini-btn.edit.ysf { color: var(--violet); border-color: rgba(181,122,255,.3); }
