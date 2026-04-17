@@ -767,9 +767,9 @@ button.btn-header { font-family: var(--font-mono); }
   </div>
   <!-- D-STAR -->
   <div class="service-card" style="border-color:rgba(0,229,255,.25);">
-    <div class="service-card-label" style="color:#00ff9f;">▸ D-STAR · MMDVMHost + DStarGateway</div>
+    <div class="service-card-label" style="color:#00ff9f;">▸ DSTAR · MMDVMHost + DStarGateway</div>
     <div class="toggle-row">
-      <span class="toggle-label" id="dstarToggleLabel">D-STAR</span>
+      <span class="toggle-label" id="dstarToggleLabel">DSTAR</span>
       <label class="sw dstar" id="swDSTAR"><input type="checkbox" id="chkDSTAR" onchange="toggleDStar(this)"><span class="sw-track"></span><span class="sw-knob"></span><span class="sw-busy-dot"></span></label>
       <span class="toggle-status" id="dstarToggleStatus">OFF</span>
     </div>
@@ -824,14 +824,14 @@ button.btn-header { font-family: var(--font-mono); }
 <!-- ── Row 2: D-STAR Display (izq) + C4FM Display (dcha) ── -->
 <div class="display-row" style="margin-top:1.2rem;">
   <div id="dstarDisplayPanel" style="display:none;">
-    <div class="panel-label" style="color:#00e5ff;">▸ D-STAR Display</div>
+    <div class="panel-label" style="color:#00e5ff;">▸ DSTAR Display</div>
     <div class="nextion-dstar">
-      <div class="nx-topbar dstar-bar"><span class="nx-mode">D-STAR · DIGITAL</span><span style="color:#006070" id="dstarStationLabel">EA3EIZ · ADER</span><span style="color:#00b0c0;opacity:.85;min-width:5rem;text-align:right;font-size:.6rem;" id="dstarDest">CQCQCQ</span></div>
+      <div class="nx-topbar dstar-bar"><span class="nx-mode">DSTAR · DIGITAL</span><span style="color:#006070" id="dstarStationLabel">EA3EIZ · ADER</span><span style="color:#00b0c0;opacity:.85;min-width:5rem;text-align:right;font-size:.6rem;" id="dstarDest">CQCQCQ</span></div>
       <div class="nx-infobar nx-infobar-dstar"><span class="nx-info-item"><span class="nx-info-lbl">PORT</span><span class="nx-info-val" id="dstarNxPort">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">FRX</span><span class="nx-info-val" style="color:#00e5ff" id="dstarNxFrx">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">FTX</span><span class="nx-info-val" style="color:#00b0c0" id="dstarNxFtx">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">IP</span><span class="nx-info-val" style="color:#80f0ff" id="dstarNxIp">—</span></span></div>
       <div class="nx-vu" id="dstarVuLeft"></div><div class="nx-vu right" id="dstarVuRight"></div>
       <div class="nx-center" id="dstarNxCenter"><div class="nx-clock" id="dstarNxClock" style="color:#00e5ff;">00:00:00</div><div class="nx-date" id="dstarNxDate" style="color:#009090;">—</div></div>
       <div class="nx-txbar" id="dstarTxBar"></div>
-      <div class="nx-botbar dstar-bar"><span style="color:#006070;font-family:var(--font-mono);font-size:.65rem;">D-STAR · DIGITAL VOICE</span><span style="color:#006070;font-family:var(--font-mono);font-size:.65rem;">XRF266 B</span><span class="nx-source" id="dstarSource"></span></div>
+      <div class="nx-botbar dstar-bar"><span style="color:#006070;font-family:var(--font-mono);font-size:.65rem;">DSTAR · DIGITAL VOICE</span><span style="color:#006070;font-family:var(--font-mono);font-size:.65rem;">XRF266 B</span><span class="nx-source" id="dstarSource"></span></div>
     </div>
   </div>
   <div id="ysfDisplayPanel">
@@ -876,12 +876,12 @@ button.btn-header { font-family: var(--font-mono); }
 <!-- ── Últimos escuchados D-STAR (izq) + C4FM (dcha) ── -->
 <div class="display-row" style="margin-top:1rem;">
   <div id="dstarLastHeardPanel" style="display:none;">
-    <div class="panel-label" style="color:#00e5ff;">▸ Últimos escuchados D-STAR</div>
+    <div class="panel-label" style="color:#00e5ff;">▸ Últimos escuchados DSTAR</div>
     <div class="lh-panel" style="border-color:#004a4a;">
       <div class="lh-header" style="background:#0a1a1a;border-bottom-color:#004a4a;color:#006070;">
         <span>Indicativo</span><span>Nombre</span><span>Hora</span><span>Src</span>
       </div>
-      <div class="lh-body" id="dstarLhBody"><div class="lh-empty">Sin actividad D-STAR</div></div>
+      <div class="lh-body" id="dstarLhBody"><div class="lh-empty">Sin actividad DSTAR</div></div>
     </div>
   </div>
   <div id="ysfLastHeardPanel">
