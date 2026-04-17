@@ -458,7 +458,7 @@ button.btn-header { font-family: var(--font-mono); }
 @media (max-width:800px) { .controls-section { grid-template-columns: 1fr; } }
 .service-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.2rem 1.6rem; }
 .service-card-label { font-family: var(--font-mono); font-size: .7rem; letter-spacing: .15em; text-transform: uppercase; margin-bottom: 1rem; }
-.service-card-label.dmr { color: var(--amber); }
+.service-card-label.dmr { color: var(--white); }
 .service-card-label.ysf { color: var(--violet); }
 .toggle-row { display: flex; align-items: center; gap: 1rem; padding: .5rem 0; }
 .toggle-label { font-family: var(--font-mono); font-size: .85rem; letter-spacing: .06em; color: var(--text-dim); text-transform: uppercase; flex: 1; transition: color .3s; }
