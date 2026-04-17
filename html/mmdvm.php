@@ -744,7 +744,7 @@ button.btn-header { font-family: var(--font-mono); }
     </div>
     <div class="service-card-btns" style="margin-top:.4rem;">
       <a href="edit_ini.php?file=mmdvm" class="ini-btn view" style="flex:1;justify-content:center;">📄 EDITAR FICHERO MMDVMHOST.ini</a>
-      <a href="edit_ini.php?file=dmrgateway" class="ini-btn view" style="flex:1;justify-content:center;color:var(--amber);border-color:rgba(255,179,0,.3);">📄 EDITAR FICHERO DMRGateway.ini</a>
+      <a href="edit_ini.php?file=dmrgateway" class="ini-btn view" style="flex:1;justify-content:center;color:var(--white);border-color:rgba(255,179,0,.3);">📄 EDITAR FICHERO DMRGateway.ini</a>
     </div>
   </div>
   <!-- C4FM -->
