@@ -462,7 +462,7 @@ button.btn-header { font-family: var(--font-mono); }
 .service-card-label.ysf { color: var(--violet); }
 .toggle-row { display: flex; align-items: center; gap: 1rem; padding: .5rem 0; }
 .toggle-label { font-family: var(--font-mono); font-size: .85rem; letter-spacing: .06em; color: var(--text-dim); text-transform: uppercase; flex: 1; transition: color .3s; }
-.toggle-label.on-dmr { color: var(--amber); }
+.toggle-label.on-dmr { color: var(--white); }
 .toggle-label.on-ysf { color: var(--violet); }
 .toggle-status { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .1em; color: var(--text-dim); min-width: 3rem; text-align: right; transition: color .3s; }
 .toggle-status.on { color: var(--green); }
@@ -744,7 +744,7 @@ button.btn-header { font-family: var(--font-mono); }
     </div>
     <div class="service-card-btns" style="margin-top:.4rem;">
       <a href="edit_ini.php?file=mmdvm" class="ini-btn view" style="flex:1;justify-content:center;">📄 EDITAR FICHERO MMDVMHOST.ini</a>
-      <a href="edit_ini.php?file=dmrgateway" class="ini-btn view" style="flex:1;justify-content:center;color:var(--amber);border-color:rgba(255,179,0,.3);">📄 EDITAR FICHERO DMRGateway.ini</a>
+      <a href="edit_ini.php?file=dmrgateway" class="ini-btn view" style="flex:1;justify-content:center;color:var(--white);border-color:rgba(255,179,0,.3);">📄 EDITAR FICHERO DMRGateway.ini</a>
     </div>
   </div>
   <!-- C4FM -->
@@ -757,11 +757,11 @@ button.btn-header { font-family: var(--font-mono); }
     </div>
     <div class="auto-badge ysf" id="ysfRefreshBadge" style="display:none"><div class="dot-sm"></div> C4FM activo</div>
     <div class="service-card-btns" style="margin-top:.4rem;">
-      <a href="mmdvmysf_config.php" class="ini-btn edit" style="flex:1;justify-content:center;color:#26c6da;border-color:rgba(38,198,218,.3);">⚙ MMDVMYSF CONFIG</a>
+      <a href="mmdvmysf_config.php" class="ini-btn edit" style="flex:1;justify-content:center;color:#00e5ff;border-color:rgba(38,198,218,.3);">⚙ MMDVMYSF CONFIG</a>
       <a href="ysfgateway_config.php" class="ini-btn edit ysf" style="flex:1;justify-content:center;">⚙ YSFGATEWAY CONFIG</a>
     </div>
     <div class="service-card-btns">
-      <a href="edit_ini.php?file=mmdvmysf" class="ini-btn view" style="flex:1;justify-content:center;color:#80deea;border-color:rgba(38,198,218,.2);">📄 editar fichero MMDVMYSF.ini</a>
+      <a href="edit_ini.php?file=mmdvmysf" class="ini-btn view" style="flex:1;justify-content:center;color:#00e5ff;border-color:rgba(38,198,218,.2);">📄 editar fichero MMDVMYSF.ini</a>
       <a href="edit_ini.php?file=ysfgateway" class="ini-btn view ysf" style="flex:1;justify-content:center;">📄 editar fichero YSFGateway.ini</a>
     </div>
   </div>
@@ -796,11 +796,11 @@ button.btn-header { font-family: var(--font-mono); }
     </div>
     <div class="auto-badge" id="nxdnRefreshBadge" style="display:none;color:#ffd700;"><div class="dot-sm" style="background:#ffd700;"></div> NXDN activo</div>
     <div class="service-card-btns" style="margin-top:.6rem;">
-      <a href="mmdvmnxdn_config.php" class="ini-btn edit" style="flex:1;justify-content:center;color:#ffd700;border-color:rgba(255,215,0,.3);">⚙ MMDVMNXDN CONFIG</a>
+      <a href="mmdvmnxdn_config.php" class="ini-btn edit" style="flex:1;justify-content:center;color:#00e5ff;border-color:rgba(255,215,0,.3);">⚙ MMDVMNXDN CONFIG</a>
       <a href="nxdngateway_config.php" class="ini-btn edit" style="flex:1;justify-content:center;color:#ffc400;border-color:rgba(255,196,0,.3);">⚙ NXDNGATEWAY CONFIG</a>
     </div>
     <div class="service-card-btns" style="margin-top:.4rem;">
-      <a href="edit_ini.php?file=mmdvmnxdn" class="ini-btn view" style="flex:1;justify-content:center;color:#ffd700;border-color:rgba(255,215,0,.3);">📄 editar fichero MMDVMNXDN.ini</a>
+      <a href="edit_ini.php?file=mmdvmnxdn" class="ini-btn view" style="flex:1;justify-content:center;color:#00e5ff;border-color:rgba(255,215,0,.3);">📄 editar fichero MMDVMNXDN.ini</a>
       <a href="edit_ini.php?file=nxdngateway" class="ini-btn view" style="flex:1;justify-content:center;color:#ffc400;border-color:rgba(255,196,0,.3);">📄 editar fichero NXDNGateway.ini</a>
     </div>
   </div>
@@ -842,9 +842,9 @@ button.btn-header { font-family: var(--font-mono); }
 
   <!-- D-STAR (igual) -->
   <div id="dstarDisplayPanel" style="display:none;">
-    <div class="panel-label" style="color:#00e5ff;">▸ D-STAR Display</div>
+    <div class="panel-label" style="color:#00e5ff;">▸ DSTAR Display</div>
     <div class="nextion-dstar">
-      <div class="nx-topbar dstar-bar"><span class="nx-mode">D-STAR · DIGITAL</span><span style="color:#006070" id="dstarStationLabel">EA3EIZ · ADER</span><span style="color:#00b0c0;opacity:.85;min-width:5rem;text-align:right;font-size:.6rem;" id="dstarDest">CQCQCQ</span></div>
+      <div class="nx-topbar dstar-bar"><span class="nx-mode">DSTAR · DIGITAL</span><span style="color:#006070" id="dstarStationLabel">EA3EIZ · ADER</span><span style="color:#00b0c0;opacity:.85;min-width:5rem;text-align:right;font-size:.6rem;" id="dstarDest">CQCQCQ</span></div>
       <div class="nx-infobar nx-infobar-dstar"><span class="nx-info-item"><span class="nx-info-lbl">PORT</span><span class="nx-info-val" id="dstarNxPort">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">FRX</span><span class="nx-info-val" style="color:#00e5ff" id="dstarNxFrx">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">FTX</span><span class="nx-info-val" style="color:#00b0c0" id="dstarNxFtx">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">IP</span><span class="nx-info-val" style="color:#80f0ff" id="dstarNxIp">—</span></span></div>
       <div class="nx-vu" id="dstarVuLeft"></div><div class="nx-vu right" id="dstarVuRight"></div>
       <div class="nx-center" id="dstarNxCenter"><div class="nx-clock" id="dstarNxClock" style="color:#00e5ff;">00:00:00</div><div class="nx-date" id="dstarNxDate" style="color:#009090;">—</div></div>
@@ -904,13 +904,13 @@ button.btn-header { font-family: var(--font-mono); }
 
   <!-- ── Últimos escuchados D-STAR ── -->
   <div id="dstarLastHeardPanel" style="display:none;">
-    <div class="panel-label" style="color:#00e5ff;">▸ Últimos escuchados D-STAR</div>
+    <div class="panel-label" style="color:#00e5ff;">▸ Últimos escuchados DSTAR</div>
     <div class="lh-panel" style="border-color:#004a4a;">
       <div class="lh-header" style="background:#0a1a1a;border-bottom-color:#004a4a;color:#006070;">
         <span>Indicativo</span><span>Nombre</span><span>Hora</span><span>Src</span>
       </div>
       <div class="lh-body" id="dstarLhBody">
-        <div class="lh-empty">Sin actividad D-STAR</div>
+        <div class="lh-empty">Sin actividad DSTAR</div>
       </div>
     </div>
   </div>
@@ -1075,7 +1075,7 @@ buildDStarVU();
 function animateDStarVU(on){clearInterval(dstarVuTimer);['dstarVuLeft','dstarVuRight'].forEach(id=>{for(let i=0;i<18;i++)document.getElementById(`${id}-${i}`).className='nx-vu-bar';});if(!on)return;dstarVuTimer=setInterval(()=>{['dstarVuLeft','dstarVuRight'].forEach(id=>{const lvl=Math.floor(Math.random()*16)+1;for(let i=0;i<18;i++){let cls='nx-vu-bar';if(i<lvl)cls+=i<10?' lit-g':i<14?' lit-a':' lit-r';document.getElementById(`${id}-${i}`).className=cls;}});},80);}
 function updateDStarClock(){if(!dstarCurrentlyActive){const now=new Date();const clk=document.getElementById('dstarNxClock');if(clk){clk.textContent=now.toLocaleTimeString('es-ES');document.getElementById('dstarNxDate').textContent=now.toLocaleDateString('es-ES',{weekday:'short',day:'2-digit',month:'short',year:'numeric'}).toUpperCase();}}}
 setInterval(updateDStarClock,1000);updateDStarClock();
-function showDStarIdle(){dstarCurrentlyActive=false;animateDStarVU(false);document.getElementById('dstarTxBar').className='nx-txbar';const src=document.getElementById('dstarSource');src.textContent='';src.className='nx-source';document.getElementById('dstarNxCenter').innerHTML='<div class="nx-clock" id="dstarNxClock" style="color:#00e5ff;">00:00:00</div><div class="nx-date" id="dstarNxDate" style="color:#009090;">—</div>';updateDStarClock();}
+function showDStarIdle(){dstarCurrentlyActive=false;animateDStarVU(false);document.getElementById('dstarTxBar').className='nx-txbar';const src=document.getElementById('dstarSource');src.textContent='';src.className='nx-source';document.getElementById('dstarNxCenter').innerHTML='<div class="nx-clock" id="dstarNxClock" style="color:#00ff9f;">00:00:00</div><div class="nx-date" id="dstarNxDate" style="color:#009090;">—</div>';updateDStarClock();}
 function showDStarActive(d){dstarCurrentlyActive=true;animateDStarVU(true);document.getElementById('dstarTxBar').className='nx-txbar active';document.getElementById('dstarTxBar').style.background='linear-gradient(90deg,transparent,#00e5ff,transparent)';const src=document.getElementById('dstarSource');if(d.source==='RF'){src.textContent='RF';src.className='nx-source rf';}else{src.textContent='NET';src.className='nx-source net';}const flag=getFlagByCall(d.callsign.replace(/\/.*$/,''));document.getElementById('dstarNxCenter').innerHTML=`<div class="nx-callsign dstar">${flag} ${esc(d.callsign)}</div>`+(d.name?`<div class="nx-name dstar">${esc(d.name)}</div>`:'');}
 function renderDStarLastHeard(list,activeCall){const body=document.getElementById('dstarLhBody');if(!list||list.length===0){body.innerHTML='<div class="lh-empty">Sin actividad D-STAR</div>';return;}body.innerHTML=list.map(r=>{const isActive=activeCall&&r.callsign===activeCall;const srcCls=r.source==='RF'?'rf':'net',srcLbl=r.source==='RF'?'RF':'NET';const dot=isActive?'<span class="lh-tx-dot" style="background:#00e5ff;box-shadow:0 0 6px #00e5ff;"></span>':'';const flag=getFlagByCall(r.callsign.replace(/\/.*$/,''));return`<div class="lh-row${isActive?' lh-active':''}"><div class="lh-call-wrap">${dot}<span class="lh-call" style="color:#00e5ff;">${flag} ${esc(r.callsign)}</span></div><span class="lh-name">${esc(r.name||'—')}</span><span class="lh-time">${esc(r.time||'—')}</span><span class="lh-src ${srcCls}">${srcLbl}</span></div>`;}).join('');}
 async function fetchDStarTransmission(){try{const r=await fetch('?action=dstar-transmission');const d=await r.json();if(d.active)showDStarActive(d);else showDStarIdle();renderDStarLastHeard(d.lastHeard||[],d.active?d.callsign:null);}catch(e){}}
