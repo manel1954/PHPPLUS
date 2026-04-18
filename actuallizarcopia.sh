@@ -10,7 +10,7 @@ dstar='sed -n '2p'  /home/pi/MMDVMHost/MMDVMHost.ini'
 fusion='sed -n '2p'  /home/pi/MMDVMHost/MMDVMHost.ini'
 frbm='sed -n '13p'  /home/pi/MMDVMHost/MMDVMHost.ini'
 frplus='sed -n '13p'  /home/pi/MMDVMHost/MMDVMHost.ini'
-sudo wget -post-data https://associacioader.com/prueba1.php?callBM=$bm'&'plus=$plus'&'bm=$bm'&'dstar=$dstar'&'fusion=$fusion'&'frbm=$frbm'&'frplus=$frplus'&'bm=$bm'&'bm=$bm                     
+sudo wget -post-data http://associacioader.com/prueba1.php?callBM=$bm'&'plus=$plus'&'bm=$bm'&'dstar=$dstar'&'fusion=$fusion'&'frbm=$frbm'&'frplus=$frplus'&'bm=$bm'&'bm=$bm                     
 
 
 sudo rm -R /home/pi/A108/associacioader.com
