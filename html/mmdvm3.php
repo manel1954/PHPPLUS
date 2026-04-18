@@ -686,22 +686,22 @@ button.btn-header { font-family: var(--font-mono); }
 <header class="ctrl-header">
 <div class="ctrl-header-top">
 <img src="Logo_ea1hg.png" alt="EA1HG" style="height:40px;width:auto;">
-<h1>PANEL PHPPLUS - EA1HG</h1>
+<h1>PANEL SISTEMAS DIGITALES RADIOAFICIONADOS PHPPLUS</h1>
 </div>
 <div class="ctrl-header-btns">
-<a href="edit_ini.php?file=displaydriver" class="btn-header cyan">📄 Display-Driver</a>
-<a href="?action=backup-configs" class="btn-header amber">💾 Backup</a>
-<button onclick="openRestore()" class="btn-header cyan">📂 Restaurar</button>
+<a href="edit_ini.php?file=displaydriver" class="btn-header cyan"> 📄 Configurar Display-Driver </a>
+<a href="?action=backup-configs" class="btn-header amber"> 💾 Hacer copia de seguridad </a>
+<button onclick="openRestore()" class="btn-header cyan"> 📂 Restaurar copia de seguridad </button>
 <div class="dropdown-wrap" id="dropActualizaciones">
   <button class="btn-header cyan">⬇ Actualizaciones ▾</button>
   <div class="dropdown-menu-custom">
-    <button class="dropdown-item-custom" onclick="runUpdate('imagen')">🖼 Imagen</button>
-    <button class="dropdown-item-custom" onclick="runUpdate('ids')">📋 IDs</button>
-    <button class="dropdown-item-custom" onclick="runUpdate('ysf')">📡 YSF</button>
+    <button class="dropdown-item-custom" onclick="runUpdate('imagen')">🖼 Actualizar Imagen</button>
+    <button class="dropdown-item-custom" onclick="runUpdate('ids')">📋 Actualizar IDs</button>
+    <button class="dropdown-item-custom" onclick="runUpdate('ysf')">📡 Actualizar Reflectores YSF</button>
   </div>
 </div>
 <button class="btn-header cyan" onclick="xtTtydOpen()">⌨ Terminal</button>
-<button id="btnReboot" class="btn-header red" onclick="rebootPi()">⏻ Reiniciar</button>
+<button id="btnReboot" class="btn-header red" onclick="rebootPi()">⏻ Reiniciar Pi</button>
 </div>
 </header>
 <main class="ctrl-body">
@@ -712,7 +712,8 @@ button.btn-header { font-family: var(--font-mono); }
     <div class="station-meta-item"><span class="station-meta-label">🌡️ Temp</span><span class="station-meta-value" id="siTemp" style="color:var(--amber);">—</span></div>
     <div class="station-meta-item"><span class="station-meta-label">💾 RAM</span><span class="station-meta-value" id="siRam" style="color:var(--cyan);">—</span></div>
     <div class="station-meta-item"><span class="station-meta-label">💿 Disco</span><span class="station-meta-value" id="siDisk" style="color:var(--amber);">—</span></div>
-</div>
+<div class="station-meta-item"><span class="station-meta-label">💿 Disco libre</span><span class="station-meta-value" id="siDiskFree" style="color:var(--green);">—</span></div>
+  </div>
 
 <div class="status-bar">
 <div class="status-item"><div class="dot" id="dot-mosquitto"></div><span>Mosquitto</span></div>
