@@ -634,8 +634,7 @@ button.btn-header { font-family: var(--font-mono); }
 .restore-btns { display: flex; gap: .8rem; }
 .restore-btn-ok { flex: 1; background: #28a745; color: #fff; border: none; border-radius: 6px; font-family: var(--font-mono); font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; padding: .6rem; cursor: pointer; transition: background .2s; }
 .restore-btn-ok:hover { background: #218838; }
-.restore-btn-cancel { flex: 1; background: transparent; color: var(--text-dim); border: 1px solid var(--border); border-radius: 6px; font-family: var(--font-mono); font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; padding: .6rem; cursor: pointer; transition: all .2s; }
-.restore-btn-cancel:hover { border-color: var(--text); color: var(--text); }
+.restore-btn-cancel:disabled { opacity: .35; cursor: not-allowed; pointer-events: none; }
 .restore-msg { margin-top: .8rem; font-family: var(--font-mono); font-size: .75rem; display: none; padding: .5rem .8rem; border-radius: 4px; border: 1px solid; }
 .restore-msg.ok { color: var(--green); border-color: var(--green); background: rgba(0,255,159,.06); }
 .restore-msg.err { color: var(--red); border-color: var(--red); background: rgba(255,69,96,.06); }
