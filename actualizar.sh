@@ -35,7 +35,7 @@ indi=$(awk "NR==2" $usuario/MMDVMHost/MMDVMBM.ini)
 ide=$(awk "NR==3" $usuario/MMDVMHost/MMDVMBM.ini)
 frec=$(awk "NR==13" $usuario/MMDVMHost/MMDVMBM.ini)
 masterbm=$(awk "NR==53" $usuario/DMRGateway/DMRGateway.ini)
-masterbm=`expr substr $masterbm 15 30`
+masterbm=`expr substr $masterbm 9 30`
 sed -i "1c $indi" $usuario/info_panel_control.ini
 sed -i "2c $ide" $usuario/info_panel_control.ini
 sed -i "3c $frec" $usuario/info_panel_control.ini
@@ -45,7 +45,7 @@ indi=$(awk "NR==2" $usuario/MMDVMHost/MMDVMPLUS.ini)
 ide=$(awk "NR==3" $usuario/MMDVMHost/MMDVMPLUS.ini)
 frec=$(awk "NR==13" $usuario/MMDVMHost/MMDVMPLUS.ini)
 masterplus=$(awk "NR==84" $usuario/DMRGateway/DMRGateway.ini)
-masterplus=`expr substr $masterplus 15 30`
+masterplus=`expr substr $masterplus 9 30`
 sed -i "11c $indi" $usuario/info_panel_control.ini
 sed -i "12c $ide" $usuario/info_panel_control.ini
 sed -i "13c $frec" $usuario/info_panel_control.ini
@@ -54,8 +54,8 @@ sed -i "14c $masterplus" $usuario/info_panel_control.ini
 indi=$(awk "NR==2" $usuario/MMDVMHost/MMDVM.ini)
 ide=$(awk "NR==3" $usuario/MMDVMHost/MMDVM.ini)
 frec=$(awk "NR==13" $usuario/MMDVMHost/MMDVM.ini)
-masterradio=$(awk "NR==232" $usuario/MMDVMHost/MMDVM.ini)
-masterradio=`expr substr $masterradio 15 30`
+masterradio=$(awk "NR==53" $usuario/DStarGateway/DStarGateway.ini)
+masterradio=`expr substr $masterradio 10 30`
 sed -i "6c $indi" $usuario/info_panel_control.ini
 sed -i "7c $ide" $usuario/info_panel_control.ini
 sed -i "8c $frec" $usuario/info_panel_control.ini
