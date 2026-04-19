@@ -878,24 +878,14 @@ button.btn-header { font-family: var(--font-mono); }
   </div>
 </div>
 
-<div id="dmrLastHeardPanel">
+
+<!-- ── Fila 1: Últimos DMR (izq) + Últimos C4FM (dcha) ── -->
+<div class="display-row" style="margin-top:1rem;">
+  <div id="dmrLastHeardPanel">
     <div class="panel-label">▸ Últimos escuchados DMR</div>
     <div class="lh-panel">
       <div class="lh-header"><span>Indicativo</span><span>Nombre</span><span>TG</span><span>Hora</span><span>Src</span></div>
       <div class="lh-body" id="lhBody"><div class="lh-empty">Sin actividad reciente</div></div>
-    </div>
-  </div>
-</div>
-
-<!-- ── Últimos escuchados D-STAR (izq) + C4FM (dcha) ── -->
-<div class="display-row" style="margin-top:1rem;">
-  <div id="dstarLastHeardPanel" style="display:none;">
-    <div class="panel-label" style="color:#00e5ff;">▸ Últimos escuchados D-STAR</div>
-    <div class="lh-panel" style="border-color:#004a4a;">
-      <div class="lh-header" style="background:#0a1a1a;border-bottom-color:#004a4a;color:#006070;">
-        <span>Indicativo</span><span>Nombre</span><span>Hora</span><span>Src</span>
-      </div>
-      <div class="lh-body" id="dstarLhBody"><div class="lh-empty">Sin actividad D-STAR</div></div>
     </div>
   </div>
   <div id="ysfLastHeardPanel">
@@ -907,9 +897,18 @@ button.btn-header { font-family: var(--font-mono); }
   </div>
 </div>
 
-<!-- ── Últimos escuchados NXDN ── -->
-<div class="display-row" style="margin-top:1rem;" id="nxdnLastHeardRow" style="display:none;">
-  <div id="nxdnLastHeardPanel" style="display:none;">
+<!-- ── Fila 2: Últimos D-STAR (izq) + Últimos NXDN (dcha) ── -->
+<div class="display-row" style="margin-top:1rem;">
+  <div id="dstarLastHeardPanel">
+    <div class="panel-label" style="color:#00e5ff;">▸ Últimos escuchados D-STAR</div>
+    <div class="lh-panel" style="border-color:#004a4a;">
+      <div class="lh-header" style="background:#0a1a1a;border-bottom-color:#004a4a;color:#006070;">
+        <span>Indicativo</span><span>Nombre</span><span>Hora</span><span>Src</span>
+      </div>
+      <div class="lh-body" id="dstarLhBody"><div class="lh-empty">Sin actividad D-STAR</div></div>
+    </div>
+  </div>
+  <div id="nxdnLastHeardPanel">
     <div class="panel-label" style="color:#ffd700;">▸ Últimos escuchados NXDN</div>
     <div class="lh-panel-nxdn">
       <div class="lh-header-nxdn"><span>Indicativo</span><span>Nombre</span><span>TG</span><span>Hora</span><span>Src</span></div>
@@ -918,9 +917,6 @@ button.btn-header { font-family: var(--font-mono); }
   </div>
 </div>
 
-
-
-<!-- ── Logs ── -->
 <div class="log-grid" style="margin-top:2rem;">
 <div id="dmrLogPanels" style="display:contents;">
 <div class="log-panel"><div class="log-panel-header"><span class="svc-name">▸ MMDVMHost</span><button class="btn-clear" onclick="clearLog('logMmd')">limpiar</button></div><div class="log-output" id="logMmd">Esperando servicios…</div></div>
