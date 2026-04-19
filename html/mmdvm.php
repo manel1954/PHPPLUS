@@ -685,6 +685,11 @@ button.btn-header { font-family: var(--font-mono); }
     margin-right: 3px;
 }
 </style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/twemoji@14.0.2/dist/twemoji.min.js" crossorigin="anonymous"></script>
+
+
 </head>
 <body>
 <header class="ctrl-header">
@@ -1259,6 +1264,23 @@ document.getElementById('xtInp').addEventListener('keydown',async function(e){
     startMMDVMYSFLogs();
     startYSFTransmissionPoll();
 })();
+// Twemoji solo en banderas, no en botones
+function applyFlagTwemoji(root){
+    const spans=(root||document).querySelectorAll('.flag-emoji');
+    spans.forEach(s=>twemoji.parse(s,{folder:'svg',ext:'.svg',base:'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/'}));
+}
+const _flagObs=new MutationObserver(m=>{
+    m.forEach(mu=>{
+        mu.addedNodes.forEach(n=>{
+            if(n.nodeType===1){
+                if(n.classList&&n.classList.contains('flag-emoji'))twemoji.parse(n,{folder:'svg',ext:'.svg',base:'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/'});
+                else n.querySelectorAll&&n.querySelectorAll('.flag-emoji').forEach(s=>twemoji.parse(s,{folder:'svg',ext:'.svg',base:'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/'}));
+            }
+        });
+    });
+});
+_flagObs.observe(document.body,{childList:true,subtree:true});
+document.addEventListener('DOMContentLoaded',()=>applyFlagTwemoji());
 </script>
 </body>
 </html>
