@@ -401,6 +401,7 @@ if ($action === 'nxdn-transmission') {
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <script src="https://cdn.jsdelivr.net/npm/twemoji@14.0.2/dist/twemoji.min.js" crossorigin="anonymous"></script>
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -962,59 +963,35 @@ const FLAGS = {
 };
 
 // ✅ FUNCIÓN GENERADORA DE BANDERAS - PREFIJOS ITU RADIOAFICIONADOS
-function getFlagByCall(callsign) {
-    if (!callsign) return '<span class="flag-wrap"><div class="flag-lollipop">'+FLAGS.ES+'</div></span>';
-    const cs = callsign.toUpperCase().trim();
-    // Orden específico para evitar falsos positivos (de más específico a más general)
-    const prefixes = [
-        // España: EA1-9, EB1-9, EC1-9, ED1-9, EE1-9, EF1-9, EG1-9, EH1-9
-        {re:/^E[ABCDEFGH][1-9]/, code:'ES'},
-        // Portugal: CT1-9, CU1-9, CQ, CR, CS
-        {re:/^C(TU|[TQ]|R|S)/, code:'PT'},
-        // Francia: F, FM, FO, FH, FJ, FK, FL, FP, FR, FS, FT, FU, FV, FW, FX
-        {re:/^F([A-Z]|M|O|H|J|K|L|P|R|S|T|U|V|W|X)/, code:'FR'},
-        // Italia: I, IM, IN, IO, IP, IQ, IR, IS, IT, IU, IV, IW, IX, IY, IZ
-        {re:/^I([M-P]|R-Z|[2-9]|M[NOPT])/, code:'IT'},
-        {re:/^I$/, code:'IT'},
-        // UK: G, M, 2E, 2M, 2I, 2D, 2W, 2S, 2C, GB, MJ, MU, GQ
-        {re:/^(G|M|2[EIMDWS]|GB|MJ|MU|GQ)/, code:'GB'},
-        // Alemania: DA-DR, DL, DM, DO, DP, DQ, Y2-Y9, DD-DR, DF-DL, DM-DQ
-        {re:/^D([A-RT]|L|M|O|P|Q)|^Y[2-9]/, code:'DE'},
-        // USA: K, W, N, AA-AL, WA-WZ, NA-NZ, KA-KZ
-        {re:/^[KWN]|^A[ALM]|^N[A-Z]|^W[A-Z]|^K[A-Z]/, code:'US'},
-        // Canadá: VA, VE, VO, VY
-        {re:/^V(A|E|O|Y)/, code:'CA'},
-        // Brasil: PY, PU, PV, PW, PX
-        {re:/^P(Y|U|V|W|X)/, code:'BR'},
-        // Argentina: LU, LV, LW, LX, L4-L9, LO-LR
-        {re:/^L(U|V|W|X|[4-9]|O|P|Q|R)/, code:'AR'},
-        // Japón: JA-JS, 7J-7N, 8J-8N
-        {re:/^J([A-S])|^7([J-N])|^8([J-N])/, code:'JP'},
-        // Australia: VK, AX, VH-VN, VX-VZ
-        {re:/^V(K|X|H|I|J|K|L|M|N|X|Y|Z)/, code:'AU'},
-        // Sudáfrica: ZS, ZT, ZU, ZV-ZZ, ZR
-        {re:/^Z(S|T|U|[V-Z]|R)/, code:'ZA'},
-        // Finlandia: OH, OF, OI, OJ
-        {re:/^O(H|F|I|J)/, code:'FI'},
-        // Países Bajos: PA-PI
-        {re:/^P([A-I])/, code:'NL'},
-        // Suiza: HB, HB9, HE
-        {re:/^(HB9?|HE)/, code:'CH'},
-        // Austria: OE
-        {re:/^OE/, code:'AT'},
-        // Polonia: SP, SO, SQ, SR, HF
-        {re:/^S(P|O|Q|R)|^HF/, code:'PL'},
-        // Rusia: UA-UI, RA-RC, UA1-0, R1-0
-        {re:/^(U[A-I]|R[A-C])/, code:'RU'},
-        // Grecia: SV, SY, SZ, J4, SX-SZ
-        {re:/^S(V|Y|Z)|^J4|^S([X-Z])/, code:'GR'},
-        // Lituania: LY
-        {re:/^LY/, code:'LT'},
-        // Croacia: 9A, YU
-        {re:/^(9A|YU)/, code:'HR'}
+function getFlagByCall(callsign){
+    if(!callsign)return'';
+    const cs=callsign.toUpperCase().trim();
+    const prefixes=[
+        {re:/^E[ABCDEFGH][1-9]/,flag:'🇪🇸'},
+        {re:/^C[TUQ]/,flag:'🇵🇹'},
+        {re:/^F[A-Z]/,flag:'🇫🇷'},
+        {re:/^I[0-9MKWZ]/,flag:'🇮🇹'},
+        {re:/^(G|M|2[EIMDWS]|GB)/,flag:'🇬🇧'},
+        {re:/^D[A-RT]|^Y[2-9]/,flag:'🇩🇪'},
+        {re:/^[KWN]|^A[ALM]/,flag:'🇺🇸'},
+        {re:/^V[AEO]/,flag:'🇨🇦'},
+        {re:/^P[YUVWX]/,flag:'🇧🇷'},
+        {re:/^L[UVWX]/,flag:'🇦🇷'},
+        {re:/^J[A-S]/,flag:'🇯🇵'},
+        {re:/^VK/,flag:'🇦🇺'},
+        {re:/^Z[STU]/,flag:'🇿🇦'},
+        {re:/^O[HFI]/,flag:'🇫🇮'},
+        {re:/^P[A-I]/,flag:'🇳🇱'},
+        {re:/^HB/,flag:'🇨🇭'},
+        {re:/^OE/,flag:'🇦🇹'},
+        {re:/^S[PQR]|^HF/,flag:'🇵🇱'},
+        {re:/^U[A-I]|^R[A-C]/,flag:'🇷🇺'},
+        {re:/^S[VYZ]|^J4/,flag:'🇬🇷'},
+        {re:/^LY/,flag:'🇱🇹'},
+        {re:/^9A/,flag:'🇭🇷'},
     ];
-    for(const p of prefixes){ if(p.re.test(cs)) return '<span class="flag-wrap"><div class="flag-lollipop">'+FLAGS[p.code]+'</div></span>'; }
-    return '<span class="flag-wrap"><div class="flag-lollipop">'+FLAGS.ES+'</div></span>';
+    for(const p of prefixes){if(p.re.test(cs))return p.flag;}
+    return'🌐';
 }
 
 // ✅ TEMPORIZADORES & ESTADO (LÓGICA INMEDIATA)
