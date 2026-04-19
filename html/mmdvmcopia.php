@@ -757,18 +757,18 @@ button.btn-header { font-family: var(--font-mono); }
   <div class="service-card">
     <div class="service-card-label dmr" style="color:#fff;">▸ DMR · MMDVMHost + DMRGateway</div>
     <div class="toggle-row">
-      <span class="toggle-label" id="dmrToggleLabel">DMR</span>
+      <span class="toggle-label" id="dmrToggleLabel"style="color:#fff;">DMR</span>
       <label class="sw dmr" id="swDMR"><input type="checkbox" id="chkDMR" onchange="toggleServices(this)"><span class="sw-track"></span><span class="sw-knob"></span><span class="sw-busy-dot"></span></label>
       <span class="toggle-status" id="dmrToggleStatus">OFF</span>
     </div>
     <div class="auto-badge" id="autoRefreshBadge" style="display:none"><div class="dot-sm"></div> auto-refresh 3s</div>
     <div class="service-card-btns">
       <a href="mmdvm_config.php" class="ini-btn edit" style="flex:1;justify-content:center;color:var(--cyan);border-color:rgba(0,212,255,.3);">⚙ MMDVMHOST Config</a>
-      <a href="dmrgateway_config.php" class="ini-btn edit" style="flex:1;justify-content:center;">⚙ DMRGateway Config</a>
+      <a href="dmrgateway_config.php" class="ini-btn edit" style="flex:1;color:#fff;justify-content:center;">⚙ DMRGateway Config</a>
     </div>
     <div class="service-card-btns" style="margin-top:.4rem;">
       <a href="edit_ini.php?file=mmdvm" class="ini-btn view" style="flex:1;justify-content:center;">📄 EDITAR FICHERO MMDVMHOST.ini</a>
-      <a href="edit_ini.php?file=dmrgateway" class="ini-btn view" style="flex:1;justify-content:center;color:var(--amber);border-color:rgba(255,179,0,.3);">📄 EDITAR FICHERO DMRGateway.ini</a>
+      <a href="edit_ini.php?file=dmrgateway" class="ini-btn view" style="flex:1;color:#fff;justify-content:center;color:var(--amber);border-color:rgba(255,179,0,.3);">📄 EDITAR FICHERO DMRGateway.ini</a>
     </div>
   </div>
   <!-- C4FM -->
