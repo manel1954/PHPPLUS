@@ -540,10 +540,16 @@ button.btn-header { font-family: var(--font-mono); }
 .nx-name { font-family: var(--font-ui); font-weight: 500; font-size: 1.2rem; color: var(--cyan); letter-spacing: .18em; text-transform: uppercase; opacity: .9; margin-top: .15rem; }
 .nx-name.ysf { color: #d4a8ff; }
 .nx-name.nxdn { color: #ffc400; }
+
+
+
 .nx-infobar { position: absolute; top: 30px; left: 0; right: 0; height: 26px; background: rgba(0,0,0,.35); border-bottom: 1px solid #0d2030; display: flex; align-items: center; justify-content: space-around; padding: 0 3rem; gap: 1rem; z-index: 2; }
 .nx-info-item { display: flex; align-items: center; gap: .4rem; }
-.nx-info-lbl { font-family: var(--font-mono); font-size: .58rem; color: var(--text-dim); letter-spacing: .12em; text-transform: uppercase; }
+.nx-info-lbl { font-family: var(--font-mono); font-size: 20px; color:#ff0; letter-spacing: .12em; text-transform: uppercase; }
 .nx-info-val { font-family: var(--font-mono); font-size: .72rem; color: var(--text); letter-spacing: .06em; font-weight: bold; }
+
+
+
 .nx-info-val.cyan { color: var(--cyan); }
 .nx-info-val.amber { color: var(--amber); }
 .nx-info-val.green { color: var(--green); }
