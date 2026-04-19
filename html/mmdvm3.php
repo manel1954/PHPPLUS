@@ -1241,7 +1241,8 @@ async function fetchSysInfo(){
         const tempEl=document.getElementById('siTemp');if(tempEl){tempEl.textContent=d.temp||'—';const t=parseFloat(d.temp);tempEl.style.color=t>75?'var(--red)':t>60?'var(--amber)':'var(--green)';}
         const ramEl=document.getElementById('siRam');if(ramEl) ramEl.textContent=d.ramUsed+' GB / '+d.ramTotal+' GB';
         const diskEl=document.getElementById('siDisk');if(diskEl) diskEl.textContent=d.diskUsed+' GB / '+d.diskTotal+' GB';
-    }catch(e){console.warn('Error al cargar info del sistema:', e);}
+    const diskFreeEl=document.getElementById('siDiskFree');if(diskFreeEl) diskFreeEl.textContent=d.diskFree+' GB';
+      }catch(e){console.warn('Error al cargar info del sistema:', e);}
 }
 fetchSysInfo();setInterval(fetchSysInfo, 5000);
 
