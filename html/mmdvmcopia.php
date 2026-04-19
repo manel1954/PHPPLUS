@@ -692,6 +692,9 @@ button.btn-header { font-family: var(--font-mono); }
     margin-right: 4px;
     border-radius: 2px;
 }
+/* Bandera más grande en el display Nextion */
+.nx-callsign .flag-emoji { font-size: 3.2rem; }
+.nx-callsign .flag-emoji-img { height: 42px; }
 </style>
 </head>
 <body>
