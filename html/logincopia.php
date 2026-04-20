@@ -2,7 +2,7 @@
 session_start();
 
 if (!empty($_SESSION['authenticated'])) {
-    header('Location: mmdvmcopia.php');
+    header('Location: mmdvm.php');
     exit;
 }
 
