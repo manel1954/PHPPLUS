@@ -27,7 +27,7 @@
             padding-bottom: 0;
         }
         .navbar-granate .navbar-brand img {
-            height: 24px;
+            height: 54px;
         }
     </style>
 </head>
