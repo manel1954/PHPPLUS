@@ -705,7 +705,7 @@ button.btn-header { font-family: var(--font-mono); }
 <header class="ctrl-header">
 <div class="ctrl-header-top">
 <img src="Logo_ea3eiz.png" alt="EA3EIZ" style="height:40px;width:auto;">
-<h1>PANEL SISTEMAS DIGITALES RADIOAFICIONADOS PHPPLUS</h1>
+<h1>PANEL SISTEMAS DIGITALES RADIOAFICIONADOS PHPPLUSxx</h1>
 </div>
 <div class="ctrl-header-btns">
 <a href="edit_ini.php?file=displaydriver" class="btn-header cyan"> 📄 Configurar Display-Driver </a>
