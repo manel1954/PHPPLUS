@@ -1,12 +1,12 @@
 #!/bin/bash
 
-stick=$(awk "NR==40" /home/pi/status.ini)
-raw=$(awk "NR==42" /home/pi/status.ini)
-ppm=$(awk "NR==44" /home/pi/status.ini)
-http=$(awk "NR==46" /home/pi/status.ini)
-gain=$(awk "NR==48" /home/pi/status.ini)
-beast=$(awk "NR==50" /home/pi/status.ini)
-index=$(awk "NR==52" /home/pi/status.ini)
+stick=$(awk "NR==10" /home/pi/dump1090.ini)
+raw=$(awk "NR==12" /home/pi/dump1090.ini)
+ppm=$(awk "NR==14" /home/pi/dump1090.ini)
+http=$(awk "NR==16" /home/pi/dump1090.ini)
+gain=$(awk "NR==18" /home/pi/dump1090.ini)
+beast=$(awk "NR==20" /home/pi/dump1090.ini)
+index=$(awk "NR==22" /home/pi/dump1090.ini)
 
 LOG=/tmp/dump1090.log
 PID_FILE=/tmp/dump1090.pid
