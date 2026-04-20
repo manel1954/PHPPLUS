@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'chang
     $new1    = trim($_POST['new1']    ?? '');
     $new2    = trim($_POST['new2']    ?? '');
 
-    if ($new1 === '' || strlen($new1) < 6) { echo json_encode(['ok'=>false,'msg'=>'La nueva contraseña debe tener al menos 6 caracteres.']); exit; }
+    if ($new1 === '' || strlen($new1) < 4) { echo json_encode(['ok'=>false,'msg'=>'La nueva contraseña debe tener al menos 6 caracteres.']); exit; }
     if ($new1 !== $new2)                   { echo json_encode(['ok'=>false,'msg'=>'Las contraseñas nuevas no coinciden.']); exit; }
 
     $users = loadUsers($pwdFile);
