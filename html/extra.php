@@ -9,7 +9,7 @@
     </style>
 </head>
 <body>
-    <h1><?php echo "holaç"; ?></h1>
+    <h1><?php echo "Hola José Luis"; ?></h1>
     
     <button class="btn-header" onclick="extraOpen()">⌨ MENU EXTRA</button>
     
