@@ -50,6 +50,16 @@ if ($action === 'dump1090-log') {
     exit;
 }
 
+if ($action === 'aircraft-json') {
+    $url  = 'http://127.0.0.1:8080/data/aircraft.json';
+    $json = @file_get_contents($url);
+    header('Content-Type: application/json');
+    echo $json !== false
+        ? $json
+        : json_encode(['aircraft'=>[], 'error'=>'No se puede conectar a dump1090 en puerto 8080']);
+    exit;
+}
+
 if ($action === 'terminal') {
     $cmd = trim($_POST['cmd'] ?? '');
     if (preg_match('/^\s*(vim|vi|less|more|top|htop|su)\s*/i', $cmd)) {
@@ -147,16 +157,10 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-ui); h
 /* Mapa */
 #dump1090MapFrame { width: 100%; height: 100%; border: none; background: #000; flex: 1; }
 
-/* ── Tabla aviones ── */
-.ac-toolbar {
-    display: flex; align-items: center; gap: 1rem;
-    padding: .5rem 1.4rem; background: rgba(0,0,0,.3);
-    border-bottom: 1px solid var(--border); flex-shrink: 0;
-    font-family: var(--font-mono); font-size: .72rem;
-}
+/* Tabla aviones */
+.ac-toolbar { display: flex; align-items: center; gap: 1rem; padding: .5rem 1.4rem; background: rgba(0,0,0,.3); border-bottom: 1px solid var(--border); flex-shrink: 0; font-family: var(--font-mono); font-size: .72rem; }
 .ac-counter { color: var(--amber); }
 .ac-updated { color: var(--text-dim); margin-left: auto; }
-
 .ac-wrap { flex: 1; overflow-y: auto; }
 .ac-wrap::-webkit-scrollbar { width: 4px; }
 .ac-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
@@ -164,51 +168,30 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-ui); h
 table.ac-table { width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: .76rem; }
 table.ac-table thead { position: sticky; top: 0; z-index: 2; }
 table.ac-table thead tr { background: #0d1520; border-bottom: 2px solid var(--border); }
-table.ac-table thead th {
-    padding: .5rem .8rem; text-align: left;
-    color: var(--text-dim); letter-spacing: .1em;
-    text-transform: uppercase; font-size: .65rem; white-space: nowrap;
-}
+table.ac-table thead th { padding: .5rem .8rem; text-align: left; color: var(--text-dim); letter-spacing: .1em; text-transform: uppercase; font-size: .65rem; white-space: nowrap; }
 table.ac-table thead th.r { text-align: right; }
-table.ac-table tbody tr {
-    border-bottom: 1px solid rgba(30,45,61,.5);
-    transition: background .15s;
-}
+table.ac-table tbody tr { border-bottom: 1px solid rgba(30,45,61,.5); transition: background .15s; }
 table.ac-table tbody tr:hover { background: rgba(0,212,255,.04); }
 table.ac-table tbody tr.ac-active { background: rgba(0,255,159,.05); }
 table.ac-table tbody tr.ac-stale  { opacity: .45; }
-table.ac-table td {
-    padding: .45rem .8rem; white-space: nowrap;
-    vertical-align: middle;
-}
+table.ac-table td { padding: .45rem .8rem; white-space: nowrap; vertical-align: middle; }
 table.ac-table td.r { text-align: right; }
 
-/* Columnas */
 .col-hex    { color: var(--text-dim); font-size: .7rem; }
 .col-flight { color: var(--cyan); font-weight: bold; letter-spacing: .05em; }
 .col-alt    { color: var(--amber); }
 .col-spd    { color: var(--green); }
-.col-hdg    { color: #c9d1d9; }
-.col-lat    { color: #7a9ab5; }
-.col-lon    { color: #7a9ab5; }
-.col-rssi   { color: var(--text-dim); font-size: .7rem; }
-.col-msgs   { color: var(--text-dim); font-size: .7rem; }
 .col-squawk { color: #d4a8ff; font-size: .7rem; }
+.col-coord  { color: #7a9ab5; }
+.col-msgs   { color: var(--text-dim); font-size: .7rem; }
 
-/* Barra de señal RSSI */
 .rssi-bar-wrap { display: flex; align-items: center; gap: .4rem; }
-.rssi-bar { height: 6px; border-radius: 2px; background: var(--green); min-width: 2px; max-width: 60px; transition: width .3s; }
+.rssi-bar { height: 6px; border-radius: 2px; background: var(--green); min-width: 2px; transition: width .3s; }
 .rssi-bar.med { background: var(--amber); }
 .rssi-bar.low { background: var(--red); }
 
-/* Indicador activo */
-.ac-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse 1.5s infinite; margin-right: .35rem; flex-shrink: 0; }
-
-/* Heading arrow */
-.hdg-arrow { display: inline-block; font-size: 1rem; line-height: 1; transition: transform .3s; }
-
-/* Empty state */
-.ac-empty { display: flex; align-items: center; justify-content: center; flex: 1; font-family: var(--font-mono); font-size: .8rem; color: var(--text-dim); }
+.ac-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse 1.5s infinite; margin-right: .35rem; }
+.ac-empty { display: flex; align-items: center; justify-content: center; flex: 1; font-family: var(--font-mono); font-size: .8rem; color: var(--text-dim); padding: 2rem; text-align: center; }
 
 /* Launch card */
 .launch-card { margin: 2rem auto; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 2rem 2.5rem; max-width: 480px; text-align: center; }
@@ -285,11 +268,11 @@ table.ac-table td.r { text-align: right; }
     <!-- Tab Aviones -->
     <div id="paneAc" class="tab-pane">
         <div class="ac-toolbar">
-            <span>✈ Aeronaves visibles: <span class="ac-counter" id="acCount">—</span></span>
+            <span>✈ Aeronaves: <span class="ac-counter" id="acCount">—</span></span>
             <span class="sep">|</span>
             <span style="color:var(--text-dim)">Con posición: <span style="color:var(--green)" id="acWithPos">—</span></span>
             <span class="sep">|</span>
-            <span style="color:var(--text-dim)">Máx distancia: <span style="color:var(--amber)" id="acMaxDist">—</span></span>
+            <span style="color:var(--text-dim)">Máx dist: <span style="color:var(--amber)" id="acMaxDist">—</span></span>
             <span class="ac-updated" id="acUpdated">—</span>
         </div>
         <div class="ac-wrap" id="acWrap">
@@ -297,13 +280,13 @@ table.ac-table td.r { text-align: right; }
             <table class="ac-table" id="acTable" style="display:none;">
                 <thead>
                     <tr>
-                        <th></th>
+                        <th style="width:22px;"></th>
                         <th>Hex</th>
                         <th>Vuelo</th>
                         <th>Squawk</th>
                         <th class="r">Alt (ft)</th>
                         <th class="r">Vel (kt)</th>
-                        <th class="r">Hdg</th>
+                        <th class="r">Rumbo</th>
                         <th class="r">Lat</th>
                         <th class="r">Lon</th>
                         <th>RSSI</th>
@@ -326,15 +309,16 @@ table.ac-table td.r { text-align: right; }
 const mapHost = window.location.hostname;
 const mapPort = 8080;
 const mapUrl  = 'http://' + mapHost + ':' + mapPort;
-const jsonUrl = mapUrl + '/data/aircraft.json';
 document.getElementById('mapUrlTxt').textContent = mapUrl;
+
+// El JSON de aviones lo pedimos vía proxy PHP para evitar CORS
+const jsonUrl = '?action=aircraft-json';
 
 let logPollInterval = null;
 let acPollInterval  = null;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function fmt(v, dec=0) { return (v !== undefined && v !== null && v !== '') ? Number(v).toFixed(dec) : '—'; }
 
 function setStatus(state, txt) {
     document.getElementById('dotStatus').className = 'dot-status ' + (state==='on'?'on':state==='err'?'err':'');
@@ -352,7 +336,6 @@ function updateStatusBar(d) {
     el.style.color  = d.active ? 'var(--green)' : 'var(--red)';
     document.getElementById('svcPid').textContent = (d.pid && d.pid !== '0') ? d.pid : '—';
 }
-
 function cerrarVentana() {
     window.close();
     setTimeout(() => {
@@ -366,20 +349,14 @@ function cerrarVentana() {
 // ── Tabs ──────────────────────────────────────────────────────────────────────
 function switchTab(tab) {
     ['log','ac','map'].forEach(t => {
-        document.getElementById('Pane' in window ? 'pane'+t.charAt(0).toUpperCase()+t.slice(1) : 'pane'+t.charAt(0).toUpperCase()+t.slice(1)).classList.remove('active');
+        document.getElementById('pane' + t.charAt(0).toUpperCase() + t.slice(1)).classList.remove('active');
+        document.getElementById('tabBtn' + t.charAt(0).toUpperCase() + t.slice(1)).className = 'btn-ex btn-dim';
     });
-    document.getElementById('paneLog').classList.remove('active');
-    document.getElementById('paneAc').classList.remove('active');
-    document.getElementById('paneMap').classList.remove('active');
-    document.getElementById('tabBtnLog').className = 'btn-ex btn-dim';
-    document.getElementById('tabBtnAc').className  = 'btn-ex btn-dim';
-    document.getElementById('tabBtnMap').className = 'btn-ex btn-dim';
+    document.getElementById('pane' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+    document.getElementById('tabBtn' + tab.charAt(0).toUpperCase() + tab.slice(1)).className = 'btn-ex btn-active';
 
-    if (tab === 'log') { document.getElementById('paneLog').classList.add('active'); document.getElementById('tabBtnLog').className = 'btn-ex btn-active'; }
-    if (tab === 'ac')  { document.getElementById('paneAc').classList.add('active');  document.getElementById('tabBtnAc').className  = 'btn-ex btn-active'; startAcPoll(); }
+    if (tab === 'ac')  startAcPoll();
     if (tab === 'map') {
-        document.getElementById('paneMap').classList.add('active');
-        document.getElementById('tabBtnMap').className = 'btn-ex btn-active';
         const frame = document.getElementById('dump1090MapFrame');
         if (!frame.src || frame.src === 'about:blank') frame.src = mapUrl;
     }
@@ -450,20 +427,24 @@ function stopAcPoll()  { clearInterval(acPollInterval); acPollInterval = null; }
 
 async function fetchAircraft() {
     try {
-        const r = await fetch(jsonUrl + '?t=' + Date.now());
+        const r = await fetch(jsonUrl + '&t=' + Date.now());
         const d = await r.json();
+        if (d.error) {
+            document.getElementById('acEmpty').textContent = '⚠ ' + d.error;
+            document.getElementById('acEmpty').style.display = 'flex';
+            document.getElementById('acTable').style.display = 'none';
+            return;
+        }
         renderAircraft(d);
     } catch(e) {
-        document.getElementById('acEmpty').textContent = '⚠ No se puede conectar a ' + jsonUrl + ' — ¿dump1090 activo?';
+        document.getElementById('acEmpty').textContent = '⚠ Error: ' + e.message;
         document.getElementById('acEmpty').style.display = 'flex';
         document.getElementById('acTable').style.display = 'none';
     }
 }
 
 function rssiBar(rssi) {
-    // rssi viene como número negativo tipo -3.2 o string "-3.2+"
-    const val = parseFloat(String(rssi).replace('+','')) || -20;
-    // Normalizamos: -1 = 100%, -10 = 50%, -20 = 0%
+    const val = parseFloat(String(rssi||'').replace('+','')) || -20;
     const pct = Math.max(0, Math.min(100, ((val + 20) / 19) * 100));
     const cls = pct > 60 ? '' : pct > 30 ? ' med' : ' low';
     return `<div class="rssi-bar-wrap"><div class="rssi-bar${cls}" style="width:${Math.round(pct*0.6)}px"></div><span style="font-size:.68rem;color:var(--text-dim)">${String(rssi||'—')}</span></div>`;
@@ -471,23 +452,19 @@ function rssiBar(rssi) {
 
 function hdgArrow(hdg) {
     if (hdg === undefined || hdg === null || hdg === '') return '—';
-    return `<span class="hdg-arrow" style="transform:rotate(${hdg}deg)">▲</span> ${Math.round(hdg)}°`;
+    return `<span style="display:inline-block;transform:rotate(${hdg}deg);font-size:1rem;line-height:1;">▲</span> ${Math.round(hdg)}°`;
 }
 
 function renderAircraft(data) {
+    const now      = data.now || (Date.now() / 1000);
     const aircraft = (data.aircraft || []).sort((a,b) => (b.messages||0) - (a.messages||0));
-    const now = data.now || (Date.now()/1000);
-
     const total    = aircraft.length;
     const withPos  = aircraft.filter(a => a.lat !== undefined).length;
 
-    // Máxima distancia (si dump1090 la incluye, si no la estimamos)
-    const maxDist  = Math.max(...aircraft.map(a => a.seen_pos !== undefined ? (a.distance||0) : 0).filter(v=>v>0));
-
-    document.getElementById('acCount').textContent   = total;
-    document.getElementById('acWithPos').textContent  = withPos;
-    document.getElementById('acMaxDist').textContent  = maxDist > 0 ? maxDist.toFixed(1) + ' nm' : '—';
-    document.getElementById('acUpdated').textContent  = 'Actualizado: ' + new Date().toLocaleTimeString('es-ES');
+    document.getElementById('acCount').textContent  = total;
+    document.getElementById('acWithPos').textContent = withPos;
+    document.getElementById('acMaxDist').textContent = '—';
+    document.getElementById('acUpdated').textContent = 'Actualizado: ' + new Date().toLocaleTimeString('es-ES');
 
     if (total === 0) {
         document.getElementById('acEmpty').textContent = 'Sin aeronaves detectadas…';
@@ -499,28 +476,30 @@ function renderAircraft(data) {
     document.getElementById('acTable').style.display = 'table';
 
     document.getElementById('acBody').innerHTML = aircraft.map(a => {
-        const seenAgo = now - (a.seen || 0);
+        const seenAgo  = now - (a.seen || 0);
         const isActive = seenAgo < 5;
         const isStale  = seenAgo > 30;
-        const dot = isActive ? '<span class="ac-dot"></span>' : '';
-        const rowCls = isActive ? 'ac-active' : isStale ? 'ac-stale' : '';
+        const dot      = isActive ? '<span class="ac-dot"></span>' : '';
+        const rowCls   = isActive ? 'ac-active' : isStale ? 'ac-stale' : '';
 
-        const alt = a.altitude !== undefined
-            ? (a.altitude === 'ground' ? '<span style="color:var(--green);font-size:.7rem;">TIERRA</span>' : '<span class="col-alt">' + Number(a.altitude).toLocaleString() + '</span>')
+        const altHtml = a.altitude !== undefined
+            ? (a.altitude === 'ground'
+                ? '<span style="color:var(--green);font-size:.7rem;">TIERRA</span>'
+                : '<span class="col-alt">' + Number(a.altitude).toLocaleString() + '</span>')
             : '<span style="color:var(--text-dim)">—</span>';
 
         return `<tr class="${rowCls}">
-            <td style="width:18px;padding-left:1rem;">${dot}</td>
-            <td class="col-hex">${esc(a.hex||'').toUpperCase()}</td>
+            <td style="padding-left:1rem;">${dot}</td>
+            <td class="col-hex">${esc((a.hex||'').toUpperCase())}</td>
             <td class="col-flight">${a.flight ? esc(a.flight.trim()) : '<span style="color:var(--text-dim)">—</span>'}</td>
             <td class="col-squawk">${a.squawk || '—'}</td>
-            <td class="col-alt r">${alt}</td>
-            <td class="col-spd r">${a.speed !== undefined ? Math.round(a.speed) : '—'}</td>
-            <td class="col-hdg r">${hdgArrow(a.track)}</td>
-            <td class="col-lat r">${a.lat !== undefined ? a.lat.toFixed(4) : '—'}</td>
-            <td class="col-lon r">${a.lon !== undefined ? a.lon.toFixed(4) : '—'}</td>
+            <td class="r">${altHtml}</td>
+            <td class="r col-spd">${a.speed !== undefined ? Math.round(a.speed) : '—'}</td>
+            <td class="r">${hdgArrow(a.track)}</td>
+            <td class="r col-coord">${a.lat !== undefined ? a.lat.toFixed(4) : '—'}</td>
+            <td class="r col-coord">${a.lon !== undefined ? a.lon.toFixed(4) : '—'}</td>
             <td>${rssiBar(a.rssi)}</td>
-            <td class="col-msgs r">${a.messages||0}</td>
+            <td class="r col-msgs">${a.messages || 0}</td>
         </tr>`;
     }).join('');
 }
