@@ -5,11 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MENU EXTRA</title>
     <style>
-        .btn-header { background: cyan; padding: 10px; border: none; cursor: pointer; }
+    body { background-color: #120f0f;
+    }
+    .btn-header { background: cyan; padding: 10px; border: none; cursor: pointer; 
+}
     </style>
 </head>
 <body>
-    <h1><?php echo "holaç"; ?></h1>
+    <h1><?php echo "MENU EXTRA"; ?></h1>
     
     <button class="btn-header" onclick="extraOpen()">⌨ DUMP1090</button>
     
