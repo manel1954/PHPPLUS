@@ -35,7 +35,7 @@
 
 <!-- HEADER -->
 <nav class="navbar navbar-expand-md navbar-granate">
-    <div class="container-fluid">
+    <div class="container">
         <a class="navbar-brand" href="#">
             <img src="Logo_ea3eiz.png" width="100" height="100" alt="Logo">
         </a>
