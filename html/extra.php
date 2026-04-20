@@ -9,7 +9,7 @@
     <style>
         .navbar-granate {
             background-color: #6b0f1a;
-            min-height: 30px;
+            min-height: 60px;
             padding-top: 0;
             padding-bottom: 0;
         }
