@@ -213,12 +213,27 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-ui); h
         <div class="ex-title">✈ dump1090 · ADS-B Receiver</div>
         <div class="ex-subtitle">SDR · Decodificador de tráfico aéreo</div>
     </div>
-    <div class="ex-btns">
+    <!-- <div class="ex-btns">
+        <button id="btnLanzar" class="btn-ex btn-cyan" onclick="lanzarDump1090()">▶ Lanzar dump1090</button>
+        <button class="btn-ex btn-green" onclick="fetchDump1090Log()">⟳ Refrescar log</button>
+        <button class="btn-ex btn-red" onclick="window.close()">✖ Cerrar</button>
+    </div> -->
+
+
+
+
+<div class="ex-btns">
     <button id="btnLanzar" class="btn-ex btn-cyan" onclick="lanzarDump1090()">▶ Lanzar dump1090</button>
     <button id="btnParar"  class="btn-ex btn-dim"  onclick="pararDump1090()" style="color:#ff4560;border-color:#ff4560;display:none;">⏹ Parar dump1090</button>
     <button class="btn-ex btn-green" onclick="fetchDump1090Log()">⟳ Refrescar log</button>
     <button class="btn-ex btn-red" onclick="cerrarVentana()">✖ Cerrar</button>
 </div>
+
+
+
+
+
+
 </header>
 
 <!-- Status -->
@@ -344,6 +359,47 @@ function xtPrStr() { return 'pi@raspberry:' + xtCwd.replace('/home/pi', '~') + '
 
 function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
+
+
+
+function cerrarVentana() {
+    stopPoll();
+    // Intenta cerrar si fue abierta con window.open
+    window.close();
+    // Fallback: si no se cierra (navegador lo bloquea), va atrás o muestra aviso
+    setTimeout(() => {
+        if (!window.closed) {
+            if (window.history.length > 1) window.history.back();
+            else document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:\'Share Tech Mono\',monospace;color:#00d4ff;font-size:1rem;">Puedes cerrar esta pestaña manualmente.</div>';
+        }
+    }, 300);
+}
+
+async function pararDump1090() {
+    const btn = document.getElementById('btnParar');
+    btn.textContent = '⏳ Parando…';
+    btn.disabled = true;
+    try {
+        const r = await fetch('?action=dump1090-stop');
+        const d = await r.json();
+        xtApp('<span class="xt-out">⏹ ' + esc(d.msg) + '</span>');
+        setStatus('', 'dump1090 detenido');
+        dumpsStarted = false;
+        btn.style.display = 'none';
+        document.getElementById('btnLanzar').textContent = '▶ Lanzar dump1090';
+        document.getElementById('btnLanzar').disabled = false;
+    } catch(e) {
+        xtApp('<span class="xt-err">❌ Error al parar: ' + esc(e.message) + '</span>');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '⏹ Parar dump1090';
+    }
+}
+
+
+
+
+
 function xtApp(html) {
     const o = document.getElementById('xtOut');
     o.innerHTML += html + '\n';
@@ -419,43 +475,6 @@ function fetchDump1090Log() {
             out.scrollTop = out.scrollHeight;
         });
 }
-
-function cerrarVentana() {
-    stopPoll();
-    // Intenta cerrar si fue abierta con window.open
-    window.close();
-    // Fallback: si no se cierra (navegador lo bloquea), va atrás o muestra aviso
-    setTimeout(() => {
-        if (!window.closed) {
-            if (window.history.length > 1) window.history.back();
-            else document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:\'Share Tech Mono\',monospace;color:#00d4ff;font-size:1rem;">Puedes cerrar esta pestaña manualmente.</div>';
-        }
-    }, 300);
-}
-
-async function pararDump1090() {
-    const btn = document.getElementById('btnParar');
-    btn.textContent = '⏳ Parando…';
-    btn.disabled = true;
-    try {
-        const r = await fetch('?action=dump1090-stop');
-        const d = await r.json();
-        xtApp('<span class="xt-out">⏹ ' + esc(d.msg) + '</span>');
-        setStatus('', 'dump1090 detenido');
-        dumpsStarted = false;
-        btn.style.display = 'none';
-        document.getElementById('btnLanzar').textContent = '▶ Lanzar dump1090';
-        document.getElementById('btnLanzar').disabled = false;
-    } catch(e) {
-        xtApp('<span class="xt-err">❌ Error al parar: ' + esc(e.message) + '</span>');
-    } finally {
-        btn.disabled = false;
-        btn.textContent = '⏹ Parar dump1090';
-    }
-}
-
-
-
 
 window.addEventListener('beforeunload', () => clearInterval(pollInterval));
 </script>
