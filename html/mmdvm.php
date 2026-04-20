@@ -212,32 +212,6 @@ if ($action === 'mmdvmysf-stop')   { saveState('ysf','off'); shell_exec('sudo sy
 if ($action === 'mmdvmysf-logs')   { $lines = intval($_GET['lines']??15); $log = shell_exec("sudo journalctl -u mmdvmysf -n {$lines} --no-pager --output=short 2>/dev/null"); header('Content-Type: application/json'); echo json_encode(['mmdvmysf'=>htmlspecialchars($log??'')]); exit; }
 if ($action === 'reboot')          { shell_exec('sudo /usr/bin/systemctl reboot 2>/dev/null'); header('Content-Type: application/json'); echo json_encode(['ok'=>true]); exit; }
 if ($action === 'display-restart') { shell_exec('sudo systemctl daemon-reload 2>/dev/null'); shell_exec('sudo systemctl enable displaydriver 2>/dev/null'); shell_exec('sudo systemctl restart displaydriver 2>/dev/null'); header('Content-Type: application/json'); echo json_encode(['ok'=>true]); exit; }
-
-
-if ($action === 'dump1090-start') {
-    $script = '/home/pi/A108/ejecutar_dump1090.sh';
-    if (!file_exists($script)) { header('Content-Type: application/json'); echo json_encode(['ok'=>false,'error'=>'Script no encontrado']); exit; }
-    $output = shell_exec("sudo bash $script 2>&1");
-    header('Content-Type: application/json');
-    echo json_encode($output !== null ? ['ok'=>true,'output'=>trim($output)] : ['ok'=>false,'error'=>'shell_exec devolvió null (sudoers?)']);
-    exit;
-}
-if ($action === 'dump1090-log') {
-    header('Content-Type: text/plain');
-    $log = '/tmp/dump1090.log';
-    if (file_exists($log)) {
-        $lines = file($log);
-        echo implode('', array_slice($lines, -80));
-    } else {
-        echo '(log vacío — dump1090 aún no iniciado)';
-    }
-    exit;
-}
-
-
-
-
-
 if ($action === 'install-display') { $output = shell_exec('sudo /home/pi/A108/instalar_displaydriver.sh 2>&1'); header('Content-Type: application/json'); echo json_encode(['ok'=>true,'output'=>htmlspecialchars($output??'')]); exit; }
 
 if ($action === 'backup-configs') {
@@ -746,7 +720,6 @@ button.btn-header { font-family: var(--font-mono); }
   </div>
 </div>
 <button class="btn-header cyan" onclick="xtTtydOpen()">⌨ Terminal</button>
-<button class="btn-header cyan" onclick="extraOpen()">⌨ MENU EXTRA</button>
 <button id="btnReboot" class="btn-header red" onclick="rebootPi()">⏻ Reiniciar Pi</button>
 </div>
 </header>
@@ -979,39 +952,6 @@ button.btn-header { font-family: var(--font-mono); }
   </div>
 </div>
 </div>
-
-
-<!-- Modal dump1090 -->
-<div id="dump1090Modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9800;align-items:center;justify-content:center;">
-  <div style="background:#0a0e14;border:1px solid #1e2d3d;border-radius:8px;width:960px;max-width:96vw;height:600px;display:flex;flex-direction:column;overflow:hidden;">
-
-    <!-- Header -->
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:.7rem 1.2rem;background:#111720;border-bottom:1px solid #1e2d3d;flex-shrink:0;">
-      <span style="font-family:'Share Tech Mono',monospace;font-size:.8rem;color:var(--cyan);letter-spacing:.12em;text-transform:uppercase;">✈ dump1090 · ADS-B</span>
-      <div style="display:flex;gap:.6rem;">
-        <!-- Pestañas -->
-        <button id="tabBtnLog" onclick="dump1090Tab('log')" style="background:rgba(0,212,255,.15);border:1px solid var(--cyan);color:var(--cyan);font-family:'Share Tech Mono',monospace;font-size:.7rem;border-radius:4px;padding:.25rem .9rem;cursor:pointer;">📋 Log</button>
-        <button id="tabBtnMap" onclick="dump1090Tab('map')" style="background:transparent;border:1px solid #1e2d3d;color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:.7rem;border-radius:4px;padding:.25rem .9rem;cursor:pointer;">🗺 Mapa</button>
-        <div style="width:1px;background:#1e2d3d;margin:0 .2rem;"></div>
-        <button onclick="fetchDump1090Log()" style="background:transparent;border:1px solid var(--green);color:var(--green);font-family:'Share Tech Mono',monospace;font-size:.7rem;border-radius:4px;padding:.25rem .8rem;cursor:pointer;" onmouseover="this.style.background='rgba(0,255,159,.1)'" onmouseout="this.style.background='transparent'">⟳ Refrescar</button>
-        <button onclick="closeDump1090Modal()" style="background:transparent;border:1px solid var(--red);color:var(--red);font-family:'Share Tech Mono',monospace;font-size:.7rem;border-radius:4px;padding:.25rem .8rem;cursor:pointer;" onmouseover="this.style.background='rgba(255,69,96,.15)'" onmouseout="this.style.background='transparent'">✖ Cerrar</button>
-      </div>
-    </div>
-
-    <!-- Tab Log -->
-    <div id="tabLog" style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
-      <pre id="dump1090Out" style="flex:1;margin:0;padding:1rem;font-family:'Share Tech Mono',monospace;font-size:.75rem;color:#00ff9f;background:#060c10;overflow-y:auto;white-space:pre-wrap;word-break:break-all;"></pre>
-    </div>
-
-    <!-- Tab Mapa -->
-    <div id="tabMap" style="flex:1;display:none;overflow:hidden;">
-      <iframe id="dump1090MapFrame" src="" style="width:100%;height:100%;border:none;background:#000;"></iframe>
-    </div>
-
-  </div>
-</div>
-
-
 
 <!-- Modal Terminal ttyd -->
 <div id="xtTtydModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9800;align-items:center;justify-content:center;">
@@ -1300,78 +1240,6 @@ function xtTtydClose(){
     document.getElementById('xtTtydModal').style.display='none';
     document.getElementById('xtTtydFrame').src='';
 }
-
-function extraOpen() {
-    const modal = document.getElementById('dump1090Modal');
-    const term  = document.getElementById('dump1090Out');
-    term.textContent = '⏳ Lanzando dump1090…';
-    modal.style.display = 'flex';
-    dump1090Tab('log');
-
-    fetch('?action=dump1090-start')
-        .then(r => r.json())
-        .then(d => {
-            if (d.ok) {
-                term.textContent = '✅ ' + (d.output || 'dump1090 iniciado') + '\n\n';
-                startDump1090Log();
-            } else {
-                term.textContent = '❌ Error: ' + d.error;
-            }
-        })
-        .catch(err => { term.textContent = '❌ Error de red: ' + err; });
-}
-
-let dump1090PollInterval = null;
-
-function dump1090Tab(tab) {
-    const isLog = tab === 'log';
-    document.getElementById('tabLog').style.display = isLog ? 'flex' : 'none';
-    document.getElementById('tabMap').style.display = isLog ? 'none' : 'flex';
-
-    const btnLog = document.getElementById('tabBtnLog');
-    const btnMap = document.getElementById('tabBtnMap');
-    btnLog.style.background = isLog ? 'rgba(0,212,255,.15)' : 'transparent';
-    btnLog.style.borderColor = isLog ? 'var(--cyan)' : '#1e2d3d';
-    btnLog.style.color       = isLog ? 'var(--cyan)'  : 'var(--text-dim)';
-    btnMap.style.background  = isLog ? 'transparent'  : 'rgba(0,212,255,.15)';
-    btnMap.style.borderColor = isLog ? '#1e2d3d'       : 'var(--cyan)';
-    btnMap.style.color       = isLog ? 'var(--text-dim)' : 'var(--cyan)';
-
-    // Carga el iframe solo cuando se abre la pestaña mapa
-    if (!isLog) {
-        const frame = document.getElementById('dump1090MapFrame');
-        const mapUrl = 'http://' + window.location.hostname + ':8080';
-        if (frame.src !== mapUrl) frame.src = mapUrl;
-    }
-}
-
-function startDump1090Log() {
-    stopDump1090Log();
-    dump1090PollInterval = setInterval(fetchDump1090Log, 1500);
-    fetchDump1090Log();
-}
-
-function stopDump1090Log() {
-    clearInterval(dump1090PollInterval);
-    dump1090PollInterval = null;
-}
-
-function fetchDump1090Log() {
-    fetch('?action=dump1090-log&t=' + Date.now())
-        .then(r => r.text())
-        .then(text => {
-            const term = document.getElementById('dump1090Out');
-            term.textContent = text;
-            term.scrollTop = term.scrollHeight;
-        });
-}
-
-function closeDump1090Modal() {
-    stopDump1090Log();
-    document.getElementById('dump1090Modal').style.display = 'none';
-    document.getElementById('dump1090MapFrame').src = ''; // libera el iframe
-}
-
 
 /* ── Terminal ── */
 (function(){
