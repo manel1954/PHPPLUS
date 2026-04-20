@@ -5,7 +5,6 @@ $action = $_GET['action'] ?? '';
 
 if ($action === 'dump1090-start') {
     shell_exec('sudo systemctl start dump1090 2>/dev/null');
-    // Espera hasta 10s a que salga del estado "activating"
     $st = 'activating';
     for ($i = 0; $i < 10; $i++) {
         sleep(1);
@@ -148,6 +147,69 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-ui); h
 /* Mapa */
 #dump1090MapFrame { width: 100%; height: 100%; border: none; background: #000; flex: 1; }
 
+/* ── Tabla aviones ── */
+.ac-toolbar {
+    display: flex; align-items: center; gap: 1rem;
+    padding: .5rem 1.4rem; background: rgba(0,0,0,.3);
+    border-bottom: 1px solid var(--border); flex-shrink: 0;
+    font-family: var(--font-mono); font-size: .72rem;
+}
+.ac-counter { color: var(--amber); }
+.ac-updated { color: var(--text-dim); margin-left: auto; }
+
+.ac-wrap { flex: 1; overflow-y: auto; }
+.ac-wrap::-webkit-scrollbar { width: 4px; }
+.ac-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+table.ac-table { width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: .76rem; }
+table.ac-table thead { position: sticky; top: 0; z-index: 2; }
+table.ac-table thead tr { background: #0d1520; border-bottom: 2px solid var(--border); }
+table.ac-table thead th {
+    padding: .5rem .8rem; text-align: left;
+    color: var(--text-dim); letter-spacing: .1em;
+    text-transform: uppercase; font-size: .65rem; white-space: nowrap;
+}
+table.ac-table thead th.r { text-align: right; }
+table.ac-table tbody tr {
+    border-bottom: 1px solid rgba(30,45,61,.5);
+    transition: background .15s;
+}
+table.ac-table tbody tr:hover { background: rgba(0,212,255,.04); }
+table.ac-table tbody tr.ac-active { background: rgba(0,255,159,.05); }
+table.ac-table tbody tr.ac-stale  { opacity: .45; }
+table.ac-table td {
+    padding: .45rem .8rem; white-space: nowrap;
+    vertical-align: middle;
+}
+table.ac-table td.r { text-align: right; }
+
+/* Columnas */
+.col-hex    { color: var(--text-dim); font-size: .7rem; }
+.col-flight { color: var(--cyan); font-weight: bold; letter-spacing: .05em; }
+.col-alt    { color: var(--amber); }
+.col-spd    { color: var(--green); }
+.col-hdg    { color: #c9d1d9; }
+.col-lat    { color: #7a9ab5; }
+.col-lon    { color: #7a9ab5; }
+.col-rssi   { color: var(--text-dim); font-size: .7rem; }
+.col-msgs   { color: var(--text-dim); font-size: .7rem; }
+.col-squawk { color: #d4a8ff; font-size: .7rem; }
+
+/* Barra de señal RSSI */
+.rssi-bar-wrap { display: flex; align-items: center; gap: .4rem; }
+.rssi-bar { height: 6px; border-radius: 2px; background: var(--green); min-width: 2px; max-width: 60px; transition: width .3s; }
+.rssi-bar.med { background: var(--amber); }
+.rssi-bar.low { background: var(--red); }
+
+/* Indicador activo */
+.ac-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse 1.5s infinite; margin-right: .35rem; flex-shrink: 0; }
+
+/* Heading arrow */
+.hdg-arrow { display: inline-block; font-size: 1rem; line-height: 1; transition: transform .3s; }
+
+/* Empty state */
+.ac-empty { display: flex; align-items: center; justify-content: center; flex: 1; font-family: var(--font-mono); font-size: .8rem; color: var(--text-dim); }
+
 /* Launch card */
 .launch-card { margin: 2rem auto; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 2rem 2.5rem; max-width: 480px; text-align: center; }
 .launch-icon  { font-size: 3rem; margin-bottom: 1rem; }
@@ -172,7 +234,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-ui); h
             <span class="sw-busy-dot"></span>
         </label>
         <span id="swLabel" style="font-family:var(--font-mono);font-size:.72rem;color:var(--text-dim);letter-spacing:.08em;text-transform:uppercase;min-width:2rem;">OFF</span>
-        <button class="btn-ex btn-green" onclick="fetchDump1090Log()">⟳ Refrescar log</button>
+        <button class="btn-ex btn-green" onclick="fetchDump1090Log()">⟳ Log</button>
         <button class="btn-ex btn-red"   onclick="cerrarVentana()">✖ Cerrar</button>
     </div>
 </header>
@@ -191,6 +253,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-ui); h
 <!-- Tabs -->
 <div class="ex-tabs">
     <button id="tabBtnLog" class="btn-ex btn-active" onclick="switchTab('log')">📋 Terminal</button>
+    <button id="tabBtnAc"  class="btn-ex btn-dim"    onclick="switchTab('ac')">✈ Aviones</button>
     <button id="tabBtnMap" class="btn-ex btn-dim"    onclick="switchTab('map')">🗺 Mapa en vivo</button>
 </div>
 
@@ -219,6 +282,39 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-ui); h
         </div>
     </div>
 
+    <!-- Tab Aviones -->
+    <div id="paneAc" class="tab-pane">
+        <div class="ac-toolbar">
+            <span>✈ Aeronaves visibles: <span class="ac-counter" id="acCount">—</span></span>
+            <span class="sep">|</span>
+            <span style="color:var(--text-dim)">Con posición: <span style="color:var(--green)" id="acWithPos">—</span></span>
+            <span class="sep">|</span>
+            <span style="color:var(--text-dim)">Máx distancia: <span style="color:var(--amber)" id="acMaxDist">—</span></span>
+            <span class="ac-updated" id="acUpdated">—</span>
+        </div>
+        <div class="ac-wrap" id="acWrap">
+            <div class="ac-empty" id="acEmpty">Esperando datos de dump1090…</div>
+            <table class="ac-table" id="acTable" style="display:none;">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Hex</th>
+                        <th>Vuelo</th>
+                        <th>Squawk</th>
+                        <th class="r">Alt (ft)</th>
+                        <th class="r">Vel (kt)</th>
+                        <th class="r">Hdg</th>
+                        <th class="r">Lat</th>
+                        <th class="r">Lon</th>
+                        <th>RSSI</th>
+                        <th class="r">Msgs</th>
+                    </tr>
+                </thead>
+                <tbody id="acBody"></tbody>
+            </table>
+        </div>
+    </div>
+
     <!-- Tab Mapa -->
     <div id="paneMap" class="tab-pane">
         <iframe id="dump1090MapFrame" src=""></iframe>
@@ -230,25 +326,26 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-ui); h
 const mapHost = window.location.hostname;
 const mapPort = 8080;
 const mapUrl  = 'http://' + mapHost + ':' + mapPort;
+const jsonUrl = mapUrl + '/data/aircraft.json';
 document.getElementById('mapUrlTxt').textContent = mapUrl;
 
 let logPollInterval = null;
+let acPollInterval  = null;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function fmt(v, dec=0) { return (v !== undefined && v !== null && v !== '') ? Number(v).toFixed(dec) : '—'; }
 
 function setStatus(state, txt) {
     document.getElementById('dotStatus').className = 'dot-status ' + (state==='on'?'on':state==='err'?'err':'');
     document.getElementById('statusTxt').textContent = txt;
 }
-
 function setSwitch(on) {
     document.getElementById('chkDump').checked = on;
     const lbl = document.getElementById('swLabel');
     lbl.textContent = on ? 'ON' : 'OFF';
     lbl.style.color  = on ? 'var(--green)' : 'var(--text-dim)';
 }
-
 function updateStatusBar(d) {
     const el = document.getElementById('svcStatus');
     el.textContent = d.status || '—';
@@ -256,7 +353,6 @@ function updateStatusBar(d) {
     document.getElementById('svcPid').textContent = (d.pid && d.pid !== '0') ? d.pid : '—';
 }
 
-// ── Cerrar ventana ────────────────────────────────────────────────────────────
 function cerrarVentana() {
     window.close();
     setTimeout(() => {
@@ -269,12 +365,21 @@ function cerrarVentana() {
 
 // ── Tabs ──────────────────────────────────────────────────────────────────────
 function switchTab(tab) {
-    const isLog = tab === 'log';
-    document.getElementById('paneLog').classList.toggle('active',  isLog);
-    document.getElementById('paneMap').classList.toggle('active', !isLog);
-    document.getElementById('tabBtnLog').className = 'btn-ex ' + ( isLog ? 'btn-active' : 'btn-dim');
-    document.getElementById('tabBtnMap').className = 'btn-ex ' + (!isLog ? 'btn-active' : 'btn-dim');
-    if (!isLog) {
+    ['log','ac','map'].forEach(t => {
+        document.getElementById('Pane' in window ? 'pane'+t.charAt(0).toUpperCase()+t.slice(1) : 'pane'+t.charAt(0).toUpperCase()+t.slice(1)).classList.remove('active');
+    });
+    document.getElementById('paneLog').classList.remove('active');
+    document.getElementById('paneAc').classList.remove('active');
+    document.getElementById('paneMap').classList.remove('active');
+    document.getElementById('tabBtnLog').className = 'btn-ex btn-dim';
+    document.getElementById('tabBtnAc').className  = 'btn-ex btn-dim';
+    document.getElementById('tabBtnMap').className = 'btn-ex btn-dim';
+
+    if (tab === 'log') { document.getElementById('paneLog').classList.add('active'); document.getElementById('tabBtnLog').className = 'btn-ex btn-active'; }
+    if (tab === 'ac')  { document.getElementById('paneAc').classList.add('active');  document.getElementById('tabBtnAc').className  = 'btn-ex btn-active'; startAcPoll(); }
+    if (tab === 'map') {
+        document.getElementById('paneMap').classList.add('active');
+        document.getElementById('tabBtnMap').className = 'btn-ex btn-active';
         const frame = document.getElementById('dump1090MapFrame');
         if (!frame.src || frame.src === 'about:blank') frame.src = mapUrl;
     }
@@ -283,15 +388,12 @@ function switchTab(tab) {
 // ── Toggle dump1090.service ───────────────────────────────────────────────────
 async function toggleDump1090(chk) {
     const wasOn = !chk.checked;
-    chk.checked = wasOn; // revertimos hasta confirmar
+    chk.checked = wasOn;
     const sw = document.getElementById('swDump');
     sw.classList.add('busy');
-
-    // Muestra terminal
     document.getElementById('launchCard').style.display = 'none';
     document.getElementById('terminalWrap').style.display = 'flex';
     xtApp('<span class="xt-out">⏳ ' + (wasOn ? 'Parando' : 'Iniciando') + ' dump1090.service…</span>');
-
     try {
         const r = await fetch('?action=' + (wasOn ? 'dump1090-stop' : 'dump1090-start'));
         const d = await r.json();
@@ -300,7 +402,7 @@ async function toggleDump1090(chk) {
             setSwitch(isNowOn);
             setStatus(isNowOn ? 'on' : '', isNowOn ? 'dump1090.service activo' : 'dump1090.service detenido');
             xtApp('<span class="xt-ok">✅ ' + esc(d.output || d.msg) + '</span>');
-            if (isNowOn) startLogPoll(); else stopLogPoll();
+            if (isNowOn) startLogPoll(); else { stopLogPoll(); stopAcPoll(); }
         } else {
             xtApp('<span class="xt-err">❌ ' + esc(d.error || d.msg) + '</span>');
             setStatus('err', 'Error al cambiar estado del servicio');
@@ -328,31 +430,99 @@ async function checkServiceStatus() {
             if (!logPollInterval) startLogPoll();
         } else {
             setStatus('', 'dump1090.service inactivo');
-            stopLogPoll();
+            stopLogPoll(); stopAcPoll();
         }
-    } catch(e) {
-        setStatus('err', 'Error al comprobar el servicio');
-    }
+    } catch(e) { setStatus('err', 'Error al comprobar el servicio'); }
 }
 
 // ── Log polling ───────────────────────────────────────────────────────────────
-function startLogPoll() {
-    stopLogPoll();
-    fetchDump1090Log();
-    logPollInterval = setInterval(fetchDump1090Log, 3000);
-}
-function stopLogPoll() {
-    clearInterval(logPollInterval);
-    logPollInterval = null;
-}
+function startLogPoll() { stopLogPoll(); fetchDump1090Log(); logPollInterval = setInterval(fetchDump1090Log, 3000); }
+function stopLogPoll()  { clearInterval(logPollInterval); logPollInterval = null; }
 function fetchDump1090Log() {
     fetch('?action=dump1090-log&t=' + Date.now())
         .then(r => r.text())
-        .then(text => {
-            const out = document.getElementById('xtOut');
-            out.textContent = text;
-            out.scrollTop = out.scrollHeight;
-        });
+        .then(text => { const o=document.getElementById('xtOut'); o.textContent=text; o.scrollTop=o.scrollHeight; });
+}
+
+// ── Aircraft polling ──────────────────────────────────────────────────────────
+function startAcPoll() { if (acPollInterval) return; fetchAircraft(); acPollInterval = setInterval(fetchAircraft, 2000); }
+function stopAcPoll()  { clearInterval(acPollInterval); acPollInterval = null; }
+
+async function fetchAircraft() {
+    try {
+        const r = await fetch(jsonUrl + '?t=' + Date.now());
+        const d = await r.json();
+        renderAircraft(d);
+    } catch(e) {
+        document.getElementById('acEmpty').textContent = '⚠ No se puede conectar a ' + jsonUrl + ' — ¿dump1090 activo?';
+        document.getElementById('acEmpty').style.display = 'flex';
+        document.getElementById('acTable').style.display = 'none';
+    }
+}
+
+function rssiBar(rssi) {
+    // rssi viene como número negativo tipo -3.2 o string "-3.2+"
+    const val = parseFloat(String(rssi).replace('+','')) || -20;
+    // Normalizamos: -1 = 100%, -10 = 50%, -20 = 0%
+    const pct = Math.max(0, Math.min(100, ((val + 20) / 19) * 100));
+    const cls = pct > 60 ? '' : pct > 30 ? ' med' : ' low';
+    return `<div class="rssi-bar-wrap"><div class="rssi-bar${cls}" style="width:${Math.round(pct*0.6)}px"></div><span style="font-size:.68rem;color:var(--text-dim)">${String(rssi||'—')}</span></div>`;
+}
+
+function hdgArrow(hdg) {
+    if (hdg === undefined || hdg === null || hdg === '') return '—';
+    return `<span class="hdg-arrow" style="transform:rotate(${hdg}deg)">▲</span> ${Math.round(hdg)}°`;
+}
+
+function renderAircraft(data) {
+    const aircraft = (data.aircraft || []).sort((a,b) => (b.messages||0) - (a.messages||0));
+    const now = data.now || (Date.now()/1000);
+
+    const total    = aircraft.length;
+    const withPos  = aircraft.filter(a => a.lat !== undefined).length;
+
+    // Máxima distancia (si dump1090 la incluye, si no la estimamos)
+    const maxDist  = Math.max(...aircraft.map(a => a.seen_pos !== undefined ? (a.distance||0) : 0).filter(v=>v>0));
+
+    document.getElementById('acCount').textContent   = total;
+    document.getElementById('acWithPos').textContent  = withPos;
+    document.getElementById('acMaxDist').textContent  = maxDist > 0 ? maxDist.toFixed(1) + ' nm' : '—';
+    document.getElementById('acUpdated').textContent  = 'Actualizado: ' + new Date().toLocaleTimeString('es-ES');
+
+    if (total === 0) {
+        document.getElementById('acEmpty').textContent = 'Sin aeronaves detectadas…';
+        document.getElementById('acEmpty').style.display = 'flex';
+        document.getElementById('acTable').style.display = 'none';
+        return;
+    }
+    document.getElementById('acEmpty').style.display = 'none';
+    document.getElementById('acTable').style.display = 'table';
+
+    document.getElementById('acBody').innerHTML = aircraft.map(a => {
+        const seenAgo = now - (a.seen || 0);
+        const isActive = seenAgo < 5;
+        const isStale  = seenAgo > 30;
+        const dot = isActive ? '<span class="ac-dot"></span>' : '';
+        const rowCls = isActive ? 'ac-active' : isStale ? 'ac-stale' : '';
+
+        const alt = a.altitude !== undefined
+            ? (a.altitude === 'ground' ? '<span style="color:var(--green);font-size:.7rem;">TIERRA</span>' : '<span class="col-alt">' + Number(a.altitude).toLocaleString() + '</span>')
+            : '<span style="color:var(--text-dim)">—</span>';
+
+        return `<tr class="${rowCls}">
+            <td style="width:18px;padding-left:1rem;">${dot}</td>
+            <td class="col-hex">${esc(a.hex||'').toUpperCase()}</td>
+            <td class="col-flight">${a.flight ? esc(a.flight.trim()) : '<span style="color:var(--text-dim)">—</span>'}</td>
+            <td class="col-squawk">${a.squawk || '—'}</td>
+            <td class="col-alt r">${alt}</td>
+            <td class="col-spd r">${a.speed !== undefined ? Math.round(a.speed) : '—'}</td>
+            <td class="col-hdg r">${hdgArrow(a.track)}</td>
+            <td class="col-lat r">${a.lat !== undefined ? a.lat.toFixed(4) : '—'}</td>
+            <td class="col-lon r">${a.lon !== undefined ? a.lon.toFixed(4) : '—'}</td>
+            <td>${rssiBar(a.rssi)}</td>
+            <td class="col-msgs r">${a.messages||0}</td>
+        </tr>`;
+    }).join('');
 }
 
 // ── Terminal interactivo ──────────────────────────────────────────────────────
@@ -377,8 +547,8 @@ document.getElementById('xtInp').addEventListener('keydown', async function(e) {
     if (e.key==='ArrowDown') { e.preventDefault(); xtHidx>0?this.value=xtHist[--xtHidx]:(xtHidx=-1,this.value=''); return; }
     if (e.key!=='Enter') return;
     const cmd=this.value.trim(); if(!cmd) return;
-    if (/^\s*clear\s*$/.test(cmd))                              { document.getElementById('xtOut').innerHTML=''; this.value=''; return; }
-    if (/^\s*(edit|nano)(\s+\S+)?\s*$/.test(cmd))              { xtApp('<span class="xt-err">Editor no disponible en esta terminal.</span>'); this.value=''; return; }
+    if (/^\s*clear\s*$/.test(cmd))  { document.getElementById('xtOut').innerHTML=''; this.value=''; return; }
+    if (/^\s*(edit|nano)(\s+\S+)?\s*$/.test(cmd)) { xtApp('<span class="xt-err">Editor no disponible.</span>'); this.value=''; return; }
     if (/^\s*(sudo\s+su|su\s*$|top|htop|vim|vi|less|more)\s*/.test(cmd)) { xtApp('<span class="xt-err">Comando interactivo no soportado.</span>'); this.value=''; return; }
     if (/^\s*cd(\s|$)/.test(cmd)) {
         const t=cmd.replace(/^\s*cd\s*/,'').trim()||'~';
