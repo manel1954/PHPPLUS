@@ -181,23 +181,6 @@ if (isset($_GET['action'])) {
         echo json_encode(['ok' => true]);
         exit;
     }
-
-    /* --- STREAM (tail -f) --- */
-    if ($action === 'stream') {
-        header('Content-Type: text/plain');
-        header('Cache-Control: no-cache');
-        header('Connection: keep-alive');
-        $h = popen("tail -f " . escapeshellarg($logFile), "r");
-        if ($h) {
-            while (!feof($h)) {
-                echo fread($h, 1024);
-                @ob_flush();
-                flush();
-            }
-            pclose($h);
-        }
-        exit;
-    }
 }
 
 /* =========================
@@ -298,12 +281,6 @@ a { color:#00ffcc; }
 <div class="card">
     <h3>Log (últimas líneas)</h3>
     <pre id="logbox"></pre>
-
-    <p>
-        🔴 <a href="?action=stream" target="_blank">
-            Ver log en tiempo real (TAIL -F)
-        </a>
-    </p>
 </div>
 
 <script>
