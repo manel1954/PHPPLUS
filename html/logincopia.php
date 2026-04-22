@@ -88,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === '') {
                 break;
             }
         }
-        if ($ok) { $_SESSION['authenticated'] = true; header('Location: mmdvm.php'); exit; }
+        if ($ok) { $_SESSION['authenticated'] = true; header('Location: mmdvmcopia.php'); exit; }
         else $error = 'Contraseña incorrecta.';
     }
 }
