@@ -720,6 +720,7 @@ button.btn-header { font-family: var(--font-mono); }
   </div>
 </div>
 <button class="btn-header cyan" onclick="xtTtydOpen()">⌨ Terminal</button>
+<a href="extra.php" class="btn-header amber">☰ Menu Extra</a>
 <button id="btnReboot" class="btn-header red" onclick="rebootPi()">⏻ Reiniciar Pi</button>
 </div>
 </header>
