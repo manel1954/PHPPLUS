@@ -4,7 +4,6 @@ session_start();
 header('X-Content-Type-Options: nosniff');
 
 $SERVICE = "svxlink";
-
 $action = $_GET['action'] ?? '';
 
 if ($action === 'start') {
@@ -15,28 +14,24 @@ if ($action === 'start') {
     echo json_encode($st==='active' ? ['ok'=>true,'output'=>'✅ Iniciado'] : ['ok'=>false,'error'=>'No arrancó: '.$st]);
     exit;
 }
-
 if ($action === 'stop') {
     shell_exec("sudo systemctl stop $SERVICE 2>/dev/null"); usleep(300000);
     header('Content-Type: application/json');
     echo json_encode(trim(shell_exec("systemctl is-active $SERVICE 2>/dev/null"))!=='active' ? ['ok'=>true,'msg'=>'✅ Detenido'] : ['ok'=>false,'msg'=>'No se pudo detener']);
     exit;
 }
-
 if ($action === 'enable') {
     shell_exec("sudo systemctl enable $SERVICE 2>/dev/null"); usleep(200000);
     header('Content-Type: application/json');
     echo json_encode(trim(shell_exec("systemctl is-enabled $SERVICE 2>/dev/null"))==='enabled' ? ['ok'=>true,'msg'=>'✅ Autostart ON'] : ['ok'=>false,'error'=>'Error']);
     exit;
 }
-
 if ($action === 'disable') {
     shell_exec("sudo systemctl disable $SERVICE 2>/dev/null"); usleep(200000);
     header('Content-Type: application/json');
     echo json_encode(trim(shell_exec("systemctl is-enabled $SERVICE 2>/dev/null"))!=='enabled' ? ['ok'=>true,'msg'=>'✅ Autostart OFF'] : ['ok'=>false,'error'=>'Error']);
     exit;
 }
-
 if ($action === 'status') {
     $st=trim(shell_exec("systemctl is-active $SERVICE 2>/dev/null"));
     $pid=trim(shell_exec("systemctl show $SERVICE --property=MainPID --value 2>/dev/null"));
@@ -45,7 +40,6 @@ if ($action === 'status') {
     echo json_encode(['active'=>$st==='active','status'=>$st,'pid'=>$pid?:'—','enabled'=>$en==='enabled']);
     exit;
 }
-
 if ($action === 'log') {
     header('Content-Type: text/plain');
     echo trim(shell_exec("sudo journalctl -u $SERVICE -n 100 --no-pager --output=short 2>/dev/null")) ?: '(sin registros)';
@@ -90,7 +84,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ui);height:10
 @keyframes spin{to{transform:translateY(-50%) rotate(360deg)}}
 .auto-bar{display:flex;align-items:center;gap:.8rem;padding:.5rem 1.4rem;background:rgba(0,0,0,.2);border-bottom:1px solid var(--border);flex-shrink:0}
 .auto-label{font-family:var(--font-mono);font-size:.75rem;color:var(--text-dim);letter-spacing:.05em;text-transform:uppercase;white-space:nowrap}
-.auto-status{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.05em;min-width:70px;transition:color .3s;text-align:right}
+.auto-status{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.05em;min-width:70px;transition:color .3s}
 .auto-status.on{color:var(--green)}
 .auto-status.off{color:var(--red)}
 .ex-status{display:flex;align-items:center;gap:1.2rem;padding:.45rem 1.4rem;background:rgba(0,0,0,.3);border-bottom:1px solid var(--border);flex-shrink:0;font-family:var(--font-mono);font-size:.72rem;flex-wrap:wrap}
@@ -101,10 +95,17 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ui);height:10
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 @keyframes pulse-amber{0%,100%{opacity:1;box-shadow:0 0 6px var(--amber)}50%{opacity:.6;box-shadow:0 0 2px var(--amber)}}
 .sep{color:var(--border)}
+/* ── TABS ── */
+.ex-tabs{display:flex;gap:.4rem;padding:.6rem 1.4rem;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
+/* ── CONTENIDO ── */
 .ex-content{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.tab-pane{flex:1;display:none;flex-direction:column;overflow:hidden}
+.tab-pane.active{display:flex}
+/* ── TERMINAL ── */
 .xterm-out{font-family:var(--font-mono);font-size:.75rem;color:#7a9ab5;background:#060c10;padding:1rem 1.4rem;flex:1;overflow-y:auto;white-space:pre-wrap;word-break:break-all;line-height:1.55}
 .xterm-out::-webkit-scrollbar{width:4px}
 .xterm-out::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+/* ── LAUNCH CARD ── */
 .launch-card{margin:2rem auto;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:2rem 2.5rem;max-width:480px;text-align:center}
 .launch-icon{font-size:3rem;margin-bottom:1rem}
 .launch-title{font-family:var(--font-orb);font-size:1.1rem;color:var(--cyan);letter-spacing:.08em;margin-bottom:.6rem}
@@ -115,6 +116,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ui);height:10
 .status-dot.on{background:var(--green);box-shadow:0 0 4px var(--green)}
 .status-dot.off{background:var(--red)}
 .status-dot.activating{background:var(--amber);box-shadow:0 0 4px var(--amber);animation:pulse-amber 1s infinite}
+/* ── IFRAME EDITOR ── */
+#editorFrame{width:100%;flex:1;border:none;background:var(--bg)}
 </style>
 </head>
 <body>
@@ -132,9 +135,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ui);height:10
             <span class="sw-busy-dot"></span>
         </label>
         <span id="svcLabel" style="font-family:var(--font-mono);font-size:.72rem;color:var(--text-dim);letter-spacing:.08em;text-transform:uppercase;min-width:2rem;">OFF</span>
-
-        <button class="btn-ex btn-green" id="btnLog" onclick="toggleLogView()">📋 Logs</button>
-        <button class="btn-ex btn-cyan" onclick="abrirEditor()">✏️ Editor</button>
         <button class="btn-ex btn-red" onclick="cerrarVentana()">✖ Cerrar</button>
     </div>
 </header>
@@ -158,59 +158,61 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ui);height:10
     <span style="color:var(--text-dim)">PID: <span id="svcPid" style="color:var(--cyan)">—</span></span>
 </div>
 
+<!-- ── TABS ── -->
+<div class="ex-tabs">
+    <button id="tabBtnTerminal" class="btn-ex btn-active" onclick="switchTab('terminal')">📋 Terminal</button>
+    <button id="tabBtnEditor"   class="btn-ex btn-dim"    onclick="switchTab('editor')">✏️ Editor</button>
+</div>
+
 <div class="ex-content">
-    <div id="launchCard" class="launch-card">
-        <div class="launch-icon">🎛️</div>
-        <div class="launch-title">svxlink · Repetidor</div>
-        <div class="launch-desc">Activa el toggle superior para arrancar el servicio con tu configuración.</div>
-        <div style="margin:1rem 0;display:flex;flex-direction:column;gap:.4rem;align-items:center;">
-            <div class="status-badge"><span class="status-dot" id="cardSvcDot"></span><span id="cardSvcText">Servicio: —</span></div>
-            <div class="status-badge"><span class="status-dot" id="cardAutoDot"></span><span id="cardAutoText">Autostart: —</span></div>
+
+    <!-- ── PANEL TERMINAL ── -->
+    <div id="paneTerminal" class="tab-pane active">
+        <div id="launchCard" class="launch-card">
+            <div class="launch-icon">🎛️</div>
+            <div class="launch-title">svxlink · Repetidor</div>
+            <div class="launch-desc">Activa el toggle superior para arrancar el servicio con tu configuración.</div>
+            <div style="margin:1rem 0;display:flex;flex-direction:column;gap:.4rem;align-items:center;">
+                <div class="status-badge"><span class="status-dot" id="cardSvcDot"></span><span id="cardSvcText">Servicio: —</span></div>
+                <div class="status-badge"><span class="status-dot" id="cardAutoDot"></span><span id="cardAutoText">Autostart: —</span></div>
+            </div>
+            <div class="launch-params">
+                ⚙ Servicio: svxlink.service<br>
+                📝 Log:     journalctl -u svxlink<br>
+                ⚙ Config:  /usr/local/etc/svxlink/<br>
+                📄 Archivos: svxlink.conf, ModuleEchoLink.conf
+            </div>
+            <button class="btn-ex btn-green" style="margin-top:.5rem" onclick="mostrarTerminal()">📋 Cargar logs</button>
         </div>
-        <div class="launch-params">
-            ⚙ Servicio: svxlink.service<br>
-            📝 Log:     journalctl -u svxlink<br>
-            ⚙ Config:  /usr/local/etc/svxlink/<br>
-            📄 Archivos: svxlink.conf, ModuleEchoLink.conf
+        <div id="terminalWrap" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
+            <div class="xterm-out" id="xtOut">Cargando logs…</div>
         </div>
     </div>
-    <div id="terminalWrap" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
-        <div class="xterm-out" id="xtOut">root@svxlink:~$ Pulsa 📋 Logs para cargar el historial
-</div>
+
+    <!-- ── PANEL EDITOR (iframe) ── -->
+    <div id="paneEditor" class="tab-pane">
+        <iframe id="editorFrame" src="" title="Editor SvxLink"></iframe>
     </div>
-</div>
+
+</div><!-- /ex-content -->
 
 <script>
-let logVisible = false;
 let logPoll = null;
+let logLoaded = false;
 
-function toggleLogView() {
-    logVisible = !logVisible;
-    const wrap = document.getElementById('terminalWrap');
-    const launch = document.getElementById('launchCard');
-    const btn = document.getElementById('btnLog');
-
-    if (logVisible) {
-        launch.style.display = 'none';
-        wrap.style.display = 'flex';
-        btn.innerHTML = '📋 Ocultar';
-        btn.className = 'btn-ex btn-amber';
-        fetchLog();
-        startLogPoll();
-    } else {
-        launch.style.display = 'block';
-        wrap.style.display = 'none';
-        btn.innerHTML = '📋 Logs';
-        btn.className = 'btn-ex btn-green';
-        stopLogPoll();
-    }
+// ── Mostrar terminal y arrancar polling ──
+function mostrarTerminal() {
+    document.getElementById('launchCard').style.display = 'none';
+    document.getElementById('terminalWrap').style.display = 'flex';
+    fetchLog();
+    startLogPoll();
+    logLoaded = true;
 }
 
 function startLogPoll() { stopLogPoll(); logPoll = setInterval(fetchLog, 3000); }
 function stopLogPoll()  { if(logPoll) clearInterval(logPoll); logPoll = null; }
 
 function fetchLog() {
-    if (!logVisible) return;
     fetch('?action=log&t=' + Date.now())
         .then(r => r.text())
         .then(text => {
@@ -220,6 +222,33 @@ function fetchLog() {
         });
 }
 
+// ── Cambio de tab ──
+function switchTab(tab) {
+    ['terminal','editor'].forEach(t => {
+        document.getElementById('pane' + t.charAt(0).toUpperCase() + t.slice(1)).classList.remove('active');
+        document.getElementById('tabBtn' + t.charAt(0).toUpperCase() + t.slice(1)).className = 'btn-ex btn-dim';
+    });
+    document.getElementById('pane' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+    document.getElementById('tabBtn' + tab.charAt(0).toUpperCase() + tab.slice(1)).className = 'btn-ex btn-active';
+
+    if (tab === 'editor') {
+        // Cargar iframe solo la primera vez
+        const frame = document.getElementById('editorFrame');
+        if (!frame.src || frame.src === window.location.href) {
+            frame.src = 'svxlink_editor.php';
+        }
+        stopLogPoll();
+    } else if (tab === 'terminal') {
+        if (logLoaded) startLogPoll();
+    }
+}
+
+// ── Llamado desde el iframe cuando pulsa X o SALIR ──
+function cerrarEditorTab() {
+    switchTab('terminal');
+}
+
+// ── Status bar ──
 function updateStatusBar(d) {
     const st = (d.status || '').toLowerCase();
     let dotState = '', statusTxt = '', svcTxt = '', svcColor = '';
@@ -268,34 +297,14 @@ function cerrarVentana() {
             <div style="font-size:5rem;font-weight:900;color:#00d4ff;margin-bottom:10px;" id="countdownNum">5</div>
             <div style="font-size:1.2rem;margin-bottom:30px;color:#7a9ab5;">Cerrando panel de control...</div>
             <button onclick="window.close()" style="padding:12px 24px;background:#ff4560;color:white;border:none;
-                border-radius:4px;cursor:pointer;font-family:inherit;font-size:1rem;"
-                onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-                Cerrar ahora
-            </button>
-        </div>
-    `;
+                border-radius:4px;cursor:pointer;font-family:inherit;font-size:1rem;">Cerrar ahora</button>
+        </div>`;
     let count = 5;
-    const interval = setInterval(() => {
+    const iv = setInterval(() => {
         count--;
-        const numEl = document.getElementById('countdownNum');
-        if (numEl) numEl.textContent = count;
-        if (count <= 0) {
-            clearInterval(interval);
-            window.close();
-            if (!window.closed) {
-                document.body.innerHTML = `
-                    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;
-                        background:#0a0e14;color:#a8b9cc;font-family:'Share Tech Mono',monospace;text-align:center;padding:20px;">
-                        <div style="font-size:1.4rem;margin-bottom:15px;">⚠️ El navegador bloqueó el cierre automático</div>
-                        <div style="font-size:0.9rem;color:#4a5568;margin-bottom:25px;">(Los scripts no pueden cerrar pestañas que no abrieron ellos)</div>
-                        <button onclick="window.close()" style="padding:12px 24px;background:#00d4ff;color:#0a0e14;border:none;
-                            border-radius:4px;cursor:pointer;font-family:inherit;font-size:1rem;font-weight:700;">
-                            Cerrar pestaña manualmente
-                        </button>
-                    </div>
-                `;
-            }
-        }
+        const el = document.getElementById('countdownNum');
+        if (el) el.textContent = count;
+        if (count <= 0) { clearInterval(iv); window.close(); }
     }, 1000);
 }
 
@@ -308,7 +317,6 @@ async function toggleService(chk) {
     document.getElementById('dotStatus').className = wasOn?'dot-status':'dot-status activating';
     document.getElementById('svcStatus').textContent = wasOn?'DETENIENDO…':'INICIANDO…';
     document.getElementById('svcStatus').style.color = wasOn?'var(--text)':'var(--amber)';
-
     try {
         const r = await fetch('?action='+(wasOn?'stop':'start'));
         const d = await r.json();
@@ -349,10 +357,6 @@ async function checkServiceStatus() {
         document.getElementById('svcStatus').textContent='ERROR';
         document.getElementById('svcStatus').style.color='var(--red)';
     }
-}
-
-function abrirEditor() {
-    window.open('svxlink_editor.php', 'svxlink_editor', 'width=820,height=950,resizable=yes,scrollbars=yes');
 }
 
 checkServiceStatus();
