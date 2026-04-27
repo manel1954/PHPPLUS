@@ -79,7 +79,7 @@
     <div class="row g-3 justify-content-start">
 
         <!-- DUMP1090 CONTROL -->
-        <div class="col-12 col-sm-6 col-lg-4">
+        <div class="col-12 col-sm-6 col-lg-3">
             <div class="card bg-secondary border-0 h-100">
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title">
@@ -96,7 +96,7 @@
         </div>
 
         <!-- DUMP1090 MONITOR -->
-        <div class="col-12 col-sm-6 col-lg-4">
+        <div class="col-12 col-sm-6 col-lg-3">
             <div class="card bg-secondary border-0 h-100">
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title">
@@ -113,7 +113,7 @@
         </div>
 
         <!-- AMBE SERVER -->
-        <div class="col-12 col-sm-6 col-lg-4">
+        <div class="col-12 col-sm-6 col-lg-3">
             <div class="card bg-secondary border-0 h-100">
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title">
@@ -130,7 +130,7 @@
         </div>
 
         <!-- RADARBOX -->
-        <div class="col-12 col-sm-6 col-lg-4">
+        <div class="col-12 col-sm-6 col-lg-3">
             <div class="card bg-secondary border-0 h-100">
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title">
@@ -147,7 +147,7 @@
         </div>
 
         <!-- FLIGHTRADAR24 -->
-        <div class="col-12 col-sm-6 col-lg-4">
+        <div class="col-12 col-sm-6 col-lg-3">
             <div class="card bg-secondary border-0 h-100">
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title">
@@ -164,7 +164,7 @@
         </div>
 
         <!-- RADIOSONDE (AUTO_RX) -->
-        <div class="col-12 col-sm-6 col-lg-4">
+        <div class="col-12 col-sm-6 col-lg-3">
             <div class="card bg-secondary border-0 h-100">
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title">
@@ -181,7 +181,7 @@
         </div>
 
         <!-- 🎛️ SVXLINK -->
-        <div class="col-12 col-sm-6 col-lg-4">
+        <div class="col-12 col-sm-6 col-lg-3">
             <div class="card bg-secondary border-0 h-100">
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title">
@@ -198,7 +198,7 @@
         </div>
 
         <!-- ✏️ SVXLINK EDITOR -->
-        <div class="col-12 col-sm-6 col-lg-4">
+        <div class="col-12 col-sm-6 col-lg-3">
             <div class="card bg-secondary border-0 h-100">
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title">
@@ -216,7 +216,7 @@
 
         <!-- 📦 PLANTILLA PARA FUTURAS TARJETAS (copiar/pegar) -->
         <!--
-        <div class="col-12 col-sm-6 col-lg-4">
+        <div class="col-12 col-sm-6 col-lg-3">
             <div class="card bg-secondary border-0 h-100">
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title">
