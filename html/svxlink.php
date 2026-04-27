@@ -248,6 +248,22 @@ function cerrarEditorTab() {
     switchTab('terminal');
 }
 
+// ── Interceptar window.close() del iframe (mismo origen) ──
+document.getElementById('editorFrame').addEventListener('load', function() {
+    try {
+        // Sobreescribir window.close dentro del iframe para que vuelva al tab Terminal
+        this.contentWindow.close = function() {
+            cerrarEditorTab();
+        };
+        // También cubrir la llamada directa al padre si existe
+        this.contentWindow.cerrarEditor = function() {
+            cerrarEditorTab();
+        };
+    } catch(e) {
+        console.warn('No se pudo interceptar iframe:', e);
+    }
+});
+
 // ── Status bar ──
 function updateStatusBar(d) {
     const st = (d.status || '').toLowerCase();
