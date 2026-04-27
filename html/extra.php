@@ -75,7 +75,8 @@
         MENU EXTRA
     </h1>
 
-    <div class="row g-3 justify-content-center">
+    <!-- 🔽 CAMBIO: justify-content-start para alinear a la izquierda -->
+    <div class="row g-3 justify-content-start">
 
         <!-- DUMP1090 CONTROL -->
         <div class="col-12 col-sm-6 col-lg-4">
@@ -178,6 +179,42 @@
                 </div>
             </div>
         </div>
+
+        <!-- 🎛️ SVXLINK (AL FINAL) -->
+        <div class="col-12 col-sm-6 col-lg-4">
+            <div class="card bg-secondary border-0 h-100">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">
+                        <i class="bi bi-broadcast me-2" style="color:#00d4ff;"></i>SVXLINK
+                    </h5>
+                    <p class="card-text text-white-50 small flex-grow-1">
+                        Control de repetidor · EchoLink · Configuración y logs
+                    </p>
+                    <a href="/svxlink.php" target="_blank" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
+                        <i class="bi bi-box-arrow-up-right me-1"></i>Abrir
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 📦 PLANTILLA PARA FUTURAS TARJETAS (copiar/pegar) -->
+        <!--
+        <div class="col-12 col-sm-6 col-lg-4">
+            <div class="card bg-secondary border-0 h-100">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">
+                        <i class="bi bi-ICONO me-2" style="color:#COLOR;"></i>TITULO
+                    </h5>
+                    <p class="card-text text-white-50 small flex-grow-1">
+                        Descripción breve del servicio
+                    </p>
+                    <a href="/archivo.php" target="_blank" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
+                        <i class="bi bi-box-arrow-up-right me-1"></i>Abrir
+                    </a>
+                </div>
+            </div>
+        </div>
+        -->
 
     </div>
 </div>
