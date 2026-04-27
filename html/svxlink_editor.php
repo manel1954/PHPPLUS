@@ -555,7 +555,7 @@ input[type="number"].cell-input::-webkit-inner-spin-button { -webkit-appearance:
 
     <!-- Barra de título -->
     <div class="title-bar">
-        <h2>✈️ &nbsp;EDITOR SVXLINK</h2>
+        <h2>✏️ &nbsp;EDITOR SVXLINK</h2>
         <a class="btn-close-x" href="extra.php" title="Cerrar">✕</a>
     </div>
 
