@@ -807,16 +807,19 @@ input[type="number"].cell-input::-webkit-inner-spin-button { -webkit-appearance:
             </button>
         </div>
 
-        <!-- ── BOTÓN GUARDAR Y SALIR ── -->
-        <form method="post">
-            <input type="hidden" name="action" value="save">
-            <!-- campos ocultos con los mismos valores del form principal -->
-            <!-- para que el save funcione desde este botón dedicado      -->
-            <button type="button" class="btn-save"
+        <!-- ── BOTONES SALIR / GUARDAR ── -->
+        <div style="display:flex;gap:6px;margin-top:6px;">
+            <a href="javascript:history.back()"
+               style="flex:1;display:block;padding:12px;background:#374151;color:#d0d8f0;
+                      border-radius:6px;text-align:center;font-size:.95rem;font-weight:800;
+                      letter-spacing:1px;text-decoration:none;">
+                ✕ &nbsp;SALIR
+            </a>
+            <button type="button" class="btn-save" style="flex:2;margin-top:0"
                     onclick="document.getElementById('mainForm').submit()">
-                💾 &nbsp;GUARDAR Y SALIR
+                💾 &nbsp;GUARDAR
             </button>
-        </form>
+        </div>
 
     </div><!-- /editor-body -->
 </div><!-- /editor-card -->
