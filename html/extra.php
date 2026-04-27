@@ -180,7 +180,7 @@
             </div>
         </div>
 
-        <!-- 🎛️ SVXLINK (AL FINAL) -->
+        <!-- 🎛️ SVXLINK -->
         <div class="col-12 col-sm-6 col-lg-4">
             <div class="card bg-secondary border-0 h-100">
                 <div class="card-body d-flex flex-column">
@@ -191,6 +191,23 @@
                         Control de repetidor · EchoLink · Configuración y logs
                     </p>
                     <a href="/svxlink.php" target="_blank" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
+                        <i class="bi bi-box-arrow-up-right me-1"></i>Abrir
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- ✏️ SVXLINK EDITOR -->
+        <div class="col-12 col-sm-6 col-lg-4">
+            <div class="card bg-secondary border-0 h-100">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">
+                        <i class="bi bi-pencil-square me-2" style="color:#00d4ff;"></i>SVXLINK EDITOR
+                    </h5>
+                    <p class="card-text text-white-50 small flex-grow-1">
+                        Editor de configuración · EchoLink · svxlink.conf
+                    </p>
+                    <a href="/svxlink_editor.php" target="_blank" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
                         <i class="bi bi-box-arrow-up-right me-1"></i>Abrir
                     </a>
                 </div>
