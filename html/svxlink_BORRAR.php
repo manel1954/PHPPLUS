@@ -4,7 +4,29 @@ session_start();
 header('X-Content-Type-Options: nosniff');
 
 $SERVICE = "svxlink";
+$CONFIG_FILES = [
+    "main" => "/usr/local/etc/svxlink/svxlink.conf",
+    "echolink" => "/usr/local/etc/svxlink/svxlink.d/ModuleEchoLink.conf"
+];
+
 $action = $_GET['action'] ?? '';
+
+if ($action === 'config-read') {
+    header('Content-Type: application/json');
+    $key = $_GET['file'] ?? '';
+    if (!isset($CONFIG_FILES[$key])) { echo json_encode(['ok'=>false, 'error'=>'Archivo no válido']); exit; }
+    echo json_encode(['ok'=>true, 'content'=>file_get_contents($CONFIG_FILES[$key])]);
+    exit;
+}
+
+if ($action === 'config-save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    header('Content-Type: application/json');
+    $key = $_POST['file'] ?? ''; $content = $_POST['content'] ?? '';
+    if (!isset($CONFIG_FILES[$key])) { echo json_encode(['ok'=>false, 'error'=>'Archivo no permitido']); exit; }
+    if (!is_writable($CONFIG_FILES[$key])) { echo json_encode(['ok'=>false, 'error'=>'Sin permisos']); exit; }
+    echo json_encode(file_put_contents($CONFIG_FILES[$key], $content) !== false ? ['ok'=>true, 'msg'=>'✅ Guardado'] : ['ok'=>false, 'error'=>'Error']);
+    exit;
+}
 
 if ($action === 'start') {
     shell_exec("sudo systemctl start $SERVICE 2>/dev/null");
@@ -107,6 +129,14 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ui);height:10
 .xterm-out{font-family:var(--font-mono);font-size:.75rem;color:#7a9ab5;background:#060c10;padding:1rem 1.4rem;flex:1;overflow-y:auto;white-space:pre-wrap;word-break:break-all;line-height:1.55}
 .xterm-out::-webkit-scrollbar{width:4px}
 .xterm-out::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.config-wrap{flex:1;display:flex;flex-direction:column;padding:1rem 1.4rem;overflow:hidden}
+.config-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem}
+.config-path{font-family:var(--font-mono);font-size:.7rem;color:var(--text-dim)}
+.config-actions{display:flex;gap:.5rem}
+.config-select{font-family:var(--font-mono);font-size:.75rem;background:#060c10;border:1px solid var(--border);color:var(--cyan);padding:.4rem .8rem;border-radius:4px;outline:none}
+.config-editor{flex:1;background:#060c10;border:1px solid var(--border);border-radius:4px;padding:.8rem;font-family:var(--font-mono);font-size:.75rem;color:#c9d1d9;resize:none;outline:none;line-height:1.6}
+.config-editor:focus{border-color:var(--cyan);box-shadow:0 0 0 2px rgba(0,212,255,.2)}
+.config-hint{font-size:.7rem;color:var(--text-dim);margin-top:.5rem}
 .launch-card{margin:2rem auto;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:2rem 2.5rem;max-width:480px;text-align:center}
 .launch-icon{font-size:3rem;margin-bottom:1rem}
 .launch-title{font-family:var(--font-orb);font-size:1.1rem;color:var(--cyan);letter-spacing:.08em;margin-bottom:.6rem}
@@ -136,7 +166,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ui);height:10
         <span id="svcLabel" style="font-family:var(--font-mono);font-size:.72rem;color:var(--text-dim);letter-spacing:.08em;text-transform:uppercase;min-width:2rem;">OFF</span>
         
         <button class="btn-ex btn-green" id="btnLog" onclick="toggleLogView()">📋 Logs</button>
-        <button class="btn-ex btn-cyan" onclick="toggleExternalEditor()">🛠️ Editor</button>
         <button class="btn-ex btn-red" onclick="cerrarVentana()">✖ Cerrar</button>
     </div>
 </header>
@@ -189,11 +218,19 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ui);height:10
     </div>
 
     <div id="paneCfg" class="tab-pane">
-        <div id="externalEditorWrap" style="flex:1;display:none;flex-direction:column;overflow:hidden;">
-            <iframe id="editorFrame" src="svxlink_editor.php" style="width:100%;height:100%;border:none;background:#060c10;" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
-        </div>
-        <div id="cfgPlaceholder" style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--text-dim);font-family:var(--font-mono);font-size:.85rem;text-align:center;padding:2rem;letter-spacing:.05em;">
-            Pulsa 🛠️ Editor para abrir el panel de configuración externo.
+        <div class="config-wrap">
+            <div class="config-header">
+                <select id="configSelect" class="config-select" onchange="loadConfig()">
+                    <option value="main">svxlink.conf</option>
+                    <option value="echolink">ModuleEchoLink.conf</option>
+                </select>
+                <div class="config-actions">
+                    <button class="btn-ex btn-cyan" onclick="loadConfig()">⟳ Recargar</button>
+                    <button class="btn-ex btn-green" onclick="saveConfig()">💾 Guardar</button>
+                </div>
+            </div>
+            <textarea id="configEditor" class="config-editor" spellcheck="false" placeholder="Cargando configuración…"></textarea>
+            <div class="config-hint">⚠️ Edita los parámetros. Los cambios requieren reiniciar el servicio para aplicar.</div>
         </div>
     </div>
 </div>
@@ -203,6 +240,7 @@ function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').
 let logVisible = false;
 let logPoll = null;
 
+// 🔽 TOGGLE LOG: Muestra/Oculta terminal + Controla polling
 function toggleLogView() {
     logVisible = !logVisible;
     const wrap = document.getElementById('terminalWrap');
@@ -280,6 +318,7 @@ function updateAutoState(enabled) {
     document.getElementById('cardAutoText').textContent = 'Autostart: ' + (enabled ? 'ON' : 'OFF');
 }
 
+// 🔽 CIERRE CON CUENTA ATRÁS (5s) + FALLBACK SEGURO
 function cerrarVentana() {
     document.body.innerHTML = `
         <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;
@@ -303,6 +342,7 @@ function cerrarVentana() {
         if (count <= 0) {
             clearInterval(interval);
             window.close();
+            // Fallback por si el navegador bloquea window.close()
             if (!window.closed) {
                 document.body.innerHTML = `
                     <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;
@@ -327,24 +367,7 @@ function switchTab(tab) {
     });
     document.getElementById('pane'+tab.charAt(0).toUpperCase()+tab.slice(1)).classList.add('active');
     document.getElementById('tabBtn'+tab.charAt(0).toUpperCase()+tab.slice(1)).className='btn-ex btn-active';
-}
-
-// 🔽 NUEVA FUNCIÓN: Mostrar/Ocultar editor externo
-function toggleExternalEditor() {
-    const wrap = document.getElementById('externalEditorWrap');
-    const placeholder = document.getElementById('cfgPlaceholder');
-    const btn = document.querySelector('button[onclick="toggleExternalEditor()"]');
-    const isHidden = wrap.style.display === 'none' || !wrap.style.display;
-    
-    if (isHidden) {
-        wrap.style.display = 'flex';
-        placeholder.style.display = 'none';
-        btn.classList.add('btn-active');
-    } else {
-        wrap.style.display = 'none';
-        placeholder.style.display = 'flex';
-        btn.classList.remove('btn-active');
-    }
+    if(tab==='cfg') loadConfig();
 }
 
 async function toggleService(chk) {
@@ -400,9 +423,37 @@ async function checkServiceStatus() {
     }
 }
 
+async function loadConfig() {
+    const editor = document.getElementById('configEditor');
+    const select = document.getElementById('configSelect');
+    editor.value = '⏳ Cargando…'; editor.disabled = true;
+    try {
+        const r = await fetch('?action=config-read&file='+select.value+'&t='+Date.now());
+        const d = await r.json();
+        editor.value = d.ok ? d.content : '⚠ Error: '+d.error;
+    } catch(e) { editor.value = '⚠ Error de red'; }
+    editor.disabled = false;
+}
+
+async function saveConfig() {
+    const editor = document.getElementById('configEditor');
+    const select = document.getElementById('configSelect');
+    editor.disabled = true;
+    try {
+        const r = await fetch('?action=config-save', {
+            method:'POST',
+            headers:{'Content-Type':'application/x-www-form-urlencoded'},
+            body:'file='+encodeURIComponent(select.value)+'&content='+encodeURIComponent(editor.value)
+        });
+        const d = await r.json();
+        alert(d.ok?'✅ '+d.msg:'❌ '+d.error);
+    } catch(e) { alert('❌ Error de red'); } finally { editor.disabled = false; }
+}
+
 // Init
 checkServiceStatus();
 setInterval(checkServiceStatus, 10000);
+if(document.getElementById('paneCfg').classList.contains('active')) loadConfig();
 </script>
 </body>
 </html>
