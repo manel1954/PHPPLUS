@@ -720,6 +720,7 @@ button.btn-header { font-family: var(--font-mono); }
   </div>
 </div>
 <button class="btn-header cyan" onclick="xtTtydOpen()">⌨ Terminal</button>
+<a href="extra.php" class="btn-header amber">☰ Menu Extra</a>
 <button id="btnReboot" class="btn-header red" onclick="rebootPi()">⏻ Reiniciar Pi</button>
 </div>
 </header>
@@ -761,7 +762,7 @@ button.btn-header { font-family: var(--font-mono); }
       <label class="sw dmr" id="swDMR"><input type="checkbox" id="chkDMR" onchange="toggleServices(this)"><span class="sw-track"></span><span class="sw-knob"></span><span class="sw-busy-dot"></span></label>
       <span class="toggle-status" id="dmrToggleStatus">OFF</span>
     </div>
-    <div class="auto-badge" id="autoRefreshBadge" style="display:none"><div class="dot-sm"></div> auto-refresh 3s</div>
+    <div class="auto-badge" id="autoRefreshBadge" style="display:none"><div class="dot-sm"></div> DMR activo</div>
     <div class="service-card-btns">
       <a href="mmdvm_config.php" class="ini-btn edit" style="flex:1;justify-content:center;color:var(--cyan);border-color:rgba(0,212,255,.3);">⚙ MMDVMHOST Config</a>
       <a href="dmrgateway_config.php" class="ini-btn edit" style="flex:1;color:#fff;justify-content:center;">⚙ DMRGateway Config</a>
@@ -957,7 +958,7 @@ button.btn-header { font-family: var(--font-mono); }
 <div id="xtTtydModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9800;align-items:center;justify-content:center;">
   <div style="background:#0a0e14;border:1px solid #1e2d3d;border-radius:8px;width:960px;max-width:96vw;height:620px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;">
     <div style="display:flex;align-items:center;justify-content:space-between;padding:.7rem 1.2rem;background:#111720;border-bottom:1px solid #1e2d3d;flex-shrink:0;">
-      <span style="font-family:'Share Tech Mono',monospace;font-size:.8rem;color:var(--cyan);letter-spacing:.12em;text-transform:uppercase;">⌨ Terminal · ADER</span>
+      <span style="font-family:'Share Tech Mono',monospace;font-size:.8rem;color:var(--cyan);letter-spacing:.12em;text-transform:uppercase;">⌨ Terminal</span>
       <button onclick="xtTtydClose()" style="background:transparent;border:1px solid var(--red);color:var(--red);font-family:'Share Tech Mono',monospace;font-size:.7rem;border-radius:4px;padding:.25rem .8rem;cursor:pointer;transition:background .2s;" onmouseover="this.style.background='rgba(255,69,96,.15)'" onmouseout="this.style.background='transparent'">✖ Cerrar</button>
     </div>
     <iframe id="xtTtydFrame" src="" style="flex:1;border:none;width:100%;background:#000;" allow="clipboard-read; clipboard-write"></iframe>
