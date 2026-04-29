@@ -372,32 +372,38 @@ header('X-Content-Type-Options: nosniff');
     // 🔓 LIBERAR PUERTO
     // ================================
     async function releasePort() {
-      log('🔓 Liberando puerto...', 'warning');
-      try {
-        if (transport) {
-          try { await transport.disconnect(); } catch(e) {}
-          transport = null;
-        }
-        if (port) {
-          try { await port.close(); } catch(e) {}
-          port = null;
-        }
-        esploader = null;
-        updateStatus('🔓 Puerto liberado — puedes reconectar', 'info');
-        els.btnConnect.classList.remove('hidden');
-        els.btnDisconnect.classList.add('hidden');
-        els.btnFlash.disabled  = true;
-        els.btnVerify.disabled = true;
-        log('✅ Puerto liberado correctamente', 'success');
-      } catch (err) {
-        log(`⚠️ Error al liberar: ${err.message}`, 'warning');
-        // Forzar reset de estado aunque haya error
-        transport = null; port = null; esploader = null;
-        updateStatus('🔓 Estado reseteado', 'info');
-        els.btnConnect.classList.remove('hidden');
-        els.btnDisconnect.classList.add('hidden');
-        updateFlashButtonState();
-      }
+  log('🔓 Liberando puerto...', 'warning');
+  try {
+    // Cancelar reader si existe
+    if (transport && transport.reader) {
+      try { await transport.reader.cancel(); } catch(e) {}
+      try { transport.reader.releaseLock(); } catch(e) {}
+    }
+    // Cancelar writer si existe
+    if (transport && transport.device && transport.device.writable) {
+      try { transport.device.writable.getWriter().releaseLock(); } catch(e) {}
+    }
+    // Desconectar transport
+    if (transport) {
+      try { await transport.disconnect(); } catch(e) {}
+      transport = null;
+    }
+    // Cerrar puerto directamente
+    if (port) {
+      try { await port.close(); } catch(e) {}
+      port = null;
+    }
+  } catch(e) {}
+
+  // Forzar reset aunque todo falle
+  transport = null; port = null; esploader = null;
+  updateStatus('🔓 Puerto liberado — puedes reconectar', 'info');
+  els.btnConnect.classList.remove('hidden');
+  els.btnDisconnect.classList.add('hidden');
+  els.btnFlash.disabled  = true;
+  els.btnVerify.disabled = true;
+  log('✅ Puerto liberado — pulsa Conectar', 'success');
+}
     }
 
     // ================================
