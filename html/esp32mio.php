@@ -12,8 +12,13 @@ header('X-Content-Type-Options: nosniff');
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🔧 ESP32 Flash Tool Web</title>
 
-  <!-- esptool-js oficial de Espressif -->
-  <script src="esptool-bundle.js"></script>
+  <!-- Cargar esptool-js como ES module y exponer globalmente -->
+  <script type="module">
+    import { ESPLoader, Transport } from './esptool-bundle.js';
+    window.ESPLoader    = ESPLoader;
+    window.Transport    = Transport;
+    window.esptoolReady = true;
+  </script>
 
   <style>
     :root {
@@ -84,24 +89,35 @@ header('X-Content-Type-Options: nosniff');
     }
     .progress-label { font-size: 0.85rem; color: #aaa; margin-top: 5px; }
 
-    .hidden   { display: none !important; }
-    .divider  { height: 1px; background: #444; margin: 20px 0; }
+    .hidden  { display: none !important; }
+    .divider { height: 1px; background: #444; margin: 20px 0; }
 
     details { margin: 10px 0; }
     summary { cursor: pointer; padding: 8px 0; color: var(--primary); font-weight: 500; }
 
-    /* Alerta HTTPS */
     .https-warn {
       background: #3a1a00; border: 1px solid var(--warning); border-radius: 8px;
       padding: 12px 16px; margin-bottom: 15px; font-size: 0.9rem; color: #ffcc80;
     }
 
-    /* Baud rate selector */
     .baud-select {
       background: #222; color: var(--text); border: 1px solid #555;
       border-radius: 6px; padding: 8px 12px; font-family: var(--mono);
       font-size: 0.9rem; cursor: pointer;
     }
+
+    #loadingOverlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.75); display: flex; align-items: center;
+      justify-content: center; z-index: 999; flex-direction: column; gap: 14px;
+    }
+    #loadingOverlay p { color: #fff; font-size: 1rem; }
+    .spinner {
+      width: 44px; height: 44px; border: 4px solid #444;
+      border-top-color: var(--primary); border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
     footer { text-align: center; padding: 20px; color: #777; font-size: 0.85rem; border-top: 1px solid #444; margin-top: 30px; }
 
@@ -113,6 +129,13 @@ header('X-Content-Type-Options: nosniff');
   </style>
 </head>
 <body>
+
+  <!-- Overlay mientras carga el módulo ES -->
+  <div id="loadingOverlay">
+    <div class="spinner"></div>
+    <p>Cargando esptool-js...</p>
+  </div>
+
   <header>
     <h1>🔧 ESP32 Flash Tool Web</h1>
     <p>Programa bootloader, partitions, firmware y LittleFS directamente desde el navegador</p>
@@ -120,10 +143,9 @@ header('X-Content-Type-Options: nosniff');
 
   <main>
 
-    <!-- Aviso HTTPS si aplica -->
     <div id="httpsWarn" class="https-warn hidden">
       ⚠️ <strong>Web Serial API requiere HTTPS o localhost.</strong>
-      Accede por <code>https://192.168.1.126/esp32.php</code> o activa
+      Accede por <code>https://192.168.1.162/esp32.php</code> o activa
       <code>brave://flags/#enable-experimental-web-platform-features</code> en Brave.
     </div>
 
@@ -222,7 +244,7 @@ header('X-Content-Type-Options: nosniff');
   </main>
 
   <footer>
-    <p>🔐 Web Serial API • Chrome/Edge/Brave (HTTPS) • esptool-js v0.4.3</p>
+    <p>🔐 Web Serial API • Chrome/Edge/Brave (HTTPS) • esptool-js</p>
     <p id="pageInfo">🔗 <?php echo htmlspecialchars((isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF']); ?></p>
   </footer>
 
@@ -230,10 +252,10 @@ header('X-Content-Type-Options: nosniff');
     // ================================
     // 🧠 ESTADO GLOBAL
     // ================================
-    let port        = null;
-    let esploader   = null;
-    let transport   = null;
-    let logBuffer   = [];
+    let port          = null;
+    let esploader     = null;
+    let transport     = null;
+    let logBuffer     = [];
     let selectedFiles = {};
 
     // ================================
@@ -261,6 +283,7 @@ header('X-Content-Type-Options: nosniff');
       customFile:        $('customFile'),
       baudSelect:        $('baudSelect'),
       httpsWarn:         $('httpsWarn'),
+      loadingOverlay:    $('loadingOverlay'),
     };
 
     // ================================
@@ -270,7 +293,7 @@ header('X-Content-Type-Options: nosniff');
 
     function log(msg, type = 'info') {
       if (!msg || !msg.toString().trim()) return;
-      const line = document.createElement('div');
+      const line  = document.createElement('div');
       const clean = msg.toString().replace(/</g,'&lt;').replace(/>/g,'&gt;');
       line.innerHTML = `<span class="timestamp">${ts()}</span><span class="${type}">${clean}</span>`;
       els.log.appendChild(line);
@@ -296,7 +319,6 @@ header('X-Content-Type-Options: nosniff');
       return str.startsWith('0x') ? parseInt(str, 16) : parseInt(str, 10);
     }
 
-    // Helper: ArrayBuffer → binary string (requerido por esptool-js)
     function arrayBufferToBstr(buffer) {
       const bytes = new Uint8Array(buffer);
       let str = '';
@@ -315,16 +337,15 @@ header('X-Content-Type-Options: nosniff');
         port = await navigator.serial.requestPort();
 
         const baudRate = parseInt(els.baudSelect.value);
-        transport = new Transport(port, true);
+        transport = new window.Transport(port, true);
 
-        // Terminal que redirige la salida de esptool-js al log
         const terminal = {
           clean:     ()    => {},
           writeLine: (msg) => log(msg),
           write:     (msg) => { if (msg && msg.trim()) log(msg); },
         };
 
-        esploader = new ESPLoader({
+        esploader = new window.ESPLoader({
           transport,
           baudrate:    baudRate,
           romBaudrate: 115200,
@@ -334,7 +355,6 @@ header('X-Content-Type-Options: nosniff');
         log('⏳ Conectando con el chip...', 'info');
         const chip = await esploader.main();
         log(`✅ Chip detectado: ${chip}`, 'success');
-        log(`   MAC: ${await esploader.chip.get_mac(esploader)}`, 'info');
 
         updateStatus(`✅ Conectado — ${chip}`, 'success');
         els.btnConnect.classList.add('hidden');
@@ -358,7 +378,7 @@ header('X-Content-Type-Options: nosniff');
         updateStatus('🔌 Desconectado', 'info');
         els.btnConnect.classList.remove('hidden');
         els.btnDisconnect.classList.add('hidden');
-        els.btnFlash.disabled = true;
+        els.btnFlash.disabled  = true;
         els.btnVerify.disabled = true;
         log('🔌 Desconectado correctamente');
       } catch (err) {
@@ -370,9 +390,7 @@ header('X-Content-Type-Options: nosniff');
     // 🗑️ BORRAR FLASH (real)
     // ================================
     async function eraseFlash() {
-      if (!esploader) {
-        log('❌ Primero conecta el ESP32', 'error'); return;
-      }
+      if (!esploader) { log('❌ Primero conecta el ESP32', 'error'); return; }
       if (!confirm('⚠️ ¿Borrar TODO el flash del ESP32?\n\nSe perderán firmware, particiones y datos.')) return;
 
       try {
@@ -384,8 +402,8 @@ header('X-Content-Type-Options: nosniff');
 
         await esploader.eraseFlash();
 
-        els.progressFill.style.width = '100%';
-        els.progressFill.textContent = '100%';
+        els.progressFill.style.width   = '100%';
+        els.progressFill.textContent   = '100%';
         log('✅ Flash borrado correctamente', 'success');
         updateStatus('✅ Flash vacío', 'success');
 
@@ -395,8 +413,8 @@ header('X-Content-Type-Options: nosniff');
       } finally {
         setTimeout(() => {
           els.progressContainer.classList.add('hidden');
-          els.progressFill.style.width = '0%';
-          els.progressFill.textContent = '0%';
+          els.progressFill.style.width  = '0%';
+          els.progressFill.textContent  = '0%';
         }, 1500);
         els.btnErase.disabled = false;
       }
@@ -407,12 +425,8 @@ header('X-Content-Type-Options: nosniff');
     // ================================
     async function flashPartitions() {
       const files = Object.values(selectedFiles);
-      if (files.length === 0) {
-        log('⚠️ Selecciona al menos un archivo .bin', 'warning'); return;
-      }
-      if (!esploader) {
-        log('❌ Primero conecta el ESP32', 'error'); return;
-      }
+      if (files.length === 0) { log('⚠️ Selecciona al menos un archivo .bin', 'warning'); return; }
+      if (!esploader)          { log('❌ Primero conecta el ESP32', 'error'); return; }
 
       try {
         log(`🚀 Programando ${files.length} partición(es)...`, 'info');
@@ -421,7 +435,6 @@ header('X-Content-Type-Options: nosniff');
         els.btnErase.disabled = true;
         els.progressContainer.classList.remove('hidden');
 
-        // Construir array de particiones para esptool-js
         const fileArray = [];
         for (const { file, offset, type } of files) {
           log(`📦 Cargando ${type}: ${file.name} @ ${offset} (${formatBytes(file.size)})`);
@@ -432,30 +445,25 @@ header('X-Content-Type-Options: nosniff');
           });
         }
 
-        // Flash real
         await esploader.writeFlash({
           fileArray,
-          flashSize:  'keep',
-          flashMode:  'keep',
-          flashFreq:  'keep',
-          eraseAll:   false,
-          compress:   true,
+          flashSize: 'keep',
+          flashMode: 'keep',
+          flashFreq: 'keep',
+          eraseAll:  false,
+          compress:  true,
           reportProgress(fileIndex, written, total) {
             const pct = Math.round((written / total) * 100);
-            els.progressFill.style.width = `${pct}%`;
+            els.progressFill.style.width  = `${pct}%`;
             els.progressFill.textContent  = `${pct}%`;
             const f = files[fileIndex];
-            els.progressLabel.textContent = `Grabando ${f?.type ?? 'partición ' + (fileIndex+1)} — ${formatBytes(written)} / ${formatBytes(total)}`;
+            els.progressLabel.textContent = `Grabando ${f?.type ?? 'archivo ' + (fileIndex+1)} — ${formatBytes(written)} / ${formatBytes(total)}`;
           },
-          calculateMD5Hash(image) {
-            return CryptoJS ? CryptoJS.MD5(CryptoJS.enc.Latin1.parse(image)).toString() : '';
-          },
+          calculateMD5Hash() { return ''; },
         });
 
         log('✅ ¡Programación completada con éxito!', 'success');
         updateStatus('✅ ESP32 programado correctamente', 'success');
-
-        // Hard reset para arrancar el nuevo firmware
         await esploader.hardReset();
         log('🔄 Reset realizado — el ESP32 ejecuta el nuevo firmware', 'success');
 
@@ -466,8 +474,8 @@ header('X-Content-Type-Options: nosniff');
       } finally {
         setTimeout(() => {
           els.progressContainer.classList.add('hidden');
-          els.progressFill.style.width = '0%';
-          els.progressFill.textContent = '0%';
+          els.progressFill.style.width  = '0%';
+          els.progressFill.textContent  = '0%';
           els.progressLabel.textContent = '';
         }, 2000);
         els.btnErase.disabled = false;
@@ -481,16 +489,16 @@ header('X-Content-Type-Options: nosniff');
     async function verifyFlash() {
       if (!esploader) { log('❌ Conecta el ESP32 primero', 'error'); return; }
       const files = Object.values(selectedFiles);
-      if (files.length === 0) { log('⚠️ Selecciona archivos para verificar', 'warning'); return; }
+      if (!files.length) { log('⚠️ Selecciona archivos para verificar', 'warning'); return; }
 
       log('🔍 Verificando integridad del flash...', 'info');
       updateStatus('🔍 Verificando...', 'warning');
 
       try {
         for (const { file, offset, type } of files) {
-          const buffer  = await file.arrayBuffer();
-          const written = arrayBufferToBstr(buffer);
-          const addr    = parseOffset(offset);
+          const buffer   = await file.arrayBuffer();
+          const written  = arrayBufferToBstr(buffer);
+          const addr     = parseOffset(offset);
           const readBack = await esploader.readFlash(addr, written.length);
 
           let match = true;
@@ -498,11 +506,11 @@ header('X-Content-Type-Options: nosniff');
             if (written.charCodeAt(i) !== readBack.charCodeAt(i)) { match = false; break; }
           }
 
-          if (match) {
-            log(`✅ ${type} @ ${offset} — OK`, 'success');
-          } else {
-            log(`❌ ${type} @ ${offset} — FALLO (datos distintos)`, 'error');
-          }
+          log(match
+            ? `✅ ${type} @ ${offset} — OK`
+            : `❌ ${type} @ ${offset} — FALLO (datos distintos)`,
+            match ? 'success' : 'error'
+          );
         }
         updateStatus('✅ Verificación completada', 'success');
       } catch (err) {
@@ -525,7 +533,7 @@ header('X-Content-Type-Options: nosniff');
     }
 
     // ================================
-    // 🎛️ UI
+    // 🎛️ UI helpers
     // ================================
     function updateFlashButtonState() {
       const hasFiles = Object.keys(selectedFiles).length > 0;
@@ -536,15 +544,15 @@ header('X-Content-Type-Options: nosniff');
     function setupPartitionInputs() {
       document.querySelectorAll('.partition-file').forEach(input => {
         input.addEventListener('change', e => {
-          const file = e.target.files[0];
+          const file   = e.target.files[0];
           if (!file) return;
           const row    = e.target.closest('.partition-row');
           const type   = e.target.dataset.type;
           const offset = row.dataset.offset;
           selectedFiles[type] = { file, offset, type };
           const sizeEl = row.querySelector('.size');
-          sizeEl.textContent = formatBytes(file.size);
-          sizeEl.style.color = '#4CAF50';
+          sizeEl.textContent  = formatBytes(file.size);
+          sizeEl.style.color  = '#4CAF50';
           log(`📄 ${type}: ${file.name} (${formatBytes(file.size)}) @ ${offset}`);
           updateFlashButtonState();
         });
@@ -562,8 +570,8 @@ header('X-Content-Type-Options: nosniff');
       selectedFiles[type] = { file, offset, type };
 
       const row = document.createElement('div');
-      row.className       = 'partition-row';
-      row.dataset.offset  = offset;
+      row.className      = 'partition-row';
+      row.dataset.offset = offset;
       row.innerHTML = `
         <label>🔸 Custom</label>
         <span style="color:#ccc;font-size:0.85rem">${file.name}</span>
@@ -583,7 +591,6 @@ header('X-Content-Type-Options: nosniff');
       updateFlashButtonState();
     }
 
-    // Drag & drop
     function setupDragDrop() {
       document.querySelectorAll('.partition-row').forEach(row => {
         row.addEventListener('dragover',  e => { e.preventDefault(); row.style.outline = '2px dashed var(--primary)'; });
@@ -602,7 +609,6 @@ header('X-Content-Type-Options: nosniff');
       });
     }
 
-    // Log management
     function clearLog() { els.log.innerHTML = ''; logBuffer = []; log('🗑️ Consola limpiada'); }
     function downloadLog() {
       if (!logBuffer.length) { log('⚠️ Sin logs', 'warning'); return; }
@@ -615,15 +621,16 @@ header('X-Content-Type-Options: nosniff');
     }
 
     // ================================
-    // 🚀 INIT
+    // 🚀 INIT — espera a que el módulo ES cargue
     // ================================
     function init() {
-      log('🚀 ESP32 Flash Tool Web cargado (esptool-js real)');
+      els.loadingOverlay.style.display = 'none';
+
+      log('🚀 ESP32 Flash Tool Web cargado');
       log(`🔗 URL: ${window.location.href}`);
 
-      // Comprobar Web Serial API
       if (!('serial' in navigator)) {
-        log('❌ Web Serial API no disponible en este navegador', 'error');
+        log('❌ Web Serial API no disponible', 'error');
         log('💡 Usa Chrome/Edge o activa brave://flags/#enable-experimental-web-platform-features', 'warning');
         updateStatus('🚫 Usa Chrome/Edge con HTTPS', 'error');
         els.httpsWarn.classList.remove('hidden');
@@ -631,21 +638,20 @@ header('X-Content-Type-Options: nosniff');
         return;
       }
 
-      // Comprobar contexto seguro
       if (!window.isSecureContext) {
         log('⚠️ Contexto no seguro: Web Serial puede no funcionar', 'warning');
         els.httpsWarn.classList.remove('hidden');
       }
 
-      // Comprobar esptool-js cargado
-      if (typeof ESPLoader === 'undefined' || typeof Transport === 'undefined') {
-        log('❌ esptool-js no se pudo cargar. Comprueba la conexión a internet', 'error');
+      if (typeof window.ESPLoader === 'undefined' || typeof window.Transport === 'undefined') {
+        log('❌ esptool-js no cargado. Verifica que esptool-bundle.js está en /var/www/html/', 'error');
+        updateStatus('❌ esptool-js no disponible', 'error');
         els.btnConnect.disabled = true;
         return;
       }
-      log('✅ esptool-js cargado correctamente', 'success');
 
-      // Eventos
+      log('✅ esptool-js listo', 'success');
+
       els.btnConnect.onclick    = connectPort;
       els.btnDisconnect.onclick = disconnectPort;
       els.btnReset.onclick      = resetESP32;
@@ -659,7 +665,6 @@ header('X-Content-Type-Options: nosniff');
       setupPartitionInputs();
       setupDragDrop();
 
-      // Detectar desconexión física
       navigator.serial.addEventListener('disconnect', e => {
         if (port && e.target === port) {
           log('🔌 ESP32 desconectado físicamente', 'warning');
@@ -672,7 +677,25 @@ header('X-Content-Type-Options: nosniff');
       log('✅ Listo. Conecta el ESP32 y selecciona los archivos .bin');
     }
 
-    document.addEventListener('DOMContentLoaded', init);
+    // Esperar a que el módulo ESM exporte ESPLoader y Transport a window
+    window.addEventListener('load', () => {
+      let elapsed = 0;
+      const check = setInterval(() => {
+        elapsed += 50;
+        if (window.ESPLoader && window.Transport) {
+          clearInterval(check);
+          init();
+          return;
+        }
+        // Timeout de seguridad: 5 segundos
+        if (elapsed >= 5000) {
+          clearInterval(check);
+          els.loadingOverlay.style.display = 'none';
+          log('❌ Timeout al cargar esptool-js. Comprueba que esptool-bundle.js existe en /var/www/html/', 'error');
+          updateStatus('❌ Error cargando esptool-js', 'error');
+        }
+      }, 50);
+    });
   </script>
 </body>
 </html>
