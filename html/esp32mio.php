@@ -403,7 +403,7 @@ header('X-Content-Type-Options: nosniff');
   els.btnFlash.disabled  = true;
   els.btnVerify.disabled = true;
   log('✅ Puerto liberado — pulsa Conectar', 'success');
-}
+
     }
 
     // ================================
