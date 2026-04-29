@@ -102,6 +102,11 @@ header('X-Content-Type-Options: nosniff');
     .btn.warning       { background: var(--warning); color: #111; }
     .btn.warning:hover { background: #F57C00; }
     .btn.info          { background: var(--info); }
+
+
+.btn.release       { background: #607D8B; }
+.btn.release:hover { background: #455A64; }
+
     .btn.release       { background: #607D8B; }
     .btn.release:hover { background: #455A64; }
 
