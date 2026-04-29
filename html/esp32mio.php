@@ -1,5 +1,5 @@
 <?php
-// esp32.php - Programador ESP32 Web con esptool-js real
+// esp32.php - Programador ESP32 Web con esptool-js real (sin stub)
 // Requiere: HTTPS o localhost + Chrome/Edge con Web Serial API
 
 header('X-Frame-Options: SAMEORIGIN');
@@ -45,9 +45,7 @@ header('X-Content-Type-Options: nosniff');
       if (fill !== undefined) arr.fill(fill);
       return arr;
     };
-    BufferPolyfill.allocUnsafe = function(size) {
-      return new Uint8Array(size);
-    };
+    BufferPolyfill.allocUnsafe = function(size) { return new Uint8Array(size); };
     BufferPolyfill.concat = function(list, totalLength) {
       if (totalLength === undefined) totalLength = list.reduce((s, b) => s + b.length, 0);
       const result = new Uint8Array(totalLength);
@@ -55,8 +53,8 @@ header('X-Content-Type-Options: nosniff');
       for (const buf of list) { result.set(buf, offset); offset += buf.length; }
       return result;
     };
-    BufferPolyfill.isBuffer = function(obj) { return obj instanceof Uint8Array; };
-    BufferPolyfill.isEncoding = function() { return false; };
+    BufferPolyfill.isBuffer   = function(obj) { return obj instanceof Uint8Array; };
+    BufferPolyfill.isEncoding = function()    { return false; };
     window.Buffer = BufferPolyfill;
   })();
   </script>
@@ -95,8 +93,8 @@ header('X-Content-Type-Options: nosniff');
     .status.warning { border-left: 4px solid var(--warning); }
 
     .btn { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 0.95rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; font-weight: 500; }
-    .btn:hover    { background: #1976D2; transform: translateY(-1px); }
-    .btn:disabled { background: #555; cursor: not-allowed; transform: none; opacity: 0.7; }
+    .btn:hover         { background: #1976D2; transform: translateY(-1px); }
+    .btn:disabled      { background: #555; cursor: not-allowed; transform: none; opacity: 0.7; }
     .btn.danger        { background: var(--error); }
     .btn.danger:hover  { background: #d32f2f; }
     .btn.success       { background: var(--success); }
@@ -204,10 +202,10 @@ header('X-Content-Type-Options: nosniff');
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px">
         <label style="font-size:0.9rem;color:#aaa">Velocidad:</label>
         <select id="baudSelect" class="baud-select">
-          <option value="115200">115200 (seguro)</option>
-          <!-- <option value="230400">230400</option>
-          <option value="460800" selected>460800 (recomendado)</option>
-          <option value="921600">921600 (rápido)</option> -->
+          <option value="115200" selected>115200 (ROM mode)</option>
+          <option value="230400">230400</option>
+          <option value="460800">460800</option>
+          <option value="921600">921600</option>
         </select>
       </div>
 
@@ -288,7 +286,7 @@ header('X-Content-Type-Options: nosniff');
   </main>
 
   <footer>
-    <p>🔐 Web Serial API • Chrome/Edge/Brave (HTTPS) • esptool-js</p>
+    <p>🔐 Web Serial API • Chrome/Edge/Brave (HTTPS) • esptool-js (ROM mode)</p>
     <p>🔗 <?php echo htmlspecialchars((isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF']); ?></p>
   </footer>
 
@@ -368,7 +366,7 @@ header('X-Content-Type-Options: nosniff');
     }
 
     // ================================
-    // 🔌 CONEXIÓN
+    // 🔌 CONEXIÓN (sin stub — ROM mode)
     // ================================
     async function connectPort() {
       try {
@@ -376,7 +374,6 @@ header('X-Content-Type-Options: nosniff');
         updateStatus('⏳ Selecciona el puerto USB del ESP32', 'warning');
 
         port = await navigator.serial.requestPort();
-        const baudRate = parseInt(els.baudSelect.value);
         transport = new window.Transport(port, true);
 
         const terminal = {
@@ -385,20 +382,34 @@ header('X-Content-Type-Options: nosniff');
           write:     (msg) => { if (msg && msg.trim()) log(msg); },
         };
 
-esploader = new window.ESPLoader({
-  transport,
-  baudrate:    115200,
-  romBaudrate: 115200,
-  terminal,
-});
+        // Siempre 115200 para ROM mode (más estable sin stub)
+        esploader = new window.ESPLoader({
+          transport,
+          baudrate:    115200,
+          romBaudrate: 115200,
+          terminal,
+          debugLogging: false,
+        });
 
-log('⏳ Conectando con el chip...', 'info');
-// Conectar sin subir el stub
-await esploader.connect();
-await esploader.detectChip();
-const chip = esploader.chip.CHIP_NAME;
-        log(`✅ Chip detectado: ${chip}`, 'success');
-        updateStatus(`✅ Conectado — ${chip}`, 'success');
+        log('⏳ Conectando con el chip (ROM mode)...', 'info');
+
+        // Conectar usando ROM, sin subir stub
+        await esploader.connect('default_reset', 7, true); // skipStub = true
+        log('✅ Conectado en ROM mode', 'success');
+
+        // Detectar chip
+        const chipMagic = await esploader.readReg(0x40001000);
+        await esploader.detectChip();
+        const chipName = esploader.chip ? esploader.chip.CHIP_NAME : 'ESP32';
+        log(`✅ Chip: ${chipName}`, 'success');
+
+        // Leer MAC
+        try {
+          const mac = await esploader.chip.readMac(esploader);
+          log(`   MAC: ${mac}`, 'info');
+        } catch(e) {}
+
+        updateStatus(`✅ Conectado — ${chipName} (ROM mode)`, 'success');
         els.btnConnect.classList.add('hidden');
         els.btnDisconnect.classList.remove('hidden');
         updateFlashButtonState();
@@ -444,8 +455,8 @@ const chip = esploader.chip.CHIP_NAME;
 
         await esploader.eraseFlash();
 
-        els.progressFill.style.width  = '100%';
-        els.progressFill.textContent  = '100%';
+        els.progressFill.style.width = '100%';
+        els.progressFill.textContent = '100%';
         log('✅ Flash borrado correctamente', 'success');
         updateStatus('✅ Flash vacío', 'success');
       } catch (err) {
@@ -507,7 +518,6 @@ const chip = esploader.chip.CHIP_NAME;
 
       } catch (err) {
         log(`❌ Error en flash: ${err.message}`, 'error');
-        log('💡 Prueba con velocidad menor (460800 o 115200)', 'warning');
         updateStatus('❌ Error en programación', 'error');
       } finally {
         setTimeout(() => {
@@ -642,19 +652,19 @@ const chip = esploader.chip.CHIP_NAME;
     function downloadLog() {
       if (!logBuffer.length) { log('⚠️ Sin logs', 'warning'); return; }
       const blob = new Blob([logBuffer.join('\n')], { type: 'text/plain' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = URL.createObjectURL(blob);
       a.download = `esp32_flash_${new Date().toISOString().slice(0,10)}.log`;
       a.click(); URL.revokeObjectURL(a.href);
       log('💾 Log guardado');
     }
 
     // ================================
-    // 🚀 INIT — espera a que ESM cargue
+    // 🚀 INIT
     // ================================
     function init() {
       els.loadingOverlay.style.display = 'none';
-      log('🚀 ESP32 Flash Tool Web cargado');
+      log('🚀 ESP32 Flash Tool Web cargado (ROM mode)');
       log(`🔗 URL: ${window.location.href}`);
 
       if (!('serial' in navigator)) {
@@ -678,7 +688,7 @@ const chip = esploader.chip.CHIP_NAME;
         return;
       }
 
-      log('✅ esptool-js listo', 'success');
+      log('✅ esptool-js listo (ROM mode — sin stub)', 'success');
 
       els.btnConnect.onclick    = connectPort;
       els.btnDisconnect.onclick = disconnectPort;
@@ -704,6 +714,7 @@ const chip = esploader.chip.CHIP_NAME;
       log('✅ Listo. Conecta el ESP32 y selecciona los archivos .bin');
     }
 
+    // Esperar a que el módulo ESM cargue ESPLoader y Transport
     window.addEventListener('load', () => {
       let elapsed = 0;
       const check = setInterval(() => {
