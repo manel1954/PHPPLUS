@@ -153,7 +153,7 @@ header('X-Content-Type-Options: nosniff');
       <div class="partition-row" id="row-littlefs">
         <label>📁 LittleFS</label>
         <input type="file" id="file-littlefs" accept=".bin" onchange="fileSelected('littlefs')">
-        <span class="offset">0x300000</span>
+        <span class="offset">0x290000</span>
       </div>
 
       <div class="divider"></div>
@@ -370,7 +370,7 @@ header('X-Content-Type-Options: nosniff');
         const res  = await fetch(`${url}/flash`, {
           method: 'POST',
           body:   formData,
-          signal: AbortSignal.timeout(300000), // 5 minutos
+          signal: AbortSignal.timeout(290000), // 5 minutos
         });
         const data = await res.json();
 
