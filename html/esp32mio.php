@@ -102,11 +102,6 @@ header('X-Content-Type-Options: nosniff');
     .btn.warning       { background: var(--warning); color: #111; }
     .btn.warning:hover { background: #F57C00; }
     .btn.info          { background: var(--info); }
-
-
-.btn.release       { background: #607D8B; }
-.btn.release:hover { background: #455A64; }
-
     .btn.release       { background: #607D8B; }
     .btn.release:hover { background: #455A64; }
 
@@ -369,41 +364,51 @@ header('X-Content-Type-Options: nosniff');
     }
 
     // ================================
-    // 🔓 LIBERAR PUERTO
+    // 🔓 LIBERAR TODOS LOS PUERTOS
     // ================================
     async function releasePort() {
-  log('🔓 Liberando puerto...', 'warning');
-  try {
-    // Cancelar reader si existe
-    if (transport && transport.reader) {
-      try { await transport.reader.cancel(); } catch(e) {}
-      try { transport.reader.releaseLock(); } catch(e) {}
-    }
-    // Cancelar writer si existe
-    if (transport && transport.device && transport.device.writable) {
-      try { transport.device.writable.getWriter().releaseLock(); } catch(e) {}
-    }
-    // Desconectar transport
-    if (transport) {
-      try { await transport.disconnect(); } catch(e) {}
-      transport = null;
-    }
-    // Cerrar puerto directamente
-    if (port) {
-      try { await port.close(); } catch(e) {}
-      port = null;
-    }
-  } catch(e) {}
+      log('🔓 Liberando puertos...', 'warning');
 
-  // Forzar reset aunque todo falle
-  transport = null; port = null; esploader = null;
-  updateStatus('🔓 Puerto liberado — puedes reconectar', 'info');
-  els.btnConnect.classList.remove('hidden');
-  els.btnDisconnect.classList.add('hidden');
-  els.btnFlash.disabled  = true;
-  els.btnVerify.disabled = true;
-  log('✅ Puerto liberado — pulsa Conectar', 'success');
+      // 1. Cancelar reader/writer del transport
+      if (transport) {
+        try {
+          if (transport.reader) {
+            try { await transport.reader.cancel(); } catch(e) {}
+            try { transport.reader.releaseLock(); } catch(e) {}
+          }
+          await transport.disconnect();
+        } catch(e) {}
+        transport = null;
+      }
 
+      // 2. Cerrar puerto actual
+      if (port) {
+        try { await port.close(); } catch(e) {}
+        port = null;
+      }
+
+      // 3. Cerrar TODOS los puertos concedidos por el navegador
+      try {
+        const ports = await navigator.serial.getPorts();
+        for (const p of ports) {
+          try {
+            await p.close();
+            log(`✅ Puerto cerrado: VID=${p.getInfo().usbVendorId} PID=${p.getInfo().usbProductId}`, 'success');
+          } catch(e) {
+            // Si ya estaba cerrado, no pasa nada
+          }
+        }
+      } catch(e) {}
+
+      // 4. Reset completo del estado
+      transport = null; port = null; esploader = null;
+
+      updateStatus('🔓 Puerto liberado — pulsa Conectar', 'info');
+      els.btnConnect.classList.remove('hidden');
+      els.btnDisconnect.classList.add('hidden');
+      els.btnFlash.disabled  = true;
+      els.btnVerify.disabled = true;
+      log('✅ Puerto liberado — ahora pulsa 🔌 Conectar ESP32', 'success');
     }
 
     // ================================
@@ -411,6 +416,15 @@ header('X-Content-Type-Options: nosniff');
     // ================================
     async function connectPort() {
       try {
+        // Cerrar puertos previos antes de abrir uno nuevo
+        log('🔍 Cerrando puertos previos...', 'info');
+        try {
+          const ports = await navigator.serial.getPorts();
+          for (const p of ports) {
+            try { await p.close(); } catch(e) {}
+          }
+        } catch(e) {}
+
         log('🔍 Solicitando puerto serie...');
         updateStatus('⏳ Selecciona el puerto USB del ESP32', 'warning');
 
@@ -464,16 +478,17 @@ header('X-Content-Type-Options: nosniff');
     async function disconnectPort() {
       try {
         if (transport) await transport.disconnect();
-        transport = null; esploader = null; port = null;
-        updateStatus('🔌 Desconectado', 'info');
-        els.btnConnect.classList.remove('hidden');
-        els.btnDisconnect.classList.add('hidden');
-        els.btnFlash.disabled  = true;
-        els.btnVerify.disabled = true;
-        log('🔌 Desconectado correctamente');
-      } catch (err) {
-        log(`⚠️ Error al desconectar: ${err.message}`, 'warning');
-      }
+      } catch(e) {}
+      try {
+        if (port) await port.close();
+      } catch(e) {}
+      transport = null; esploader = null; port = null;
+      updateStatus('🔌 Desconectado', 'info');
+      els.btnConnect.classList.remove('hidden');
+      els.btnDisconnect.classList.add('hidden');
+      els.btnFlash.disabled  = true;
+      els.btnVerify.disabled = true;
+      log('🔌 Desconectado correctamente');
     }
 
     // ================================
@@ -726,7 +741,7 @@ header('X-Content-Type-Options: nosniff');
       }
 
       log('✅ esptool-js listo', 'success');
-      log('💡 Si el puerto aparece ocupado, pulsa 🔓 Liberar Puerto', 'info');
+      log('💡 Si el puerto aparece ocupado pulsa 🔓 Liberar Puerto', 'info');
 
       els.btnConnect.onclick    = connectPort;
       els.btnDisconnect.onclick = disconnectPort;
@@ -749,9 +764,9 @@ header('X-Content-Type-Options: nosniff');
         }
       });
 
-      window.addEventListener('beforeunload', () => {
-        if (transport) { try { transport.disconnect(); } catch(e) {} }
-        if (port)      { try { port.close(); } catch(e) {} }
+      window.addEventListener('beforeunload', async () => {
+        try { if (transport) await transport.disconnect(); } catch(e) {}
+        try { if (port) await port.close(); } catch(e) {}
       });
 
       log('✅ Listo. Conecta el ESP32 y selecciona los archivos .bin');
