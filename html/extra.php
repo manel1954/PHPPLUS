@@ -75,7 +75,6 @@
         MENU EXTRA
     </h1>
 
-    <!-- 🔽 CAMBIO: justify-content-start para alinear a la izquierda -->
     <div class="row g-3 justify-content-start">
 
         <!-- DUMP1090 CONTROL -->
@@ -214,24 +213,22 @@
             </div>
         </div>
 
-        <!-- 📦 PLANTILLA PARA FUTURAS TARJETAS (copiar/pegar) -->
-        <!--
+        <!-- 🚀 PROGRAMADOR ESP32 -->
         <div class="col-12 col-sm-6 col-lg-3">
             <div class="card bg-secondary border-0 h-100">
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title">
-                        <i class="bi bi-ICONO me-2" style="color:#COLOR;"></i>TITULO
+                        <i class="bi bi-cpu me-2" style="color:#00ffff;"></i>Programador ESP32
                     </h5>
                     <p class="card-text text-white-50 small flex-grow-1">
-                        Descripción breve del servicio
+                        Grabador de Firmware para módulos ESP32 vía WebSerial
                     </p>
-                    <a href="/archivo.php" target="_blank" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
+                    <a href="/esp32.php" target="_blank" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
                         <i class="bi bi-box-arrow-up-right me-1"></i>Abrir
                     </a>
                 </div>
             </div>
         </div>
-        -->
 
     </div>
 </div>
