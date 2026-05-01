@@ -230,7 +230,7 @@
             </div>
         </div>
 
-        <!-- EDITOR GENERAL -->
+        <!-- EDITOR GENERAL
         <div class="col-12 col-sm-6 col-lg-3">
             <div class="card bg-secondary border-0 h-100">
                 <div class="card-body d-flex flex-column">
@@ -245,7 +245,7 @@
                     </a>
                 </div>
             </div>
-        </div>
+        </div> -->
 
     </div>
 </div>
