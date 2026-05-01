@@ -647,7 +647,7 @@ function pedirAutoplace() {
 // ═══════════════════════════════════════════════════════════
 function abrirModal() { document.getElementById('overlay').classList.add('show'); }
 function cerrarModal() { document.getElementById('overlay').classList.remove('show'); pendingAction = null; }
-document.getElementById('btnConfirm').onclick = () => { cerrarModal(); if (pendingAction) pendingAction(); };
+document.getElementById('btnConfirm').onclick = () => { const fn = pendingAction; cerrarModal(); if (fn) fn(); };
 document.getElementById('overlay').addEventListener('click', e => { if (e.target === e.currentTarget) cerrarModal(); });
 
 // ═══════════════════════════════════════════════════════════
