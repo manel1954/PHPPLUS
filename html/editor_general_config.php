@@ -12,40 +12,51 @@ $INI_FILES = [
     'DStarGateway' => '/home/pi/DStarGateway/DStarGateway.ini',
 ];
 
-// NOTA: En DStarGateway.ini el Callsign aparece en [Gateway] y en [Repeater 1].
-//       El Username aparece en [IRCDDB 1], NO en [Gateway].
-//       Para campos con múltiples secciones en el mismo fichero usamos entradas
-//       con clave compuesta fichero|sección para poder repetirlas.
-$FIELD_MAP = [
+// ── Mapa: campo => [ [file_key, section, ini_key], ... ]
+// Usamos arrays de arrays para poder repetir el mismo fichero
+// con distintas secciones (DStarGateway aparece 3 veces).
+$WRITE_MAP = [
     'Callsign'    => [
-        'MMDVMHost'         => ['General',    'Callsign'],
-        'MMDVMYSF'          => ['General',    'Callsign'],
-        'MMDVMDSTAR'        => ['General',    'Callsign'],
-        'MMDVMNXDN'         => ['General',    'Callsign'],
-        'DStarGateway'      => ['Gateway',    'Callsign'],
-        'DStarGateway_rep1' => ['Repeater 1', 'Callsign'],
+        ['MMDVMHost',    'General',    'Callsign'],
+        ['MMDVMYSF',     'General',    'Callsign'],
+        ['MMDVMDSTAR',   'General',    'Callsign'],
+        ['MMDVMNXDN',    'General',    'Callsign'],
+        ['DStarGateway', 'Gateway',    'Callsign'],
+        ['DStarGateway', 'Repeater 1', 'Callsign'],
     ],
     'Username'    => [
-        'DStarGateway' => ['IRCDDB 1', 'Username'],
+        ['DStarGateway', 'IRCDDB 1',   'Username'],
     ],
-    'Id'          => ['MMDVMHost' => ['General', 'Id']],
-    'RXFrequency' => ['MMDVMHost' => ['Info',    'RXFrequency']],
-    'TXFrequency' => ['MMDVMHost' => ['Info',    'TXFrequency']],
-    'Latitude'    => ['MMDVMHost' => ['Info',    'Latitude']],
-    'Longitude'   => ['MMDVMHost' => ['Info',    'Longitude']],
-    'Location'    => ['MMDVMHost' => ['Info',    'Location']],
-    'URL'         => ['MMDVMHost' => ['Info',    'URL']],
+    'Id'          => [['MMDVMHost', 'General', 'Id']],
+    'RXFrequency' => [['MMDVMHost', 'Info',    'RXFrequency']],
+    'TXFrequency' => [['MMDVMHost', 'Info',    'TXFrequency']],
+    'Latitude'    => [['MMDVMHost', 'Info',    'Latitude']],
+    'Longitude'   => [['MMDVMHost', 'Info',    'Longitude']],
+    'Location'    => [['MMDVMHost', 'Info',    'Location']],
+    'URL'         => [['MMDVMHost', 'Info',    'URL']],
+];
+
+// ── Para leer valores del formulario (primer fichero que tenga el campo)
+$READ_MAP = [
+    'Callsign'    => ['MMDVMHost',    'General',    'Callsign'],
+    'Username'    => ['DStarGateway', 'IRCDDB 1',   'Username'],
+    'Id'          => ['MMDVMHost',    'General',    'Id'],
+    'RXFrequency' => ['MMDVMHost',    'Info',       'RXFrequency'],
+    'TXFrequency' => ['MMDVMHost',    'Info',       'TXFrequency'],
+    'Latitude'    => ['MMDVMHost',    'Info',       'Latitude'],
+    'Longitude'   => ['MMDVMHost',    'Info',       'Longitude'],
+    'Location'    => ['MMDVMHost',    'Info',       'Location'],
+    'URL'         => ['MMDVMHost',    'Info',       'URL'],
 ];
 
 // ============================================================
-//  Funciones INI — sin FILE_SKIP_EMPTY_LINES para preservar
-//  la estructura original completa (comentarios, líneas vacías)
+//  Funciones INI
 // ============================================================
 
 function ini_read_value(string $filepath, string $section, string $key): ?string {
     if (!file_exists($filepath)) return null;
     $lines = file($filepath, FILE_IGNORE_NEW_LINES);
-    $in_section = false;
+    $in_section = ($section === ''); // sección vacía = antes del primer [header]
     foreach ($lines as $line) {
         $trimmed = trim($line);
         if (preg_match('/^\[(.+)\]$/', $trimmed, $m)) {
@@ -62,88 +73,102 @@ function ini_read_value(string $filepath, string $section, string $key): ?string
 }
 
 /**
- * Escribe un valor en un INI preservando TODA la estructura original.
- * Retorna true en éxito o string con el error.
+ * Escribe MÚLTIPLES (sección, clave, valor) en un solo fichero con
+ * UNA ÚNICA lectura y escritura. Así no se sobreescriben los cambios.
+ *
+ * $changes = [ ['Gateway','Callsign','EA3EIY'], ['Repeater 1','Callsign','EA3EIY'], ... ]
+ *
+ * Retorna array de errores (vacío = todo OK).
  */
-function ini_write_value(string $filepath, string $section, string $key, string $value): bool|string {
-    if (!file_exists($filepath))  return "❌ Fichero no encontrado: $filepath";
-    if (!is_writable($filepath))  return "❌ Sin permiso de escritura: $filepath (propietario: " . posix_getpwuid(fileowner($filepath))['name'] . ", proceso: " . posix_getpwuid(posix_geteuid())['name'] . ")";
+function ini_write_batch(string $filepath, array $changes): array {
+    $errors = [];
 
-    // Leer SIN omitir líneas vacías para preservar el fichero intacto
+    if (!file_exists($filepath))  { return ["❌ No encontrado: $filepath"]; }
+    if (!is_writable($filepath))  {
+        $owner = posix_getpwuid(fileowner($filepath))['name'] ?? '?';
+        $proc  = posix_getpwuid(posix_geteuid())['name'] ?? '?';
+        return ["❌ Sin escritura: $filepath (propietario=$owner proceso=$proc)"];
+    }
+
     $lines = file($filepath, FILE_IGNORE_NEW_LINES);
-    if ($lines === false) return "❌ No se pudo leer: $filepath";
+    if ($lines === false) return ["❌ No se pudo leer: $filepath"];
 
-    $output        = [];
-    $in_section    = false;
-    $found_section = false;
-    $found_key     = false;
+    // Construir índice: clave = "SECTION\tKEY" (minúsculas) => índice en $changes
+    $pending = [];   // "section\tkey" => índice en $changes
+    foreach ($changes as $i => [$sec, $key, $val]) {
+        $pending[strtolower($sec) . "\t" . strtolower($key)] = $i;
+    }
+
+    $output       = [];
+    $cur_section  = '';   // sección actual mientras recorremos
+    $found        = [];   // índices ya escritos
+    $section_line = [];   // índice en $output donde está cada [Section]
 
     foreach ($lines as $raw) {
         $trimmed = trim($raw);
 
-        // Detectar cabecera de sección
+        // Cabecera de sección
         if (preg_match('/^\[(.+)\]$/', $trimmed, $m)) {
-            // Al salir de la sección objetivo sin haber encontrado la clave → la añadimos
-            if ($in_section && !$found_key) {
-                $output[] = "$key=$value";
-                $found_key = true;
-            }
-            $in_section = (strcasecmp(trim($m[1]), $section) === 0);
-            if ($in_section) $found_section = true;
+            $cur_section = trim($m[1]);
             $output[] = $raw;
+            $section_line[strtolower($cur_section)] = count($output) - 1;
             continue;
         }
 
-        // Reemplazar clave (ignorar comentarios)
-        if ($in_section && !$found_key
-            && $trimmed !== '' && $trimmed[0] !== ';' && $trimmed[0] !== '#'
-            && preg_match('/^' . preg_quote($key, '/') . '\s*=/i', $trimmed)) {
-            $output[] = "$key=$value";
-            $found_key = true;
-            continue;
+        // ¿Es una clave que debemos reemplazar?
+        if ($trimmed !== '' && $trimmed[0] !== ';' && $trimmed[0] !== '#') {
+            $pkey = strtolower($cur_section) . "\t" . strtolower(preg_split('/\s*=/', $trimmed, 2)[0]);
+            if (isset($pending[$pkey]) && !in_array($pending[$pkey], $found)) {
+                $idx = $pending[$pkey];
+                [, $key, $val] = $changes[$idx];
+                $output[] = "$key=$val";
+                $found[] = $idx;
+                continue;  // descarta la línea original
+            }
         }
 
         $output[] = $raw;
     }
 
-    // La clave estaba en la última sección del fichero y no se encontró
-    if ($in_section && !$found_key) {
-        $output[] = "$key=$value";
-    }
+    // Claves no encontradas → añadir al final de su sección (o crear sección nueva)
+    foreach ($changes as $i => [$sec, $key, $val]) {
+        if (in_array($i, $found)) continue;
 
-    // La sección no existe → crearla al final
-    if (!$found_section) {
-        $output[] = '';
-        $output[] = "[$section]";
-        $output[] = "$key=$value";
+        $skey = strtolower($sec);
+        if (isset($section_line[$skey])) {
+            // Insertar justo después de la última línea de esa sección
+            // Buscamos el índice correcto: después del [header] y todas sus claves
+            $insert_after = $section_line[$skey];
+            for ($j = $insert_after + 1; $j < count($output); $j++) {
+                $t = trim($output[$j]);
+                if (preg_match('/^\[(.+)\]$/', $t)) break; // próxima sección
+                $insert_after = $j;
+            }
+            array_splice($output, $insert_after + 1, 0, ["$key=$val"]);
+            // Actualizar section_line para los siguientes inserts
+            foreach ($section_line as &$sl) {
+                if ($sl > $insert_after) $sl++;
+            }
+            unset($sl);
+        } else {
+            // La sección no existe → crearla al final
+            $output[] = '';
+            $output[] = "[$sec]";
+            $output[] = "$key=$val";
+            $section_line[$skey] = count($output) - 3;
+        }
     }
 
     $bytes = file_put_contents($filepath, implode(PHP_EOL, $output) . PHP_EOL);
-    if ($bytes === false) return "❌ file_put_contents falló en: $filepath";
-    return true;
+    if ($bytes === false) $errors[] = "❌ file_put_contents falló: $filepath";
+    return $errors;
 }
 
-/**
- * Resuelve el path real para claves compuestas como 'DStarGateway_rep1'
- * (usa el mismo fichero que el prefijo base 'DStarGateway').
- */
-function resolve_path(string $file_key, array $ini_files): ?string {
-    if (isset($ini_files[$file_key])) return $ini_files[$file_key];
-    $base = strstr($file_key, '_', true); // prefijo antes del primer '_'
-    return ($base && isset($ini_files[$base])) ? $ini_files[$base] : null;
-}
-
-function read_all_values(array $field_map, array $ini_files): array {
+function read_form_values(array $read_map, array $ini_files): array {
     $values = [];
-    foreach ($field_map as $field => $targets) {
-        $val = null;
-        foreach ($targets as $file_key => [$section, $key]) {
-            $path = resolve_path($file_key, $ini_files);
-            if (!$path) continue;
-            $v = ini_read_value($path, $section, $key);
-            if ($v !== null) { $val = $v; break; }
-        }
-        $values[$field] = $val ?? '';
+    foreach ($read_map as $field => [$file_key, $section, $key]) {
+        $path = $ini_files[$file_key] ?? null;
+        $values[$field] = ($path ? ini_read_value($path, $section, $key) : null) ?? '';
     }
     return $values;
 }
@@ -209,10 +234,10 @@ if (($_GET['action'] ?? '') === 'diag_dstar') {
 }
 
 // ============================================================
-//  Procesar POST – guardar valores
+//  Procesar POST – guardar valores (escritura en batch por fichero)
 // ============================================================
 $messages    = [];
-$form_values = read_all_values($FIELD_MAP, $INI_FILES);
+$form_values = read_form_values($READ_MAP, $INI_FILES);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_config'])) {
     $post_fields = [
@@ -220,35 +245,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_config'])) {
         'Latitude', 'Longitude', 'Location', 'URL'
     ];
 
-    $errors  = [];
-    $written = [];
-
+    // Agrupar cambios por fichero → UNA escritura por fichero
+    // $batch[$filepath][] = [section, key, value]
+    $batch = [];
     foreach ($post_fields as $field) {
         $new_val = trim($_POST[$field] ?? '');
-        $targets = $FIELD_MAP[$field] ?? [];
-        foreach ($targets as $file_key => [$section, $key]) {
-            $path = resolve_path($file_key, $INI_FILES);
-            if (!$path) continue;
-            $result = ini_write_value($path, $section, $key, $new_val);
-            if ($result === true) {
-                $written[] = "$file_key → [$section] $key";
-            } else {
-                $errors[] = "$file_key [$section] $key: $result";
-            }
-        }
         $form_values[$field] = $new_val;
+        foreach ($WRITE_MAP[$field] ?? [] as [$file_key, $section, $key]) {
+            $path = $INI_FILES[$file_key] ?? null;
+            if (!$path) continue;
+            $batch[$path][] = [$section, $key, $new_val];
+        }
+    }
+
+    $errors  = [];
+    $written = [];
+    foreach ($batch as $path => $changes) {
+        $errs = ini_write_batch($path, $changes);
+        if (empty($errs)) {
+            $written[] = basename($path) . " (" . count($changes) . " campos)";
+        } else {
+            $errors = array_merge($errors, $errs);
+        }
     }
 
     if (empty($errors)) {
-        $n = count(array_unique(array_map(fn($w) => explode(' →', $w)[0], $written)));
-        $messages[] = ['type' => 'success', 'text' => "✅ Guardado en $n fichero(s): " . implode(' · ', array_map(fn($w) => explode(' →', $w)[0], $written))];
+        $messages[] = ['type' => 'success', 'text' => "✅ Guardado en " . count($written) . " fichero(s): " . implode(' · ', $written)];
     } else {
         foreach ($errors as $e) {
             $messages[] = ['type' => 'danger', 'text' => $e];
         }
         if (!empty($written)) {
-            $flist = implode(' · ', array_map(fn($w) => explode(' →', $w)[0], $written));
-            $messages[] = ['type' => 'warning', 'text' => "⚠️ Escrito parcialmente en: $flist"];
+            $messages[] = ['type' => 'warning', 'text' => "⚠️ Escrito parcialmente en: " . implode(', ', $written)];
         }
     }
 }
