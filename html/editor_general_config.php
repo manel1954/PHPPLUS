@@ -21,7 +21,7 @@ $WRITE_MAP = [
         ['MMDVMYSF',     'General',    'Callsign'],
         ['MMDVMDSTAR',   'General',    'Callsign'],
         ['MMDVMNXDN',    'General',    'Callsign'],
-        ['DStarGateway', 'Gateway',    'Callsign'],
+        ['DStarGateway', 'General',    'Callsign'],
         ['DStarGateway', 'Repeater 1', 'Callsign'],
     ],
     'Username'    => [
@@ -203,7 +203,7 @@ if (($_GET['action'] ?? '') === 'diag_dstar') {
                 $cur_section = $m[1];
                 $info['sections'][] = $cur_section;
             }
-            if (strcasecmp($cur_section, 'Gateway') === 0) {
+            if (strcasecmp($cur_section, 'General') === 0) {
                 if (preg_match('/^Callsign\s*=\s*(.*)/i', $t, $m)) $info['callsign_found'] = trim($m[1]);
             }
             if (strcasecmp($cur_section, 'IRCDDB 1') === 0) {
@@ -215,7 +215,7 @@ if (($_GET['action'] ?? '') === 'diag_dstar') {
         }
         // Test de escritura real
         if ($info['writable']) {
-            $test = ini_write_value($path, 'Gateway', '_test_ader_', 'ok');
+            $test = ini_write_value($path, 'General', '_test_ader_', 'ok');
             if ($test === true) {
                 // Limpiar el campo de prueba
                 $lines2 = file($path, FILE_IGNORE_NEW_LINES);
@@ -404,7 +404,7 @@ body { background: var(--bg-base); color: var(--text-main); font-family: var(--f
                         <input type="text" name="Callsign" class="form-control"
                                value="<?= htmlspecialchars($form_values['Callsign']) ?>"
                                placeholder="Ej: EA3EIZ" maxlength="20">
-                        <div class="form-hint">[General] en los 4 MMDVM + [Gateway] en DStarGateway</div>
+                        <div class="form-hint">[General] en los 4 MMDVM + DStarGateway</div>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">DMR Id <span class="badge-ini">MMDVMHost</span></label>
@@ -422,13 +422,13 @@ body { background: var(--bg-base); color: var(--text-main); font-family: var(--f
                         <input type="text" name="Username" class="form-control dstar-field"
                                value="<?= htmlspecialchars($form_values['Username']) ?>"
                                placeholder="Ej: EA3EIZ" maxlength="20">
-                        <div class="form-hint">[Gateway] Username= en DStarGateway.ini</div>
+                        <div class="form-hint">[IRCDDB 1] Username= en DStarGateway.ini</div>
                     </div>
                     <div class="col-md-6 d-flex align-items-end pb-1">
                         <div class="form-hint" style="color:rgba(191,0,255,.7);line-height:1.6;">
                             <i class="bi bi-info-circle"></i>
                             El Callsign también escribe en<br>
-                            DStarGateway.ini → [Gateway] Callsign=
+                            DStarGateway.ini → [General] Callsign=
                         </div>
                     </div>
                 </div>
@@ -563,12 +563,12 @@ body { background: var(--bg-base); color: var(--text-main); font-family: var(--f
                         <div>↳ MMDVMYSF [General]</div>
                         <div>↳ MMDVMDSTAR [General]</div>
                         <div>↳ MMDVMNXDN [General]</div>
-                        <div style="color:var(--violet);">↳ DStarGateway [Gateway]</div>
+                        <div style="color:var(--violet);">↳ DStarGateway [General]</div>
                     </div>
                 </div>
                 <div style="margin-bottom:.6rem;"><span style="color:var(--violet);">Username</span>
                     <div style="color:var(--text-muted);padding-left:.8rem;">
-                        <div style="color:var(--violet);">↳ DStarGateway [Gateway]</div>
+                        <div style="color:var(--violet);">↳ DStarGateway [General]</div>
                     </div>
                 </div>
                 <div style="margin-bottom:.6rem;"><span style="color:var(--cyan);">Id</span>
@@ -628,7 +628,7 @@ function runDiag() {
                 out += `⚠️ No se encontraron secciones (¿fichero vacío o ilegible?)\n\n`;
             }
 
-            out += `🔍 [Gateway]   Callsign = ${d.callsign_found !== null ? d.callsign_found : '⚠️ NO ENCONTRADO'}\n`;
+            out += `🔍 [General]   Callsign = ${d.callsign_found !== null ? d.callsign_found : '⚠️ NO ENCONTRADO'}\n`;
             out += `🔍 [IRCDDB 1] Username = ${d.username_found !== null ? d.username_found : '⚠️ NO ENCONTRADO'}\n`;
             out += `🔍 [Repeater 1] Callsign = ${d.callsign_rep1 !== undefined ? d.callsign_rep1 : '⚠️ NO ENCONTRADO'}\n\n`;
 
