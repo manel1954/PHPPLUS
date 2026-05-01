@@ -1,11 +1,9 @@
 <?php
 // ============================================================
 //  EDITOR GENERAL CONFIG – Panel ADER
-//  Lee y escribe los campos comunes en los ficheros INI
 // ============================================================
 session_start();
 
-// --- Rutas a los ficheros INI ---
 $INI_FILES = [
     'MMDVMHost'    => '/home/pi/MMDVMHost/MMDVMHost.ini',
     'MMDVMYSF'     => '/home/pi/MMDVMHost/MMDVMYSF.ini',
@@ -14,7 +12,6 @@ $INI_FILES = [
     'DStarGateway' => '/home/pi/DStarGateway/DStarGateway.ini',
 ];
 
-// --- Mapa de campos: campo => [ fichero => [sección, clave] ] ---
 $FIELD_MAP = [
     'Callsign'    => [
         'MMDVMHost'    => ['General', 'Callsign'],
@@ -26,31 +23,18 @@ $FIELD_MAP = [
     'Username'    => [
         'DStarGateway' => ['Gateway', 'Username'],
     ],
-    'Id'          => [
-        'MMDVMHost'    => ['General', 'Id'],
-    ],
-    'RXFrequency' => [
-        'MMDVMHost'    => ['Info', 'RXFrequency'],
-    ],
-    'TXFrequency' => [
-        'MMDVMHost'    => ['Info', 'TXFrequency'],
-    ],
-    'Latitude'    => [
-        'MMDVMHost'    => ['Info', 'Latitude'],
-    ],
-    'Longitude'   => [
-        'MMDVMHost'    => ['Info', 'Longitude'],
-    ],
-    'Location'    => [
-        'MMDVMHost'    => ['Info', 'Location'],
-    ],
-    'URL'         => [
-        'MMDVMHost'    => ['Info', 'URL'],
-    ],
+    'Id'          => ['MMDVMHost' => ['General', 'Id']],
+    'RXFrequency' => ['MMDVMHost' => ['Info',    'RXFrequency']],
+    'TXFrequency' => ['MMDVMHost' => ['Info',    'TXFrequency']],
+    'Latitude'    => ['MMDVMHost' => ['Info',    'Latitude']],
+    'Longitude'   => ['MMDVMHost' => ['Info',    'Longitude']],
+    'Location'    => ['MMDVMHost' => ['Info',    'Location']],
+    'URL'         => ['MMDVMHost' => ['Info',    'URL']],
 ];
 
 // ============================================================
-//  Funciones INI (preservan comentarios y orden)
+//  Funciones INI — sin FILE_SKIP_EMPTY_LINES para preservar
+//  la estructura original completa (comentarios, líneas vacías)
 // ============================================================
 
 function ini_read_value(string $filepath, string $section, string $key): ?string {
@@ -60,25 +44,30 @@ function ini_read_value(string $filepath, string $section, string $key): ?string
     foreach ($lines as $line) {
         $trimmed = trim($line);
         if (preg_match('/^\[(.+)\]$/', $trimmed, $m)) {
-            $in_section = (strcasecmp($m[1], $section) === 0);
+            $in_section = (strcasecmp(trim($m[1]), $section) === 0);
             continue;
         }
-        if ($in_section && preg_match('/^' . preg_quote($key, '/') . '\s*=\s*(.*)$/i', $trimmed, $m)) {
-            return trim($m[1]);
+        if ($in_section && $trimmed !== '' && $trimmed[0] !== ';' && $trimmed[0] !== '#') {
+            if (preg_match('/^' . preg_quote($key, '/') . '\s*=\s*(.*)$/i', $trimmed, $m)) {
+                return trim($m[1]);
+            }
         }
     }
     return null;
 }
 
+/**
+ * Escribe un valor en un INI preservando TODA la estructura original.
+ * Retorna true en éxito o string con el error.
+ */
 function ini_write_value(string $filepath, string $section, string $key, string $value): bool|string {
-    if (!file_exists($filepath)) {
-        return "Fichero no encontrado: $filepath";
-    }
-    if (!is_writable($filepath)) {
-        return "Sin permiso de escritura: $filepath";
-    }
+    if (!file_exists($filepath))  return "❌ Fichero no encontrado: $filepath";
+    if (!is_writable($filepath))  return "❌ Sin permiso de escritura: $filepath (propietario: " . posix_getpwuid(fileowner($filepath))['name'] . ", proceso: " . posix_getpwuid(posix_geteuid())['name'] . ")";
 
-    $lines = file($filepath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    // Leer SIN omitir líneas vacías para preservar el fichero intacto
+    $lines = file($filepath, FILE_IGNORE_NEW_LINES);
+    if ($lines === false) return "❌ No se pudo leer: $filepath";
+
     $output        = [];
     $in_section    = false;
     $found_section = false;
@@ -87,19 +76,23 @@ function ini_write_value(string $filepath, string $section, string $key, string 
     foreach ($lines as $raw) {
         $trimmed = trim($raw);
 
+        // Detectar cabecera de sección
         if (preg_match('/^\[(.+)\]$/', $trimmed, $m)) {
+            // Al salir de la sección objetivo sin haber encontrado la clave → la añadimos
             if ($in_section && !$found_key) {
                 $output[] = "$key=$value";
                 $found_key = true;
             }
-            $in_section = (strcasecmp($m[1], $section) === 0);
+            $in_section = (strcasecmp(trim($m[1]), $section) === 0);
             if ($in_section) $found_section = true;
             $output[] = $raw;
             continue;
         }
 
-        if ($in_section && !$found_key &&
-            preg_match('/^' . preg_quote($key, '/') . '\s*=/i', $trimmed)) {
+        // Reemplazar clave (ignorar comentarios)
+        if ($in_section && !$found_key
+            && $trimmed !== '' && $trimmed[0] !== ';' && $trimmed[0] !== '#'
+            && preg_match('/^' . preg_quote($key, '/') . '\s*=/i', $trimmed)) {
             $output[] = "$key=$value";
             $found_key = true;
             continue;
@@ -108,23 +101,23 @@ function ini_write_value(string $filepath, string $section, string $key, string 
         $output[] = $raw;
     }
 
+    // La clave estaba en la última sección del fichero y no se encontró
     if ($in_section && !$found_key) {
         $output[] = "$key=$value";
     }
 
+    // La sección no existe → crearla al final
     if (!$found_section) {
         $output[] = '';
         $output[] = "[$section]";
         $output[] = "$key=$value";
     }
 
-    $result = file_put_contents($filepath, implode(PHP_EOL, $output) . PHP_EOL);
-    return $result !== false ? true : "Error al escribir en $filepath";
+    $bytes = file_put_contents($filepath, implode(PHP_EOL, $output) . PHP_EOL);
+    if ($bytes === false) return "❌ file_put_contents falló en: $filepath";
+    return true;
 }
 
-// ============================================================
-//  Leer valores actuales de todos los ficheros
-// ============================================================
 function read_all_values(array $field_map, array $ini_files): array {
     $values = [];
     foreach ($field_map as $field => $targets) {
@@ -138,6 +131,61 @@ function read_all_values(array $field_map, array $ini_files): array {
         $values[$field] = $val ?? '';
     }
     return $values;
+}
+
+// ============================================================
+//  Acción AJAX de diagnóstico para DStarGateway.ini
+// ============================================================
+if (($_GET['action'] ?? '') === 'diag_dstar') {
+    header('Content-Type: application/json');
+    $path = $INI_FILES['DStarGateway'];
+    $info = [
+        'path'       => $path,
+        'exists'     => file_exists($path),
+        'readable'   => is_readable($path),
+        'writable'   => is_writable($path),
+        'owner'      => file_exists($path) ? (posix_getpwuid(fileowner($path))['name'] ?? '?') : '?',
+        'process_user' => posix_getpwuid(posix_geteuid())['name'] ?? '?',
+        'perms'      => file_exists($path) ? substr(sprintf('%o', fileperms($path)), -4) : '?',
+        'sections'   => [],
+        'callsign_found'  => null,
+        'username_found'  => null,
+        'raw_head'   => '',
+    ];
+
+    if ($info['exists'] && $info['readable']) {
+        $lines = file($path, FILE_IGNORE_NEW_LINES);
+        $info['raw_head'] = implode("\n", array_slice($lines, 0, 30));
+        $cur_section = '';
+        foreach ($lines as $line) {
+            $t = trim($line);
+            if (preg_match('/^\[(.+)\]$/', $t, $m)) {
+                $cur_section = $m[1];
+                $info['sections'][] = $cur_section;
+            }
+            if (strcasecmp($cur_section, 'Gateway') === 0) {
+                if (preg_match('/^Callsign\s*=\s*(.*)/i', $t, $m))  $info['callsign_found']  = $m[1];
+                if (preg_match('/^Username\s*=\s*(.*)/i', $t, $m))  $info['username_found']  = $m[1];
+            }
+        }
+        // Test de escritura real
+        if ($info['writable']) {
+            $test = ini_write_value($path, 'Gateway', '_test_ader_', 'ok');
+            if ($test === true) {
+                // Limpiar el campo de prueba
+                $lines2 = file($path, FILE_IGNORE_NEW_LINES);
+                $cleaned = array_filter($lines2, fn($l) => !preg_match('/^_test_ader_=/i', trim($l)));
+                file_put_contents($path, implode(PHP_EOL, $cleaned) . PHP_EOL);
+                $info['write_test'] = 'OK – escritura real verificada';
+            } else {
+                $info['write_test'] = $test;
+            }
+        } else {
+            $info['write_test'] = 'No se pudo probar (sin permiso de escritura)';
+        }
+    }
+    echo json_encode($info, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+    exit;
 }
 
 // ============================================================
@@ -158,7 +206,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_config'])) {
     foreach ($post_fields as $field) {
         $new_val = trim($_POST[$field] ?? '');
         $targets = $FIELD_MAP[$field] ?? [];
-
         foreach ($targets as $file_key => [$section, $key]) {
             $path = $INI_FILES[$file_key] ?? null;
             if (!$path) continue;
@@ -166,7 +213,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_config'])) {
             if ($result === true) {
                 $written[] = "$file_key → [$section] $key";
             } else {
-                $errors[] = $result;
+                $errors[] = "$file_key [$section] $key: $result";
             }
         }
         $form_values[$field] = $new_val;
@@ -174,31 +221,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_config'])) {
 
     if (empty($errors)) {
         $n = count(array_unique(array_map(fn($w) => explode(' →', $w)[0], $written)));
-        $messages[] = ['type' => 'success', 'text' => "✅ Configuración guardada correctamente en $n fichero(s)."];
+        $messages[] = ['type' => 'success', 'text' => "✅ Guardado en $n fichero(s): " . implode(' · ', array_map(fn($w) => explode(' →', $w)[0], $written))];
     } else {
         foreach ($errors as $e) {
-            $messages[] = ['type' => 'danger', 'text' => '❌ ' . htmlspecialchars($e)];
+            $messages[] = ['type' => 'danger', 'text' => $e];
         }
         if (!empty($written)) {
-            $flist = implode(', ', array_unique(array_map(fn($w) => explode(' →', $w)[0], $written)));
+            $flist = implode(' · ', array_map(fn($w) => explode(' →', $w)[0], $written));
             $messages[] = ['type' => 'warning', 'text' => "⚠️ Escrito parcialmente en: $flist"];
         }
     }
 }
 
-// ============================================================
-//  Estado (existencia + permisos) de cada fichero
-// ============================================================
+// Estado de ficheros
 $file_status = [];
 foreach ($INI_FILES as $key => $path) {
     $exists   = file_exists($path);
     $writable = $exists && is_writable($path);
-    $file_status[$key] = [
-        'path'     => $path,
-        'exists'   => $exists,
-        'writable' => $writable,
-    ];
+    $owner    = $exists ? (posix_getpwuid(fileowner($path))['name'] ?? '?') : '?';
+    $perms    = $exists ? substr(sprintf('%o', fileperms($path)), -4) : '?';
+    $file_status[$key] = compact('path','exists','writable','owner','perms');
 }
+$proc_user = posix_getpwuid(posix_geteuid())['name'] ?? '?';
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -206,12 +250,9 @@ foreach ($INI_FILES as $key => $path) {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Editor General · Panel ADER</title>
-
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-
 <style>
 :root {
     --bg-base:    #0d1117;
@@ -229,238 +270,64 @@ foreach ($INI_FILES as $key => $path) {
     --font-ui:    'Rajdhani', sans-serif;
     --font-mono:  'Share Tech Mono', monospace;
 }
-
 * { box-sizing: border-box; }
+body { background: var(--bg-base); color: var(--text-main); font-family: var(--font-ui); min-height: 100vh; }
 
-body {
-    background: var(--bg-base);
-    color: var(--text-main);
-    font-family: var(--font-ui);
-    font-size: 1rem;
-    min-height: 100vh;
-}
-
-/* ─── Header ─────────────────────────────────────────── */
 .page-header {
-    background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+    background: linear-gradient(135deg,#0d1117,#161b22);
     border-bottom: 1px solid var(--cyan);
     padding: 1.25rem 2rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+    display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
 }
-.page-header h1 {
-    font-family: var(--font-hud);
-    font-size: 1.4rem;
-    color: var(--cyan);
-    margin: 0;
-    letter-spacing: .1em;
-    text-shadow: 0 0 12px rgba(0,229,255,.45);
-}
-.page-header .badge-subtitle {
-    font-family: var(--font-mono);
-    font-size: .7rem;
-    color: var(--text-muted);
-    background: rgba(0,229,255,.08);
-    border: 1px solid rgba(0,229,255,.2);
-    border-radius: 4px;
-    padding: 2px 8px;
-}
-.btn-back {
-    font-family: var(--font-hud);
-    font-size: .7rem;
-    letter-spacing: .05em;
-    color: var(--text-muted);
-    border: 1px solid var(--border);
-    background: transparent;
-    border-radius: 6px;
-    padding: 5px 12px;
-    text-decoration: none;
-    transition: all .2s;
-}
-.btn-back:hover { color: var(--cyan); border-color: var(--cyan); }
+.page-header h1 { font-family: var(--font-hud); font-size: 1.4rem; color: var(--cyan); margin: 0; letter-spacing:.1em; text-shadow: 0 0 12px rgba(0,229,255,.45); }
+.badge-subtitle { font-family: var(--font-mono); font-size:.7rem; color:var(--text-muted); background:rgba(0,229,255,.08); border:1px solid rgba(0,229,255,.2); border-radius:4px; padding:2px 8px; }
+.btn-back { font-family:var(--font-hud); font-size:.7rem; letter-spacing:.05em; color:var(--text-muted); border:1px solid var(--border); background:transparent; border-radius:6px; padding:5px 12px; text-decoration:none; transition:all .2s; }
+.btn-back:hover { color:var(--cyan); border-color:var(--cyan); }
 
-/* ─── Cards ──────────────────────────────────────────── */
-.ader-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-}
-.ader-card-title {
-    font-family: var(--font-hud);
-    font-size: .85rem;
-    letter-spacing: .12em;
-    color: var(--cyan);
-    margin-bottom: 1.25rem;
-    display: flex;
-    align-items: center;
-    gap: .5rem;
-}
-.ader-card-title::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: linear-gradient(90deg, var(--cyan) 0%, transparent 100%);
-    opacity: .35;
-    margin-left: .5rem;
-}
+.ader-card { background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:1.5rem; margin-bottom:1.5rem; }
+.ader-card-title { font-family:var(--font-hud); font-size:.85rem; letter-spacing:.12em; color:var(--cyan); margin-bottom:1.25rem; display:flex; align-items:center; gap:.5rem; }
+.ader-card-title::after { content:''; flex:1; height:1px; background:linear-gradient(90deg,var(--cyan),transparent); opacity:.35; margin-left:.5rem; }
 
-/* ─── Form controls ──────────────────────────────────── */
-.form-label {
-    font-family: var(--font-mono);
-    font-size: .78rem;
-    color: var(--text-muted);
-    margin-bottom: .3rem;
-    letter-spacing: .04em;
-}
-.form-label .badge-ini {
-    font-size: .62rem;
-    background: rgba(0,229,255,.1);
-    color: var(--cyan);
-    border: 1px solid rgba(0,229,255,.25);
-    border-radius: 3px;
-    padding: 1px 5px;
-    margin-left: 4px;
-    vertical-align: middle;
-}
-.form-label .badge-ini-dstar {
-    font-size: .62rem;
-    background: rgba(191,0,255,.1);
-    color: var(--violet);
-    border: 1px solid rgba(191,0,255,.3);
-    border-radius: 3px;
-    padding: 1px 5px;
-    margin-left: 4px;
-    vertical-align: middle;
-}
-.form-control {
-    background: var(--bg-input) !important;
-    border: 1px solid var(--border) !important;
-    color: var(--text-main) !important;
-    font-family: var(--font-mono);
-    font-size: .9rem;
-    border-radius: 6px;
-    transition: border-color .2s, box-shadow .2s;
-}
-.form-control:focus {
-    border-color: var(--cyan) !important;
-    box-shadow: 0 0 0 3px rgba(0,229,255,.15) !important;
-    outline: none;
-}
-.form-control.dstar-field:focus {
-    border-color: var(--violet) !important;
-    box-shadow: 0 0 0 3px rgba(191,0,255,.15) !important;
-}
-.form-control::placeholder { color: #4a5568; }
+.form-label { font-family:var(--font-mono); font-size:.78rem; color:var(--text-muted); margin-bottom:.3rem; }
+.badge-ini { font-size:.62rem; background:rgba(0,229,255,.1); color:var(--cyan); border:1px solid rgba(0,229,255,.25); border-radius:3px; padding:1px 5px; margin-left:4px; vertical-align:middle; }
+.badge-ini-dstar { font-size:.62rem; background:rgba(191,0,255,.1); color:var(--violet); border:1px solid rgba(191,0,255,.3); border-radius:3px; padding:1px 5px; margin-left:4px; vertical-align:middle; }
+.form-control { background:var(--bg-input)!important; border:1px solid var(--border)!important; color:var(--text-main)!important; font-family:var(--font-mono); font-size:.9rem; border-radius:6px; transition:border-color .2s, box-shadow .2s; }
+.form-control:focus { border-color:var(--cyan)!important; box-shadow:0 0 0 3px rgba(0,229,255,.15)!important; outline:none; }
+.form-control.dstar-field:focus { border-color:var(--violet)!important; box-shadow:0 0 0 3px rgba(191,0,255,.15)!important; }
+.form-control::placeholder { color:#4a5568; }
+.form-hint { font-size:.72rem; color:var(--text-muted); font-family:var(--font-mono); margin-top:.25rem; }
 
-.form-hint {
-    font-size: .72rem;
-    color: var(--text-muted);
-    font-family: var(--font-mono);
-    margin-top: .25rem;
-}
+.section-label { font-family:var(--font-hud); font-size:.65rem; letter-spacing:.15em; color:var(--text-muted); text-transform:uppercase; margin:1.5rem 0 .75rem; display:flex; align-items:center; gap:.5rem; }
+.section-label::before { content:''; display:inline-block; width:3px; height:12px; background:var(--cyan); border-radius:2px; }
+.section-label.dstar::before { background:var(--violet); }
 
-/* ─── Botón guardar ───────────────────────────────────── */
-.btn-save {
-    font-family: var(--font-hud);
-    font-size: .8rem;
-    letter-spacing: .1em;
-    background: var(--cyan);
-    color: #000;
-    border: none;
-    border-radius: 8px;
-    padding: .6rem 2rem;
-    cursor: pointer;
-    transition: all .2s;
-    box-shadow: 0 0 16px rgba(0,229,255,.3);
-}
-.btn-save:hover {
-    background: #fff;
-    box-shadow: 0 0 24px rgba(0,229,255,.6);
-}
+.btn-save { font-family:var(--font-hud); font-size:.8rem; letter-spacing:.1em; background:var(--cyan); color:#000; border:none; border-radius:8px; padding:.6rem 2rem; cursor:pointer; transition:all .2s; box-shadow:0 0 16px rgba(0,229,255,.3); }
+.btn-save:hover { background:#fff; box-shadow:0 0 24px rgba(0,229,255,.6); }
 
-/* ─── File status table ───────────────────────────────── */
-.file-status-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-family: var(--font-mono);
-    font-size: .75rem;
-}
-.file-status-table th {
-    color: var(--text-muted);
-    border-bottom: 1px solid var(--border);
-    padding: .4rem .6rem;
-    text-align: left;
-    font-weight: normal;
-}
-.file-status-table td {
-    padding: .4rem .6rem;
-    border-bottom: 1px solid rgba(255,255,255,.04);
-    vertical-align: middle;
-}
-.file-status-table tr:last-child td { border-bottom: none; }
-.pill {
-    display: inline-block;
-    border-radius: 4px;
-    padding: 1px 8px;
-    font-size: .63rem;
-    font-weight: 600;
-    letter-spacing: .05em;
-}
-.pill-ok     { background: rgba(0,230,118,.15); color: var(--green); border: 1px solid rgba(0,230,118,.3); }
-.pill-warn   { background: rgba(255,179,0,.12); color: var(--amber); border: 1px solid rgba(255,179,0,.3); }
-.pill-danger { background: rgba(255,23,68,.12);  color: var(--red);   border: 1px solid rgba(255,23,68,.3); }
+.ader-alert { border-radius:7px; padding:.75rem 1rem; margin-bottom:.75rem; font-family:var(--font-mono); font-size:.82rem; border-left:3px solid transparent; }
+.ader-alert-success { background:rgba(0,230,118,.1); border-color:var(--green); color:var(--green); }
+.ader-alert-danger  { background:rgba(255,23,68,.1);  border-color:var(--red);   color:var(--red); }
+.ader-alert-warning { background:rgba(255,179,0,.1);  border-color:var(--amber); color:var(--amber); }
 
-/* ─── Alerts ─────────────────────────────────────────── */
-.ader-alert {
-    border-radius: 7px;
-    padding: .75rem 1rem;
-    margin-bottom: .75rem;
-    font-family: var(--font-mono);
-    font-size: .82rem;
-    border-left: 3px solid transparent;
-}
-.ader-alert-success { background: rgba(0,230,118,.1);  border-color: var(--green); color: var(--green); }
-.ader-alert-danger  { background: rgba(255,23,68,.1);   border-color: var(--red);   color: var(--red); }
-.ader-alert-warning { background: rgba(255,179,0,.1);   border-color: var(--amber); color: var(--amber); }
+.fst { width:100%; border-collapse:collapse; font-family:var(--font-mono); font-size:.73rem; }
+.fst th { color:var(--text-muted); border-bottom:1px solid var(--border); padding:.35rem .5rem; text-align:left; font-weight:normal; }
+.fst td { padding:.35rem .5rem; border-bottom:1px solid rgba(255,255,255,.04); vertical-align:middle; }
+.pill { display:inline-block; border-radius:4px; padding:1px 7px; font-size:.62rem; font-weight:600; }
+.pill-ok   { background:rgba(0,230,118,.15); color:var(--green); border:1px solid rgba(0,230,118,.3); }
+.pill-warn { background:rgba(255,179,0,.12); color:var(--amber); border:1px solid rgba(255,179,0,.3); }
+.pill-err  { background:rgba(255,23,68,.12);  color:var(--red);   border:1px solid rgba(255,23,68,.3); }
 
-/* ─── Section divider ─────────────────────────────────── */
-.section-label {
-    font-family: var(--font-hud);
-    font-size: .65rem;
-    letter-spacing: .15em;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    margin: 1.5rem 0 .75rem;
-    display: flex;
-    align-items: center;
-    gap: .5rem;
-}
-.section-label::before {
-    content: '';
-    display: inline-block;
-    width: 3px;
-    height: 12px;
-    background: var(--cyan);
-    border-radius: 2px;
-}
-.section-label.dstar::before { background: var(--violet); }
-
-@media (max-width: 768px) {
-    .page-header { flex-wrap: wrap; }
-    .col-freq { flex: 0 0 100%; }
-}
+/* Diagnóstico */
+.diag-box { background:#0d1117; border:1px solid var(--violet); border-radius:8px; padding:1rem; font-family:var(--font-mono); font-size:.72rem; color:var(--text-muted); margin-top:.75rem; white-space:pre-wrap; word-break:break-all; max-height:340px; overflow-y:auto; }
+.btn-diag { font-family:var(--font-hud); font-size:.72rem; letter-spacing:.08em; background:transparent; color:var(--violet); border:1px solid var(--violet); border-radius:6px; padding:4px 14px; cursor:pointer; transition:all .2s; }
+.btn-diag:hover { background:rgba(191,0,255,.15); }
+.btn-diag.running { opacity:.5; cursor:wait; }
 </style>
 </head>
 <body>
 
-<!-- ── Header ──────────────────────────────────────────── -->
 <div class="page-header">
-    <a href="extra.php" class="btn-back">
-        <i class="bi bi-arrow-left"></i> Menu Extra
-    </a>
+    <a href="extra.php" class="btn-back"><i class="bi bi-arrow-left"></i> Menu Extra</a>
     <div>
         <h1><i class="bi bi-sliders"></i> &nbsp;EDITOR GENERAL</h1>
         <span class="badge-subtitle">MMDVMHost · YSF · D-STAR · NXDN · DStarGateway</span>
@@ -470,118 +337,83 @@ body {
 <div class="container-fluid py-4 px-4">
 <div class="row g-4">
 
-    <!-- ── Columna izquierda: formulario ─────────────── -->
+    <!-- ── Formulario ─────────────────────────────────── -->
     <div class="col-lg-8">
 
         <?php foreach ($messages as $msg): ?>
-        <div class="ader-alert ader-alert-<?= $msg['type'] ?>">
-            <?= $msg['text'] ?>
-        </div>
+        <div class="ader-alert ader-alert-<?= $msg['type'] ?>"><?= htmlspecialchars($msg['text']) ?></div>
         <?php endforeach; ?>
 
         <div class="ader-card">
-            <div class="ader-card-title">
-                <i class="bi bi-pencil-square"></i>
-                CONFIGURACIÓN GENERAL
-            </div>
+            <div class="ader-card-title"><i class="bi bi-pencil-square"></i> CONFIGURACIÓN GENERAL</div>
 
             <form method="POST" autocomplete="off">
 
-                <!-- ── Identificación ──────────────────── -->
                 <div class="section-label">Identificación de estación</div>
                 <div class="row g-3 mb-3">
                     <div class="col-md-6">
-                        <label class="form-label">
-                            Callsign
-                            <span class="badge-ini">MMDVMHost · YSF · DSTAR · NXDN · DStarGW</span>
-                        </label>
+                        <label class="form-label">Callsign <span class="badge-ini">MMDVMHost · YSF · DSTAR · NXDN · DStarGW</span></label>
                         <input type="text" name="Callsign" class="form-control"
                                value="<?= htmlspecialchars($form_values['Callsign']) ?>"
-                               placeholder="Ej: EA3EIZ"
-                               maxlength="20">
+                               placeholder="Ej: EA3EIZ" maxlength="20">
                         <div class="form-hint">[General] en los 4 MMDVM + [Gateway] en DStarGateway</div>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">
-                            DMR Id
-                            <span class="badge-ini">MMDVMHost</span>
-                        </label>
+                        <label class="form-label">DMR Id <span class="badge-ini">MMDVMHost</span></label>
                         <input type="text" name="Id" class="form-control"
                                value="<?= htmlspecialchars($form_values['Id']) ?>"
-                               placeholder="Ej: 214317526"
-                               pattern="[0-9]*">
+                               placeholder="Ej: 214317526" pattern="[0-9]*">
                         <div class="form-hint">[General] Id= en MMDVMHost.ini</div>
                     </div>
                 </div>
 
-                <!-- ── D-Star Gateway ──────────────────── -->
                 <div class="section-label dstar">D-Star Gateway</div>
                 <div class="row g-3 mb-3">
                     <div class="col-md-6">
-                        <label class="form-label">
-                            Username
-                            <span class="badge-ini-dstar">DStarGateway</span>
-                        </label>
+                        <label class="form-label">Username <span class="badge-ini-dstar">DStarGateway</span></label>
                         <input type="text" name="Username" class="form-control dstar-field"
                                value="<?= htmlspecialchars($form_values['Username']) ?>"
-                               placeholder="Ej: EA3EIZ"
-                               maxlength="20">
+                               placeholder="Ej: EA3EIZ" maxlength="20">
                         <div class="form-hint">[Gateway] Username= en DStarGateway.ini</div>
                     </div>
                     <div class="col-md-6 d-flex align-items-end pb-1">
-                        <div class="form-hint" style="color:rgba(191,0,255,.7); font-size:.7rem; line-height:1.6;">
+                        <div class="form-hint" style="color:rgba(191,0,255,.7);line-height:1.6;">
                             <i class="bi bi-info-circle"></i>
-                            El Callsign también se escribe en<br>
+                            El Callsign también escribe en<br>
                             DStarGateway.ini → [Gateway] Callsign=
                         </div>
                     </div>
                 </div>
 
-                <!-- ── Frecuencias ─────────────────────── -->
                 <div class="section-label">Frecuencias</div>
                 <div class="row g-3 mb-3">
-                    <div class="col-md-6 col-freq">
-                        <label class="form-label">
-                            RX Frecuencia (Hz)
-                            <span class="badge-ini">MMDVMHost</span>
-                        </label>
+                    <div class="col-md-6">
+                        <label class="form-label">RX Frecuencia (Hz) <span class="badge-ini">MMDVMHost</span></label>
                         <input type="text" name="RXFrequency" class="form-control"
                                value="<?= htmlspecialchars($form_values['RXFrequency']) ?>"
-                               placeholder="Ej: 430500000"
-                               pattern="[0-9]*">
+                               placeholder="Ej: 430500000" pattern="[0-9]*">
                         <div class="form-hint">[Info] RXFrequency=</div>
                     </div>
-                    <div class="col-md-6 col-freq">
-                        <label class="form-label">
-                            TX Frecuencia (Hz)
-                            <span class="badge-ini">MMDVMHost</span>
-                        </label>
+                    <div class="col-md-6">
+                        <label class="form-label">TX Frecuencia (Hz) <span class="badge-ini">MMDVMHost</span></label>
                         <input type="text" name="TXFrequency" class="form-control"
                                value="<?= htmlspecialchars($form_values['TXFrequency']) ?>"
-                               placeholder="Ej: 430500000"
-                               pattern="[0-9]*">
+                               placeholder="Ej: 430500000" pattern="[0-9]*">
                         <div class="form-hint">[Info] TXFrequency=</div>
                     </div>
                 </div>
 
-                <!-- ── Posición geográfica ─────────────── -->
                 <div class="section-label">Posición geográfica</div>
                 <div class="row g-3 mb-3">
                     <div class="col-md-6">
-                        <label class="form-label">
-                            Latitud
-                            <span class="badge-ini">MMDVMHost</span>
-                        </label>
+                        <label class="form-label">Latitud <span class="badge-ini">MMDVMHost</span></label>
                         <input type="text" name="Latitude" class="form-control"
                                value="<?= htmlspecialchars($form_values['Latitude']) ?>"
                                placeholder="Ej: 41.3851">
                         <div class="form-hint">[Info] Latitude=</div>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">
-                            Longitud
-                            <span class="badge-ini">MMDVMHost</span>
-                        </label>
+                        <label class="form-label">Longitud <span class="badge-ini">MMDVMHost</span></label>
                         <input type="text" name="Longitude" class="form-control"
                                value="<?= htmlspecialchars($form_values['Longitude']) ?>"
                                placeholder="Ej: 2.1734">
@@ -589,24 +421,17 @@ body {
                     </div>
                 </div>
 
-                <!-- ── Información pública ─────────────── -->
                 <div class="section-label">Información pública</div>
                 <div class="row g-3 mb-3">
                     <div class="col-md-6">
-                        <label class="form-label">
-                            Location
-                            <span class="badge-ini">MMDVMHost</span>
-                        </label>
+                        <label class="form-label">Location <span class="badge-ini">MMDVMHost</span></label>
                         <input type="text" name="Location" class="form-control"
                                value="<?= htmlspecialchars($form_values['Location']) ?>"
                                placeholder="Ej: Barcelona, Spain">
                         <div class="form-hint">[Info] Location=</div>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">
-                            URL
-                            <span class="badge-ini">MMDVMHost</span>
-                        </label>
+                        <label class="form-label">URL <span class="badge-ini">MMDVMHost</span></label>
                         <input type="text" name="URL" class="form-control"
                                value="<?= htmlspecialchars($form_values['URL']) ?>"
                                placeholder="Ej: www.associacioader.com">
@@ -614,8 +439,7 @@ body {
                     </div>
                 </div>
 
-                <hr style="border-color:var(--border); margin:1.5rem 0;">
-
+                <hr style="border-color:var(--border);margin:1.5rem 0;">
                 <div class="d-flex align-items-center gap-3">
                     <button type="submit" name="save_config" class="btn-save">
                         <i class="bi bi-floppy"></i> &nbsp;GUARDAR CONFIGURACIÓN
@@ -624,56 +448,41 @@ body {
                         Los ficheros se actualizan al instante
                     </span>
                 </div>
-
             </form>
-        </div><!-- /ader-card -->
+        </div>
     </div><!-- /col-lg-8 -->
 
-    <!-- ── Columna derecha ───────────────────────────── -->
+    <!-- ── Columna derecha ────────────────────────────── -->
     <div class="col-lg-4">
 
         <!-- Estado de ficheros -->
         <div class="ader-card">
-            <div class="ader-card-title">
-                <i class="bi bi-file-earmark-code"></i>
-                ESTADO DE FICHEROS
+            <div class="ader-card-title"><i class="bi bi-file-earmark-code"></i> ESTADO DE FICHEROS</div>
+            <div style="font-family:var(--font-mono);font-size:.68rem;color:var(--text-muted);margin-bottom:.6rem;">
+                Proceso web: <span style="color:var(--amber);"><?= htmlspecialchars($proc_user) ?></span>
             </div>
-            <table class="file-status-table">
-                <thead>
-                    <tr>
-                        <th>Fichero</th>
-                        <th>Existe</th>
-                        <th>Escritura</th>
-                    </tr>
-                </thead>
+            <table class="fst">
+                <thead><tr><th>Fichero</th><th>Permisos</th><th>Propietario</th><th>W</th></tr></thead>
                 <tbody>
-                <?php foreach ($file_status as $key => $s): ?>
+                <?php foreach ($file_status as $key => $s):
+                    $isDstar = ($key === 'DStarGateway');
+                ?>
                     <tr>
-                        <td style="color:var(--text-main); font-size:.72rem;
-                            <?= $key === 'DStarGateway' ? 'color:var(--violet)!important;' : '' ?>">
-                            <?= $key ?>.ini
-                        </td>
-                        <td>
-                            <?php if ($s['exists']): ?>
-                                <span class="pill pill-ok">OK</span>
-                            <?php else: ?>
-                                <span class="pill pill-danger">NO</span>
-                            <?php endif; ?>
-                        </td>
+                        <td style="<?= $isDstar ? 'color:var(--violet);' : '' ?>"><?= $key ?></td>
+                        <td><?= $s['exists'] ? htmlspecialchars($s['perms']) : '<span class="pill pill-err">NO</span>' ?></td>
+                        <td><?= $s['exists'] ? htmlspecialchars($s['owner']) : '—' ?></td>
                         <td>
                             <?php if (!$s['exists']): ?>
-                                <span class="pill pill-danger">N/A</span>
+                                <span class="pill pill-err">NO</span>
                             <?php elseif ($s['writable']): ?>
                                 <span class="pill pill-ok">OK</span>
                             <?php else: ?>
-                                <span class="pill pill-warn">PERM</span>
+                                <span class="pill pill-warn">NO</span>
                             <?php endif; ?>
                         </td>
                     </tr>
                     <tr>
-                        <td colspan="3"
-                            style="font-size:.63rem;color:var(--text-muted);font-family:var(--font-mono);
-                                   padding-top:0;padding-bottom:.5rem;word-break:break-all;">
+                        <td colspan="4" style="font-size:.62rem;color:#444e5f;padding-top:0;padding-bottom:.4rem;word-break:break-all;">
                             <?= htmlspecialchars($s['path']) ?>
                         </td>
                     </tr>
@@ -682,16 +491,25 @@ body {
             </table>
         </div>
 
+        <!-- Diagnóstico DStarGateway -->
+        <div class="ader-card" style="border-color:rgba(191,0,255,.35);">
+            <div class="ader-card-title" style="color:var(--violet);">
+                <i class="bi bi-bug"></i> DIAGNÓSTICO DSTARGATEWAY
+            </div>
+            <p style="font-family:var(--font-mono);font-size:.72rem;color:var(--text-muted);margin-bottom:.75rem;">
+                Analiza permisos reales, secciones del INI y hace una escritura de prueba.
+            </p>
+            <button class="btn-diag" id="btnDiag" onclick="runDiag()">
+                <i class="bi bi-play-circle"></i> &nbsp;Ejecutar diagnóstico
+            </button>
+            <div class="diag-box" id="diagBox" style="display:none;"></div>
+        </div>
+
         <!-- Mapa de campos -->
         <div class="ader-card">
-            <div class="ader-card-title">
-                <i class="bi bi-diagram-3"></i>
-                MAPA DE CAMPOS
-            </div>
+            <div class="ader-card-title"><i class="bi bi-diagram-3"></i> MAPA DE CAMPOS</div>
             <div style="font-family:var(--font-mono);font-size:.72rem;line-height:1.9;">
-
-                <div style="margin-bottom:.7rem;">
-                    <span style="color:var(--cyan);">Callsign</span>
+                <div style="margin-bottom:.6rem;"><span style="color:var(--cyan);">Callsign</span>
                     <div style="color:var(--text-muted);padding-left:.8rem;">
                         <div>↳ MMDVMHost [General]</div>
                         <div>↳ MMDVMYSF [General]</div>
@@ -700,59 +518,26 @@ body {
                         <div style="color:var(--violet);">↳ DStarGateway [Gateway]</div>
                     </div>
                 </div>
-
-                <div style="margin-bottom:.7rem;">
-                    <span style="color:var(--violet);">Username</span>
+                <div style="margin-bottom:.6rem;"><span style="color:var(--violet);">Username</span>
                     <div style="color:var(--text-muted);padding-left:.8rem;">
                         <div style="color:var(--violet);">↳ DStarGateway [Gateway]</div>
                     </div>
                 </div>
-
-                <div style="margin-bottom:.7rem;">
-                    <span style="color:var(--cyan);">Id</span>
-                    <div style="color:var(--text-muted);padding-left:.8rem;">
-                        <div>↳ MMDVMHost [General]</div>
-                    </div>
+                <div style="margin-bottom:.6rem;"><span style="color:var(--cyan);">Id</span>
+                    <div style="color:var(--text-muted);padding-left:.8rem;"><div>↳ MMDVMHost [General]</div></div>
                 </div>
-
-                <div style="margin-bottom:.7rem;">
-                    <span style="color:var(--cyan);">RXFrequency · TXFrequency</span>
-                    <div style="color:var(--text-muted);padding-left:.8rem;">
-                        <div>↳ MMDVMHost [Info]</div>
-                    </div>
+                <div style="margin-bottom:.6rem;"><span style="color:var(--cyan);">RXFrequency · TXFrequency · Latitude · Longitude · Location · URL</span>
+                    <div style="color:var(--text-muted);padding-left:.8rem;"><div>↳ MMDVMHost [Info]</div></div>
                 </div>
-
-                <div style="margin-bottom:.7rem;">
-                    <span style="color:var(--cyan);">Latitude · Longitude</span>
-                    <div style="color:var(--text-muted);padding-left:.8rem;">
-                        <div>↳ MMDVMHost [Info]</div>
-                    </div>
-                </div>
-
-                <div style="margin-bottom:.7rem;">
-                    <span style="color:var(--cyan);">Location · URL</span>
-                    <div style="color:var(--text-muted);padding-left:.8rem;">
-                        <div>↳ MMDVMHost [Info]</div>
-                    </div>
-                </div>
-
             </div>
         </div>
 
-        <!-- Nota permisos -->
+        <!-- Permisos -->
         <div class="ader-card" style="border-color:rgba(255,179,0,.3);">
             <div class="ader-card-title" style="color:var(--amber);">
-                <i class="bi bi-shield-exclamation"></i>
-                PERMISOS NECESARIOS
+                <i class="bi bi-shield-exclamation"></i> PERMISOS
             </div>
-            <p style="font-family:var(--font-mono);font-size:.72rem;color:var(--text-muted);
-                      line-height:1.7;margin:0;">
-                El usuario <code style="color:var(--amber);">www-data</code> necesita
-                escritura en todos los INI:
-            </p>
-            <pre style="background:#0d1117;border:1px solid var(--border);border-radius:5px;
-                        padding:.6rem;font-size:.67rem;color:var(--green);margin-top:.6rem;
-                        overflow-x:auto;">sudo chown pi:www-data \
+            <pre style="background:#0d1117;border:1px solid var(--border);border-radius:5px;padding:.6rem;font-size:.67rem;color:var(--green);margin:0;overflow-x:auto;">sudo chown pi:www-data \
   /home/pi/MMDVMHost/*.ini \
   /home/pi/DStarGateway/*.ini
 sudo chmod 664 \
@@ -761,9 +546,62 @@ sudo chmod 664 \
         </div>
 
     </div><!-- /col-lg-4 -->
-</div><!-- /row -->
-</div><!-- /container -->
+</div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function runDiag() {
+    const btn = document.getElementById('btnDiag');
+    const box = document.getElementById('diagBox');
+    btn.classList.add('running');
+    btn.textContent = '⏳ Analizando...';
+    box.style.display = 'block';
+    box.style.color = 'var(--text-muted)';
+    box.textContent = 'Ejecutando diagnóstico…';
+
+    fetch('?action=diag_dstar')
+        .then(r => r.json())
+        .then(d => {
+            let out = '';
+            out += `📁 Ruta: ${d.path}\n`;
+            out += `👤 Proceso web: ${d.process_user}\n`;
+            out += `👤 Propietario fichero: ${d.owner}\n\n`;
+            out += `✔ Existe:   ${d.exists   ? '✅ Sí' : '❌ No'}\n`;
+            out += `✔ Legible:  ${d.readable ? '✅ Sí' : '❌ No'}\n`;
+            out += `✔ Escritura:${d.writable ? '✅ Sí' : '❌ No'}\n\n`;
+            out += `🔑 Permisos del fichero: ${d.perms || '?'}\n\n`;
+
+            if (d.sections && d.sections.length) {
+                out += `📋 Secciones encontradas:\n`;
+                d.sections.forEach(s => out += `   [${s}]\n`);
+                out += '\n';
+            } else {
+                out += `⚠️ No se encontraron secciones (¿fichero vacío o ilegible?)\n\n`;
+            }
+
+            out += `🔍 [Gateway] Callsign = ${d.callsign_found !== null ? d.callsign_found : '⚠️ NO ENCONTRADO'}\n`;
+            out += `🔍 [Gateway] Username = ${d.username_found !== null ? d.username_found : '⚠️ NO ENCONTRADO'}\n\n`;
+
+            out += `✏️ Test escritura: ${d.write_test || '—'}\n\n`;
+
+            if (d.raw_head) {
+                out += `── Primeras 30 líneas del fichero ──\n${d.raw_head}`;
+            }
+
+            box.textContent = out;
+            box.style.color = d.writable && d.write_test && d.write_test.startsWith('OK')
+                ? 'var(--green)' : 'var(--amber)';
+        })
+        .catch(e => {
+            box.textContent = '❌ Error al ejecutar diagnóstico: ' + e;
+            box.style.color = 'var(--red)';
+        })
+        .finally(() => {
+            btn.classList.remove('running');
+            btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> &nbsp;Repetir diagnóstico';
+        });
+}
+</script>
 </body>
 </html>
