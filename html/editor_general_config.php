@@ -9,7 +9,6 @@ $INI_FILES = [
     'MMDVMYSF'     => '/home/pi/MMDVMHost/MMDVMYSF.ini',
     'MMDVMDSTAR'   => '/home/pi/MMDVMHost/MMDVMDSTAR.ini',
     'MMDVMNXDN'    => '/home/pi/MMDVMHost/MMDVMNXDN.ini',
-    'DStarGateway' => '/home/pi/DStarGateway/DStarGateway.ini',
 ];
 
 // ── Mapa: campo => [ [file_key, section, ini_key], ... ]
@@ -21,17 +20,6 @@ $WRITE_MAP = [
         ['MMDVMYSF',     'General',    'Callsign'],
         ['MMDVMDSTAR',   'General',    'Callsign'],
         ['MMDVMNXDN',    'General',    'Callsign'],
-        ['DStarGateway', 'General',    'Callsign'],
-        ['DStarGateway', 'Repeater 1', 'Callsign'],
-    ],
-    'Username'    => [
-        ['DStarGateway', 'IRCDDB 1',   'Username'],
-    ],
-    'IRCDDB1_Enabled'  => [
-        ['DStarGateway', 'IRCDDB 1',   'Enabled'],
-    ],
-    'IRCDDB1_Hostname' => [
-        ['DStarGateway', 'IRCDDB 1',   'Hostname'],
     ],
     'Id'          => [['MMDVMHost', 'General', 'Id']],
     'RXFrequency' => [['MMDVMHost', 'Info',    'RXFrequency']],
@@ -45,9 +33,6 @@ $WRITE_MAP = [
 // ── Para leer valores del formulario (primer fichero que tenga el campo)
 $READ_MAP = [
     'Callsign'    => ['MMDVMHost',    'General',    'Callsign'],
-    'Username'         => ['DStarGateway', 'IRCDDB 1', 'Username'],
-    'IRCDDB1_Enabled'  => ['DStarGateway', 'IRCDDB 1', 'Enabled'],
-    'IRCDDB1_Hostname' => ['DStarGateway', 'IRCDDB 1', 'Hostname'],
     'Id'          => ['MMDVMHost',    'General',    'Id'],
     'RXFrequency' => ['MMDVMHost',    'Info',       'RXFrequency'],
     'TXFrequency' => ['MMDVMHost',    'Info',       'TXFrequency'],
@@ -181,65 +166,7 @@ function read_form_values(array $read_map, array $ini_files): array {
     return $values;
 }
 
-// ============================================================
-//  Acción AJAX de diagnóstico para DStarGateway.ini
-// ============================================================
-if (($_GET['action'] ?? '') === 'diag_dstar') {
-    header('Content-Type: application/json');
-    $path = $INI_FILES['DStarGateway'];
-    $info = [
-        'path'       => $path,
-        'exists'     => file_exists($path),
-        'readable'   => is_readable($path),
-        'writable'   => is_writable($path),
-        'owner'      => file_exists($path) ? (posix_getpwuid(fileowner($path))['name'] ?? '?') : '?',
-        'process_user' => posix_getpwuid(posix_geteuid())['name'] ?? '?',
-        'perms'      => file_exists($path) ? substr(sprintf('%o', fileperms($path)), -4) : '?',
-        'sections'   => [],
-        'callsign_found'  => null,
-        'username_found'  => null,
-        'raw_head'   => '',
-    ];
 
-    if ($info['exists'] && $info['readable']) {
-        $lines = file($path, FILE_IGNORE_NEW_LINES);
-        $info['raw_head'] = implode("\n", array_slice($lines, 0, 30));
-        $cur_section = '';
-        foreach ($lines as $line) {
-            $t = trim($line);
-            if (preg_match('/^\[(.+)\]$/', $t, $m)) {
-                $cur_section = $m[1];
-                $info['sections'][] = $cur_section;
-            }
-            if (strcasecmp($cur_section, 'General') === 0) {
-                if (preg_match('/^Callsign\s*=\s*(.*)/i', $t, $m)) $info['callsign_found'] = trim($m[1]);
-            }
-            if (strcasecmp($cur_section, 'IRCDDB 1') === 0) {
-                if (preg_match('/^Username\s*=\s*(.*)/i', $t, $m)) $info['username_found'] = trim($m[1]);
-            }
-            if (strcasecmp($cur_section, 'Repeater 1') === 0) {
-                if (preg_match('/^Callsign\s*=\s*(.*)/i', $t, $m)) $info['callsign_rep1'] = trim($m[1]);
-            }
-        }
-        // Test de escritura real
-        if ($info['writable']) {
-            $test = ini_write_value($path, 'General', '_test_ader_', 'ok');
-            if ($test === true) {
-                // Limpiar el campo de prueba
-                $lines2 = file($path, FILE_IGNORE_NEW_LINES);
-                $cleaned = array_filter($lines2, fn($l) => !preg_match('/^_test_ader_=/i', trim($l)));
-                file_put_contents($path, implode(PHP_EOL, $cleaned) . PHP_EOL);
-                $info['write_test'] = 'OK – escritura real verificada';
-            } else {
-                $info['write_test'] = $test;
-            }
-        } else {
-            $info['write_test'] = 'No se pudo probar (sin permiso de escritura)';
-        }
-    }
-    echo json_encode($info, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
-    exit;
-}
 
 // ============================================================
 //  Procesar POST – guardar valores (escritura en batch por fichero)
@@ -249,7 +176,7 @@ $form_values = read_form_values($READ_MAP, $INI_FILES);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_config'])) {
     $post_fields = [
-        'Callsign', 'Username', 'IRCDDB1_Enabled', 'IRCDDB1_Hostname',
+        'Callsign',
         'Id', 'RXFrequency', 'TXFrequency',
         'Latitude', 'Longitude', 'Location', 'URL'
     ];
@@ -387,7 +314,7 @@ body { background: var(--bg-base); color: var(--text-main); font-family: var(--f
     <a href="extra.php" class="btn-back"><i class="bi bi-arrow-left"></i> Menu Extra</a>
     <div>
         <h1><i class="bi bi-sliders"></i> &nbsp;EDITOR GENERAL</h1>
-        <span class="badge-subtitle">MMDVMHost · YSF · D-STAR · NXDN · DStarGateway</span>
+        <span class="badge-subtitle">MMDVMHost · YSF · D-STAR · NXDN</span>
     </div>
 </div>
 
@@ -409,11 +336,11 @@ body { background: var(--bg-base); color: var(--text-main); font-family: var(--f
                 <div class="section-label">Identificación de estación</div>
                 <div class="row g-3 mb-3">
                     <div class="col-md-6">
-                        <label class="form-label">Callsign <span class="badge-ini">MMDVMHost · YSF · DSTAR · NXDN · DStarGW</span></label>
+                        <label class="form-label">Callsign <span class="badge-ini">MMDVMHost · YSF · DSTAR · NXDN</span></label>
                         <input type="text" name="Callsign" class="form-control"
                                value="<?= htmlspecialchars($form_values['Callsign']) ?>"
                                placeholder="Ej: EA3EIZ" maxlength="20">
-                        <div class="form-hint">[General] en los 4 MMDVM + DStarGateway</div>
+                        <div class="form-hint">[General] Callsign= en los 4 ficheros MMDVM</div>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">DMR Id <span class="badge-ini">MMDVMHost</span></label>
@@ -423,39 +350,6 @@ body { background: var(--bg-base); color: var(--text-main); font-family: var(--f
                         <div class="form-hint">[General] Id= en MMDVMHost.ini</div>
                     </div>
                 </div>
-
-                <div class="section-label dstar">D-Star Gateway · IRCDDB 1</div>
-                <div class="row g-3 mb-3">
-                    <div class="col-md-4">
-                        <label class="form-label">Username <span class="badge-ini-dstar">DStarGateway</span></label>
-                        <input type="text" name="Username" class="form-control dstar-field"
-                               value="<?= htmlspecialchars($form_values['Username']) ?>"
-                               placeholder="Ej: EA3EIZ" maxlength="20">
-                        <div class="form-hint">[IRCDDB 1] Username=</div>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Hostname <span class="badge-ini-dstar">DStarGateway</span></label>
-                        <input type="text" name="IRCDDB1_Hostname" class="form-control dstar-field"
-                               value="<?= htmlspecialchars($form_values['IRCDDB1_Hostname']) ?>"
-                               placeholder="Ej: ircv4.openquad.net">
-                        <div class="form-hint">[IRCDDB 1] Hostname=</div>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Enabled <span class="badge-ini-dstar">DStarGateway</span></label>
-                        <select name="IRCDDB1_Enabled" class="form-control dstar-field">
-                            <option value="1" <?= ($form_values['IRCDDB1_Enabled'] === '1') ? 'selected' : '' ?>>1 – Activo</option>
-                            <option value="0" <?= ($form_values['IRCDDB1_Enabled'] === '0') ? 'selected' : '' ?>>0 – Inactivo</option>
-                        </select>
-                        <div class="form-hint">[IRCDDB 1] Enabled=</div>
-                    </div>
-                </div>
-                <div class="row g-3 mb-1">
-                    <div class="col-12">
-                        <div class="form-hint" style="color:rgba(191,0,255,.7);line-height:1.6;">
-                            <i class="bi bi-info-circle"></i>
-                            El Callsign también escribe en DStarGateway.ini → [General] Callsign= y [Repeater 1] Callsign=
-                        </div>
-                    </div>
                 </div>
 
                 <div class="section-label">Frecuencias</div>
@@ -538,10 +432,9 @@ body { background: var(--bg-base); color: var(--text-main); font-family: var(--f
                 <thead><tr><th>Fichero</th><th>Permisos</th><th>Propietario</th><th>W</th></tr></thead>
                 <tbody>
                 <?php foreach ($file_status as $key => $s):
-                    $isDstar = ($key === 'DStarGateway');
-                ?>
+                            ?>
                     <tr>
-                        <td style="<?= $isDstar ? 'color:var(--violet);' : '' ?>"><?= $key ?></td>
+                        <td><?= $key ?></td>
                         <td><?= $s['exists'] ? htmlspecialchars($s['perms']) : '<span class="pill pill-err">NO</span>' ?></td>
                         <td><?= $s['exists'] ? htmlspecialchars($s['owner']) : '—' ?></td>
                         <td>
@@ -563,21 +456,6 @@ body { background: var(--bg-base); color: var(--text-main); font-family: var(--f
                 </tbody>
             </table>
         </div>
-
-        <!-- Diagnóstico DStarGateway -->
-        <div class="ader-card" style="border-color:rgba(191,0,255,.35);">
-            <div class="ader-card-title" style="color:var(--violet);">
-                <i class="bi bi-bug"></i> DIAGNÓSTICO DSTARGATEWAY
-            </div>
-            <p style="font-family:var(--font-mono);font-size:.72rem;color:var(--text-muted);margin-bottom:.75rem;">
-                Analiza permisos reales, secciones del INI y hace una escritura de prueba.
-            </p>
-            <button class="btn-diag" id="btnDiag" onclick="runDiag()">
-                <i class="bi bi-play-circle"></i> &nbsp;Ejecutar diagnóstico
-            </button>
-            <div class="diag-box" id="diagBox" style="display:none;"></div>
-        </div>
-
         <!-- Mapa de campos -->
         <div class="ader-card">
             <div class="ader-card-title"><i class="bi bi-diagram-3"></i> MAPA DE CAMPOS</div>
@@ -588,14 +466,8 @@ body { background: var(--bg-base); color: var(--text-main); font-family: var(--f
                         <div>↳ MMDVMYSF [General]</div>
                         <div>↳ MMDVMDSTAR [General]</div>
                         <div>↳ MMDVMNXDN [General]</div>
-                        <div style="color:var(--violet);">↳ DStarGateway [General]</div>
-                    </div>
+                        </div>
                 </div>
-                <div style="margin-bottom:.6rem;">
-                    <span style="color:var(--violet);">Username · Hostname · Enabled</span>
-                    <div style="color:var(--text-muted);padding-left:.8rem;">
-                        <div style="color:var(--violet);">↳ DStarGateway [IRCDDB 1]</div>
-                    </div>
                 </div>
                 <div style="margin-bottom:.6rem;"><span style="color:var(--cyan);">Id</span>
                     <div style="color:var(--text-muted);padding-left:.8rem;"><div>↳ MMDVMHost [General]</div></div>
@@ -612,11 +484,10 @@ body { background: var(--bg-base); color: var(--text-main); font-family: var(--f
                 <i class="bi bi-shield-exclamation"></i> PERMISOS
             </div>
             <pre style="background:#0d1117;border:1px solid var(--border);border-radius:5px;padding:.6rem;font-size:.67rem;color:var(--green);margin:0;overflow-x:auto;">sudo chown pi:www-data \
-  /home/pi/MMDVMHost/*.ini \
-  /home/pi/DStarGateway/*.ini
+  /home/pi/MMDVMHost/*.ini
 sudo chmod 664 \
-  /home/pi/MMDVMHost/*.ini \
-  /home/pi/DStarGateway/*.ini</pre>
+  /home/pi/MMDVMHost/*.ini
+</pre>
         </div>
 
     </div><!-- /col-lg-4 -->
@@ -625,38 +496,8 @@ sudo chmod 664 \
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-function runDiag() {
-    const btn = document.getElementById('btnDiag');
-    const box = document.getElementById('diagBox');
-    btn.classList.add('running');
-    btn.textContent = '⏳ Analizando...';
-    box.style.display = 'block';
-    box.style.color = 'var(--text-muted)';
-    box.textContent = 'Ejecutando diagnóstico…';
-
-    fetch('?action=diag_dstar')
-        .then(r => r.json())
-        .then(d => {
-            let out = '';
-            out += `📁 Ruta: ${d.path}\n`;
-            out += `👤 Proceso web: ${d.process_user}\n`;
-            out += `👤 Propietario fichero: ${d.owner}\n\n`;
-            out += `✔ Existe:   ${d.exists   ? '✅ Sí' : '❌ No'}\n`;
-            out += `✔ Legible:  ${d.readable ? '✅ Sí' : '❌ No'}\n`;
-            out += `✔ Escritura:${d.writable ? '✅ Sí' : '❌ No'}\n\n`;
-            out += `🔑 Permisos del fichero: ${d.perms || '?'}\n\n`;
-
-            if (d.sections && d.sections.length) {
-                out += `📋 Secciones encontradas:\n`;
-                d.sections.forEach(s => out += `   [${s}]\n`);
-                out += '\n';
-            } else {
-                out += `⚠️ No se encontraron secciones (¿fichero vacío o ilegible?)\n\n`;
-            }
 
             out += `🔍 [General]   Callsign = ${d.callsign_found !== null ? d.callsign_found : '⚠️ NO ENCONTRADO'}\n`;
-            out += `🔍 [IRCDDB 1] Username = ${d.username_found !== null ? d.username_found : '⚠️ NO ENCONTRADO'}\n`;
-            out += `🔍 [Repeater 1] Callsign = ${d.callsign_rep1 !== undefined ? d.callsign_rep1 : '⚠️ NO ENCONTRADO'}\n\n`;
 
             out += `✏️ Test escritura: ${d.write_test || '—'}\n\n`;
 
