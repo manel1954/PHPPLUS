@@ -662,7 +662,7 @@ body {
             </table>
         </div>
 
-        <!-- Info sobre qué campos van a qué fichero -->
+        <!-- Info sobre qué campos van a qué fichero
         <div class="ader-card">
             <div class="ader-card-title">
                 <i class="bi bi-diagram-3"></i>
@@ -692,10 +692,10 @@ body {
                 </div>
                 <?php endforeach; ?>
             </div>
-        </div>
+        </div> -->
 
         <!-- Nota de permisos -->
-        <div class="ader-card" style="border-color:rgba(255,179,0,.3);">
+        <!-- <div class="ader-card" style="border-color:rgba(255,179,0,.3);">
             <div class="ader-card-title" style="color:var(--amber);">
                 <i class="bi bi-shield-exclamation"></i>
                 PERMISOS NECESARIOS
@@ -709,7 +709,7 @@ body {
                         padding:.6rem;font-size:.68rem;color:var(--green);margin-top:.6rem;
                         overflow-x:auto;">sudo chown pi:www-data *.ini
 sudo chmod 664 *.ini</pre>
-        </div>
+        </div> -->
 
     </div><!-- /col-lg-4 -->
 </div><!-- /row -->
