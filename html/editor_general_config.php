@@ -1,46 +1,51 @@
 <?php
 // ============================================================
 //  EDITOR GENERAL CONFIG – Panel ADER
-//  Lee y escribe los campos comunes en los 4 ficheros INI
+//  Lee y escribe los campos comunes en los ficheros INI
 // ============================================================
 session_start();
 
 // --- Rutas a los ficheros INI ---
 $INI_FILES = [
-    'MMDVMHost'  => '/home/pi/MMDVMHost/MMDVMHost.ini',
-    'MMDVMYSF'   => '/home/pi/MMDVMHost/MMDVMYSF.ini',
-    'MMDVMDSTAR' => '/home/pi/MMDVMHost/MMDVMDSTAR.ini',
-    'MMDVMNXDN'  => '/home/pi/MMDVMHost/MMDVMNXDN.ini',
+    'MMDVMHost'    => '/home/pi/MMDVMHost/MMDVMHost.ini',
+    'MMDVMYSF'     => '/home/pi/MMDVMHost/MMDVMYSF.ini',
+    'MMDVMDSTAR'   => '/home/pi/MMDVMHost/MMDVMDSTAR.ini',
+    'MMDVMNXDN'    => '/home/pi/MMDVMHost/MMDVMNXDN.ini',
+    'DStarGateway' => '/home/pi/DStarGateway/DStarGateway.ini',
 ];
 
 // --- Mapa de campos: campo => [ fichero => [sección, clave] ] ---
 $FIELD_MAP = [
     'Callsign'    => [
-        'MMDVMHost'  => ['General', 'Callsign'],
-        'MMDVMYSF'   => ['General', 'Callsign'],
-        'MMDVMDSTAR' => ['General', 'Callsign'],
-        'MMDVMNXDN'  => ['General', 'Callsign'],
+        'MMDVMHost'    => ['General', 'Callsign'],
+        'MMDVMYSF'     => ['General', 'Callsign'],
+        'MMDVMDSTAR'   => ['General', 'Callsign'],
+        'MMDVMNXDN'    => ['General', 'Callsign'],
+        'DStarGateway' => ['Gateway', 'Callsign'],
+    ],
+    'Username'    => [
+        'DStarGateway' => ['Gateway', 'Username'],
     ],
     'Id'          => [
-        'MMDVMHost'  => ['General', 'Id'],
+        'MMDVMHost'    => ['General', 'Id'],
     ],
     'RXFrequency' => [
-        'MMDVMHost'  => ['Info', 'RXFrequency'],
+        'MMDVMHost'    => ['Info', 'RXFrequency'],
     ],
     'TXFrequency' => [
-        'MMDVMHost'  => ['Info', 'TXFrequency'],
+        'MMDVMHost'    => ['Info', 'TXFrequency'],
     ],
     'Latitude'    => [
-        'MMDVMHost'  => ['Info', 'Latitude'],
+        'MMDVMHost'    => ['Info', 'Latitude'],
     ],
     'Longitude'   => [
-        'MMDVMHost'  => ['Info', 'Longitude'],
+        'MMDVMHost'    => ['Info', 'Longitude'],
     ],
     'Location'    => [
-        'MMDVMHost'  => ['Info', 'Location'],
+        'MMDVMHost'    => ['Info', 'Location'],
     ],
     'URL'         => [
-        'MMDVMHost'  => ['Info', 'URL'],
+        'MMDVMHost'    => ['Info', 'URL'],
     ],
 ];
 
@@ -48,10 +53,6 @@ $FIELD_MAP = [
 //  Funciones INI (preservan comentarios y orden)
 // ============================================================
 
-/**
- * Lee un valor de un fichero INI (sección + clave).
- * Devuelve string o null si no existe.
- */
 function ini_read_value(string $filepath, string $section, string $key): ?string {
     if (!file_exists($filepath)) return null;
     $lines = file($filepath, FILE_IGNORE_NEW_LINES);
@@ -69,11 +70,6 @@ function ini_read_value(string $filepath, string $section, string $key): ?string
     return null;
 }
 
-/**
- * Escribe (o crea) un valor en un fichero INI preservando todo lo demás.
- * Si la sección no existe, la crea al final del fichero.
- * Devuelve true en éxito, string de error en fallo.
- */
 function ini_write_value(string $filepath, string $section, string $key, string $value): bool|string {
     if (!file_exists($filepath)) {
         return "Fichero no encontrado: $filepath";
@@ -91,9 +87,7 @@ function ini_write_value(string $filepath, string $section, string $key, string 
     foreach ($lines as $raw) {
         $trimmed = trim($raw);
 
-        // Detectar cabecera de sección
         if (preg_match('/^\[(.+)\]$/', $trimmed, $m)) {
-            // Si salimos de la sección buscada sin haber encontrado la clave, la añadimos
             if ($in_section && !$found_key) {
                 $output[] = "$key=$value";
                 $found_key = true;
@@ -104,7 +98,6 @@ function ini_write_value(string $filepath, string $section, string $key, string 
             continue;
         }
 
-        // Reemplazar clave dentro de la sección
         if ($in_section && !$found_key &&
             preg_match('/^' . preg_quote($key, '/') . '\s*=/i', $trimmed)) {
             $output[] = "$key=$value";
@@ -115,12 +108,10 @@ function ini_write_value(string $filepath, string $section, string $key, string 
         $output[] = $raw;
     }
 
-    // Si la clave no se encontró dentro de una sección que sí existía
     if ($in_section && !$found_key) {
         $output[] = "$key=$value";
     }
 
-    // Si la sección no existía en absoluto, la creamos al final
     if (!$found_section) {
         $output[] = '';
         $output[] = "[$section]";
@@ -137,7 +128,6 @@ function ini_write_value(string $filepath, string $section, string $key, string 
 function read_all_values(array $field_map, array $ini_files): array {
     $values = [];
     foreach ($field_map as $field => $targets) {
-        // Prioridad: leer del primer fichero que tenga el campo definido
         $val = null;
         foreach ($targets as $file_key => [$section, $key]) {
             $path = $ini_files[$file_key] ?? null;
@@ -153,12 +143,12 @@ function read_all_values(array $field_map, array $ini_files): array {
 // ============================================================
 //  Procesar POST – guardar valores
 // ============================================================
-$messages   = [];   // ['type'=>'success'|'danger', 'text'=>'...']
+$messages    = [];
 $form_values = read_all_values($FIELD_MAP, $INI_FILES);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_config'])) {
     $post_fields = [
-        'Callsign', 'Id', 'RXFrequency', 'TXFrequency',
+        'Callsign', 'Username', 'Id', 'RXFrequency', 'TXFrequency',
         'Latitude', 'Longitude', 'Location', 'URL'
     ];
 
@@ -179,21 +169,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_config'])) {
                 $errors[] = $result;
             }
         }
-        // Actualizar valores del formulario con los nuevos
         $form_values[$field] = $new_val;
     }
 
     if (empty($errors)) {
-        $messages[] = [
-            'type' => 'success',
-            'text' => '✅ Configuración guardada correctamente en ' . count(array_unique(array_map(fn($w) => explode(' →', $w)[0], $written))) . ' fichero(s).'
-        ];
+        $n = count(array_unique(array_map(fn($w) => explode(' →', $w)[0], $written)));
+        $messages[] = ['type' => 'success', 'text' => "✅ Configuración guardada correctamente en $n fichero(s)."];
     } else {
         foreach ($errors as $e) {
             $messages[] = ['type' => 'danger', 'text' => '❌ ' . htmlspecialchars($e)];
         }
         if (!empty($written)) {
-            $messages[] = ['type' => 'warning', 'text' => '⚠️ Escrito parcialmente en: ' . implode(', ', array_unique(array_map(fn($w) => explode(' →', $w)[0], $written)))];
+            $flist = implode(', ', array_unique(array_map(fn($w) => explode(' →', $w)[0], $written)));
+            $messages[] = ['type' => 'warning', 'text' => "⚠️ Escrito parcialmente en: $flist"];
         }
     }
 }
@@ -201,16 +189,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_config'])) {
 // ============================================================
 //  Estado (existencia + permisos) de cada fichero
 // ============================================================
-// $file_status = [];
-// foreach ($INI_FILES as $key => $path) {
-//     $exists   = file_exists($path);
-//     $writable = $exists && is_writable($path);
-//     $file_status[$key] = [
-//         'path'     => $path,
-//         'exists'   => $exists,
-//         'writable' => $writable,
-//     ];
-// }
+$file_status = [];
+foreach ($INI_FILES as $key => $path) {
+    $exists   = file_exists($path);
+    $writable = $exists && is_writable($path);
+    $file_status[$key] = [
+        'path'     => $path,
+        'exists'   => $exists,
+        'writable' => $writable,
+    ];
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -219,19 +207,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_config'])) {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Editor General · Panel ADER</title>
 
-<!-- Bootstrap 5.3 -->
-<link rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-<!-- Bootstrap Icons -->
-<link rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-<!-- Google Fonts -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600&family=Share+Tech+Mono&display=swap"
-      rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
 <style>
-/* ─── CSS Variables (Panel ADER) ──────────────────────── */
 :root {
     --bg-base:    #0d1117;
     --bg-card:    #161b22;
@@ -253,9 +234,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_config'])) {
 
 body {
     background: var(--bg-base);
-    color:      var(--text-main);
+    color: var(--text-main);
     font-family: var(--font-ui);
-    font-size:  1rem;
+    font-size: 1rem;
     min-height: 100vh;
 }
 
@@ -344,6 +325,16 @@ body {
     margin-left: 4px;
     vertical-align: middle;
 }
+.form-label .badge-ini-dstar {
+    font-size: .62rem;
+    background: rgba(191,0,255,.1);
+    color: var(--violet);
+    border: 1px solid rgba(191,0,255,.3);
+    border-radius: 3px;
+    padding: 1px 5px;
+    margin-left: 4px;
+    vertical-align: middle;
+}
 .form-control {
     background: var(--bg-input) !important;
     border: 1px solid var(--border) !important;
@@ -357,6 +348,10 @@ body {
     border-color: var(--cyan) !important;
     box-shadow: 0 0 0 3px rgba(0,229,255,.15) !important;
     outline: none;
+}
+.form-control.dstar-field:focus {
+    border-color: var(--violet) !important;
+    box-shadow: 0 0 0 3px rgba(191,0,255,.15) !important;
 }
 .form-control::placeholder { color: #4a5568; }
 
@@ -391,7 +386,7 @@ body {
     width: 100%;
     border-collapse: collapse;
     font-family: var(--font-mono);
-    font-size: .78rem;
+    font-size: .75rem;
 }
 .file-status-table th {
     color: var(--text-muted);
@@ -401,7 +396,7 @@ body {
     font-weight: normal;
 }
 .file-status-table td {
-    padding: .45rem .6rem;
+    padding: .4rem .6rem;
     border-bottom: 1px solid rgba(255,255,255,.04);
     vertical-align: middle;
 }
@@ -410,13 +405,13 @@ body {
     display: inline-block;
     border-radius: 4px;
     padding: 1px 8px;
-    font-size: .65rem;
+    font-size: .63rem;
     font-weight: 600;
     letter-spacing: .05em;
 }
-.pill-ok      { background: rgba(0,230,118,.15); color: var(--green); border: 1px solid rgba(0,230,118,.3); }
-.pill-warn    { background: rgba(255,179,0,.12); color: var(--amber); border: 1px solid rgba(255,179,0,.3); }
-.pill-danger  { background: rgba(255,23,68,.12);  color: var(--red);   border: 1px solid rgba(255,23,68,.3); }
+.pill-ok     { background: rgba(0,230,118,.15); color: var(--green); border: 1px solid rgba(0,230,118,.3); }
+.pill-warn   { background: rgba(255,179,0,.12); color: var(--amber); border: 1px solid rgba(255,179,0,.3); }
+.pill-danger { background: rgba(255,23,68,.12);  color: var(--red);   border: 1px solid rgba(255,23,68,.3); }
 
 /* ─── Alerts ─────────────────────────────────────────── */
 .ader-alert {
@@ -451,8 +446,8 @@ body {
     background: var(--cyan);
     border-radius: 2px;
 }
+.section-label.dstar::before { background: var(--violet); }
 
-/* ─── Responsive ──────────────────────────────────────── */
 @media (max-width: 768px) {
     .page-header { flex-wrap: wrap; }
     .col-freq { flex: 0 0 100%; }
@@ -461,14 +456,14 @@ body {
 </head>
 <body>
 
-<!-- ── Header ──────────────────────────────────────── -->
+<!-- ── Header ──────────────────────────────────────────── -->
 <div class="page-header">
-    <a href="mmdvm.php" class="btn-back">
-        <i class="bi bi-arrow-left"></i> Panel ADER
+    <a href="extra.php" class="btn-back">
+        <i class="bi bi-arrow-left"></i> Menu Extra
     </a>
     <div>
         <h1><i class="bi bi-sliders"></i> &nbsp;EDITOR GENERAL</h1>
-        <span class="badge-subtitle">MMDVMHost · YSF · D-STAR · NXDN</span>
+        <span class="badge-subtitle">MMDVMHost · YSF · D-STAR · NXDN · DStarGateway</span>
     </div>
 </div>
 
@@ -478,7 +473,6 @@ body {
     <!-- ── Columna izquierda: formulario ─────────────── -->
     <div class="col-lg-8">
 
-        <!-- Mensajes de resultado -->
         <?php foreach ($messages as $msg): ?>
         <div class="ader-alert ader-alert-<?= $msg['type'] ?>">
             <?= $msg['text'] ?>
@@ -493,19 +487,19 @@ body {
 
             <form method="POST" autocomplete="off">
 
-                <!-- Callsign + Id -->
+                <!-- ── Identificación ──────────────────── -->
                 <div class="section-label">Identificación de estación</div>
                 <div class="row g-3 mb-3">
                     <div class="col-md-6">
                         <label class="form-label">
                             Callsign
-                            <span class="badge-ini">MMDVMHost · YSF · DSTAR · NXDN</span>
+                            <span class="badge-ini">MMDVMHost · YSF · DSTAR · NXDN · DStarGW</span>
                         </label>
                         <input type="text" name="Callsign" class="form-control"
                                value="<?= htmlspecialchars($form_values['Callsign']) ?>"
                                placeholder="Ej: EA3EIZ"
                                maxlength="20">
-                        <div class="form-hint">[General] Callsign= en los 4 ficheros</div>
+                        <div class="form-hint">[General] en los 4 MMDVM + [Gateway] en DStarGateway</div>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">
@@ -520,7 +514,30 @@ body {
                     </div>
                 </div>
 
-                <!-- RX / TX Frecuencia -->
+                <!-- ── D-Star Gateway ──────────────────── -->
+                <div class="section-label dstar">D-Star Gateway</div>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            Username
+                            <span class="badge-ini-dstar">DStarGateway</span>
+                        </label>
+                        <input type="text" name="Username" class="form-control dstar-field"
+                               value="<?= htmlspecialchars($form_values['Username']) ?>"
+                               placeholder="Ej: EA3EIZ"
+                               maxlength="20">
+                        <div class="form-hint">[Gateway] Username= en DStarGateway.ini</div>
+                    </div>
+                    <div class="col-md-6 d-flex align-items-end pb-1">
+                        <div class="form-hint" style="color:rgba(191,0,255,.7); font-size:.7rem; line-height:1.6;">
+                            <i class="bi bi-info-circle"></i>
+                            El Callsign también se escribe en<br>
+                            DStarGateway.ini → [Gateway] Callsign=
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Frecuencias ─────────────────────── -->
                 <div class="section-label">Frecuencias</div>
                 <div class="row g-3 mb-3">
                     <div class="col-md-6 col-freq">
@@ -547,7 +564,7 @@ body {
                     </div>
                 </div>
 
-                <!-- Latitud / Longitud -->
+                <!-- ── Posición geográfica ─────────────── -->
                 <div class="section-label">Posición geográfica</div>
                 <div class="row g-3 mb-3">
                     <div class="col-md-6">
@@ -572,7 +589,7 @@ body {
                     </div>
                 </div>
 
-                <!-- Location + URL -->
+                <!-- ── Información pública ─────────────── -->
                 <div class="section-label">Información pública</div>
                 <div class="row g-3 mb-3">
                     <div class="col-md-6">
@@ -612,8 +629,135 @@ body {
         </div><!-- /ader-card -->
     </div><!-- /col-lg-8 -->
 
+    <!-- ── Columna derecha ───────────────────────────── -->
+    <div class="col-lg-4">
+
+        <!-- Estado de ficheros -->
+        <div class="ader-card">
+            <div class="ader-card-title">
+                <i class="bi bi-file-earmark-code"></i>
+                ESTADO DE FICHEROS
+            </div>
+            <table class="file-status-table">
+                <thead>
+                    <tr>
+                        <th>Fichero</th>
+                        <th>Existe</th>
+                        <th>Escritura</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($file_status as $key => $s): ?>
+                    <tr>
+                        <td style="color:var(--text-main); font-size:.72rem;
+                            <?= $key === 'DStarGateway' ? 'color:var(--violet)!important;' : '' ?>">
+                            <?= $key ?>.ini
+                        </td>
+                        <td>
+                            <?php if ($s['exists']): ?>
+                                <span class="pill pill-ok">OK</span>
+                            <?php else: ?>
+                                <span class="pill pill-danger">NO</span>
+                            <?php endif; ?>
+                        </td>
+                        <td>
+                            <?php if (!$s['exists']): ?>
+                                <span class="pill pill-danger">N/A</span>
+                            <?php elseif ($s['writable']): ?>
+                                <span class="pill pill-ok">OK</span>
+                            <?php else: ?>
+                                <span class="pill pill-warn">PERM</span>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3"
+                            style="font-size:.63rem;color:var(--text-muted);font-family:var(--font-mono);
+                                   padding-top:0;padding-bottom:.5rem;word-break:break-all;">
+                            <?= htmlspecialchars($s['path']) ?>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
                 </tbody>
             </table>
+        </div>
+
+        <!-- Mapa de campos -->
+        <div class="ader-card">
+            <div class="ader-card-title">
+                <i class="bi bi-diagram-3"></i>
+                MAPA DE CAMPOS
+            </div>
+            <div style="font-family:var(--font-mono);font-size:.72rem;line-height:1.9;">
+
+                <div style="margin-bottom:.7rem;">
+                    <span style="color:var(--cyan);">Callsign</span>
+                    <div style="color:var(--text-muted);padding-left:.8rem;">
+                        <div>↳ MMDVMHost [General]</div>
+                        <div>↳ MMDVMYSF [General]</div>
+                        <div>↳ MMDVMDSTAR [General]</div>
+                        <div>↳ MMDVMNXDN [General]</div>
+                        <div style="color:var(--violet);">↳ DStarGateway [Gateway]</div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom:.7rem;">
+                    <span style="color:var(--violet);">Username</span>
+                    <div style="color:var(--text-muted);padding-left:.8rem;">
+                        <div style="color:var(--violet);">↳ DStarGateway [Gateway]</div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom:.7rem;">
+                    <span style="color:var(--cyan);">Id</span>
+                    <div style="color:var(--text-muted);padding-left:.8rem;">
+                        <div>↳ MMDVMHost [General]</div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom:.7rem;">
+                    <span style="color:var(--cyan);">RXFrequency · TXFrequency</span>
+                    <div style="color:var(--text-muted);padding-left:.8rem;">
+                        <div>↳ MMDVMHost [Info]</div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom:.7rem;">
+                    <span style="color:var(--cyan);">Latitude · Longitude</span>
+                    <div style="color:var(--text-muted);padding-left:.8rem;">
+                        <div>↳ MMDVMHost [Info]</div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom:.7rem;">
+                    <span style="color:var(--cyan);">Location · URL</span>
+                    <div style="color:var(--text-muted);padding-left:.8rem;">
+                        <div>↳ MMDVMHost [Info]</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Nota permisos -->
+        <div class="ader-card" style="border-color:rgba(255,179,0,.3);">
+            <div class="ader-card-title" style="color:var(--amber);">
+                <i class="bi bi-shield-exclamation"></i>
+                PERMISOS NECESARIOS
+            </div>
+            <p style="font-family:var(--font-mono);font-size:.72rem;color:var(--text-muted);
+                      line-height:1.7;margin:0;">
+                El usuario <code style="color:var(--amber);">www-data</code> necesita
+                escritura en todos los INI:
+            </p>
+            <pre style="background:#0d1117;border:1px solid var(--border);border-radius:5px;
+                        padding:.6rem;font-size:.67rem;color:var(--green);margin-top:.6rem;
+                        overflow-x:auto;">sudo chown pi:www-data \
+  /home/pi/MMDVMHost/*.ini \
+  /home/pi/DStarGateway/*.ini
+sudo chmod 664 \
+  /home/pi/MMDVMHost/*.ini \
+  /home/pi/DStarGateway/*.ini</pre>
         </div>
 
     </div><!-- /col-lg-4 -->
