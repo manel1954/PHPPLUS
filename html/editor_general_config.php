@@ -201,16 +201,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_config'])) {
 // ============================================================
 //  Estado (existencia + permisos) de cada fichero
 // ============================================================
-$file_status = [];
-foreach ($INI_FILES as $key => $path) {
-    $exists   = file_exists($path);
-    $writable = $exists && is_writable($path);
-    $file_status[$key] = [
-        'path'     => $path,
-        'exists'   => $exists,
-        'writable' => $writable,
-    ];
-}
+// $file_status = [];
+// foreach ($INI_FILES as $key => $path) {
+//     $exists   = file_exists($path);
+//     $writable = $exists && is_writable($path);
+//     $file_status[$key] = [
+//         'path'     => $path,
+//         'exists'   => $exists,
+//         'writable' => $writable,
+//     ];
+// }
 ?>
 <!DOCTYPE html>
 <html lang="es">
