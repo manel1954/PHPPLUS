@@ -12,16 +12,21 @@ $INI_FILES = [
     'DStarGateway' => '/home/pi/DStarGateway/DStarGateway.ini',
 ];
 
+// NOTA: En DStarGateway.ini el Callsign aparece en [Gateway] y en [Repeater 1].
+//       El Username aparece en [IRCDDB 1], NO en [Gateway].
+//       Para campos con múltiples secciones en el mismo fichero usamos entradas
+//       con clave compuesta fichero|sección para poder repetirlas.
 $FIELD_MAP = [
     'Callsign'    => [
-        'MMDVMHost'    => ['General', 'Callsign'],
-        'MMDVMYSF'     => ['General', 'Callsign'],
-        'MMDVMDSTAR'   => ['General', 'Callsign'],
-        'MMDVMNXDN'    => ['General', 'Callsign'],
-        'DStarGateway' => ['Gateway', 'Callsign'],
+        'MMDVMHost'         => ['General',    'Callsign'],
+        'MMDVMYSF'          => ['General',    'Callsign'],
+        'MMDVMDSTAR'        => ['General',    'Callsign'],
+        'MMDVMNXDN'         => ['General',    'Callsign'],
+        'DStarGateway'      => ['Gateway',    'Callsign'],
+        'DStarGateway_rep1' => ['Repeater 1', 'Callsign'],
     ],
     'Username'    => [
-        'DStarGateway' => ['Gateway', 'Username'],
+        'DStarGateway' => ['IRCDDB 1', 'Username'],
     ],
     'Id'          => ['MMDVMHost' => ['General', 'Id']],
     'RXFrequency' => ['MMDVMHost' => ['Info',    'RXFrequency']],
@@ -118,12 +123,22 @@ function ini_write_value(string $filepath, string $section, string $key, string 
     return true;
 }
 
+/**
+ * Resuelve el path real para claves compuestas como 'DStarGateway_rep1'
+ * (usa el mismo fichero que el prefijo base 'DStarGateway').
+ */
+function resolve_path(string $file_key, array $ini_files): ?string {
+    if (isset($ini_files[$file_key])) return $ini_files[$file_key];
+    $base = strstr($file_key, '_', true); // prefijo antes del primer '_'
+    return ($base && isset($ini_files[$base])) ? $ini_files[$base] : null;
+}
+
 function read_all_values(array $field_map, array $ini_files): array {
     $values = [];
     foreach ($field_map as $field => $targets) {
         $val = null;
         foreach ($targets as $file_key => [$section, $key]) {
-            $path = $ini_files[$file_key] ?? null;
+            $path = resolve_path($file_key, $ini_files);
             if (!$path) continue;
             $v = ini_read_value($path, $section, $key);
             if ($v !== null) { $val = $v; break; }
@@ -164,8 +179,13 @@ if (($_GET['action'] ?? '') === 'diag_dstar') {
                 $info['sections'][] = $cur_section;
             }
             if (strcasecmp($cur_section, 'Gateway') === 0) {
-                if (preg_match('/^Callsign\s*=\s*(.*)/i', $t, $m))  $info['callsign_found']  = $m[1];
-                if (preg_match('/^Username\s*=\s*(.*)/i', $t, $m))  $info['username_found']  = $m[1];
+                if (preg_match('/^Callsign\s*=\s*(.*)/i', $t, $m)) $info['callsign_found'] = trim($m[1]);
+            }
+            if (strcasecmp($cur_section, 'IRCDDB 1') === 0) {
+                if (preg_match('/^Username\s*=\s*(.*)/i', $t, $m)) $info['username_found'] = trim($m[1]);
+            }
+            if (strcasecmp($cur_section, 'Repeater 1') === 0) {
+                if (preg_match('/^Callsign\s*=\s*(.*)/i', $t, $m)) $info['callsign_rep1'] = trim($m[1]);
             }
         }
         // Test de escritura real
@@ -207,7 +227,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_config'])) {
         $new_val = trim($_POST[$field] ?? '');
         $targets = $FIELD_MAP[$field] ?? [];
         foreach ($targets as $file_key => [$section, $key]) {
-            $path = $INI_FILES[$file_key] ?? null;
+            $path = resolve_path($file_key, $INI_FILES);
             if (!$path) continue;
             $result = ini_write_value($path, $section, $key, $new_val);
             if ($result === true) {
@@ -580,8 +600,9 @@ function runDiag() {
                 out += `⚠️ No se encontraron secciones (¿fichero vacío o ilegible?)\n\n`;
             }
 
-            out += `🔍 [Gateway] Callsign = ${d.callsign_found !== null ? d.callsign_found : '⚠️ NO ENCONTRADO'}\n`;
-            out += `🔍 [Gateway] Username = ${d.username_found !== null ? d.username_found : '⚠️ NO ENCONTRADO'}\n\n`;
+            out += `🔍 [Gateway]   Callsign = ${d.callsign_found !== null ? d.callsign_found : '⚠️ NO ENCONTRADO'}\n`;
+            out += `🔍 [IRCDDB 1] Username = ${d.username_found !== null ? d.username_found : '⚠️ NO ENCONTRADO'}\n`;
+            out += `🔍 [Repeater 1] Callsign = ${d.callsign_rep1 !== undefined ? d.callsign_rep1 : '⚠️ NO ENCONTRADO'}\n\n`;
 
             out += `✏️ Test escritura: ${d.write_test || '—'}\n\n`;
 
