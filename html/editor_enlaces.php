@@ -2,7 +2,7 @@
 // editor_enlaces.php  –  Editor CRUD con posicionado fila/columna
 // Mismo directorio que enlaces.json y mis_enlaces.php
 
-define('JSON_FILE', __DIR__ . '/enlaces.json');
+define('JSON_FILE', '/home/pi/.local/enlaces.json');
 
 function leerEnlaces(): array {
     if (!file_exists(JSON_FILE)) file_put_contents(JSON_FILE, '[]');

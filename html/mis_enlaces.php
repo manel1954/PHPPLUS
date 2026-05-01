@@ -2,7 +2,7 @@
 // mis_enlaces.php  –  Panel de enlaces rápidos
 // Posicionado explícito en CSS Grid usando fila/columna del JSON
 
-define('JSON_FILE', __DIR__ . '/enlaces.json');
+define('JSON_FILE', '/home/pi/.local/enlaces.json');
 
 $enlaces = [];
 if (file_exists(JSON_FILE)) {
