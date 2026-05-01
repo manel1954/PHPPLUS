@@ -179,7 +179,7 @@
             </div>
         </div>
 
-        <!-- 🎛️ SVXLINK -->
+        <!-- SVXLINK -->
         <div class="col-12 col-sm-6 col-lg-3">
             <div class="card bg-secondary border-0 h-100">
                 <div class="card-body d-flex flex-column">
@@ -196,7 +196,7 @@
             </div>
         </div>
 
-        <!-- 🔷 BLUETOOTH -->
+        <!-- BLUETOOTH -->
         <div class="col-12 col-sm-6 col-lg-3">
             <div class="card bg-secondary border-0 h-100">
                 <div class="card-body d-flex flex-column">
@@ -213,7 +213,7 @@
             </div>
         </div>
 
-        <!-- 🚀 PROGRAMADOR ESP32 -->
+        <!-- PROGRAMADOR ESP32 -->
         <div class="col-12 col-sm-6 col-lg-3">
             <div class="card bg-secondary border-0 h-100">
                 <div class="card-body d-flex flex-column">
@@ -230,25 +230,22 @@
             </div>
         </div>
 
-
-<!-- EDITOR GENERAL -->
-<div class="extra-card">
-    <div class="extra-card-header">
-        <i class="bi bi-sliders" style="color:var(--cyan);"></i>
-        EDITOR GENERAL
-    </div>
-    <div class="extra-card-desc">
-        Configuración global · Callsign · Id · Frecuencias · Posición · URL
-    </div>
-    <a href="editor_general_config.php" target="_blank" class="btn-extra-open">
-        <i class="bi bi-box-arrow-up-right"></i> Abrir
-    </a>
-</div>
-
-
-
-
-
+        <!-- EDITOR GENERAL -->
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card bg-secondary border-0 h-100">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">
+                        <i class="bi bi-sliders me-2" style="color:#00e5ff;"></i>EDITOR GENERAL
+                    </h5>
+                    <p class="card-text text-white-50 small flex-grow-1">
+                        Configuración global · Callsign · Id · Frecuencias · Posición · URL
+                    </p>
+                    <a href="/editor_general_config.php" target="_blank" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
+                        <i class="bi bi-box-arrow-up-right me-1"></i>Abrir
+                    </a>
+                </div>
+            </div>
+        </div>
 
     </div>
 </div>
