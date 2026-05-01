@@ -613,7 +613,7 @@ body {
     </div><!-- /col-lg-8 -->
 
     <!-- ── Columna derecha: estado de ficheros ─────────── -->
-    <div class="col-lg-4">
+    <!-- <div class="col-lg-4">
 
         <div class="ader-card">
             <div class="ader-card-title">
@@ -656,7 +656,7 @@ body {
                                    padding-top:0;padding-bottom:.55rem;">
                             <?= htmlspecialchars($s['path']) ?>
                         </td>
-                    </tr>
+                    </tr> -->
                 <?php endforeach; ?>
                 </tbody>
             </table>
