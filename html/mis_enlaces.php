@@ -227,7 +227,9 @@ endfor;
 </div>
 
 <footer>
-    <button class="btn-salir" onclick="window.close()">✕ &nbsp;CERRAR</button>
+
+<a href="editor_general_config.php" class="btn-header red"> 📄 editor general </a>
+    <!-- <button class="btn-salir" onclick="window.close()">✕ &nbsp;CERRAR</button> -->
 </footer>
 
 <script>
