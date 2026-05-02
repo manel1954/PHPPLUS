@@ -169,6 +169,7 @@ foreach ($enlaces as $e) {
             border: none; cursor: pointer;
             background: #c0392b; color: white;
             transition: background .2s, transform .1s;
+            text-decoration: none;
         }
         .btn-salir:hover { background: #27ae60; transform: scale(1.04); }
 
