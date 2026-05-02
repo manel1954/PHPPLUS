@@ -121,7 +121,12 @@ header{
 }
 .badge{font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;color:var(--cyan);background:rgba(0,229,255,.08);border:1px solid rgba(0,229,255,.28);border-radius:3px;padding:3px 9px;letter-spacing:2px}
 header h1{font-family:'Orbitron',sans-serif;font-size:16px;font-weight:900;letter-spacing:5px;color:#fff}
+
 .a-volver{margin-left:auto;font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;padding:5px 13px;border-radius:var(--r);border:1px solid #444;background:#252525;color:#888;text-decoration:none;transition:all .2s}
+
+.a-volver-ader{margin-left:auto;font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;padding:5px 13px;border-radius:var(--r);border:1px solid #444;background:#f00;color:#888;text-decoration:none;transition:all .2s}
+
+
 .a-volver:hover{background:#333;color:#fff;border-color:#555}
 
 /* LAYOUT PRINCIPAL */
@@ -233,9 +238,9 @@ input[type=color]{width:36px;height:32px;border:1px solid #444;border-radius:3px
 <header>
     <div class="badge">EDITOR</div>
     <h1>ENLACES</h1>
-    <a href="mmdvm.php" class="a-volver" target="_blank">↗ PANEL ADER</a>
+    
     <a href="mis_enlaces.php" class="a-volver" target="_blank">↗ VER PANEL</a>
-
+ <a href="mmdvm.php" class="a-volver-ader" target="_blank">↗ PANEL ADER</a>
     
 </header>
 
