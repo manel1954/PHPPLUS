@@ -140,11 +140,12 @@ foreach ($enlaces as $e) {
         footer { margin-top: 24px; display: flex; justify-content: center; }
         .btn-salir {
             font-family: 'Orbitron', sans-serif;
-            font-size: 11px; letter-spacing: 13px;
+            font-size: 11px; letter-spacing: 3px;
             padding: 9px 40px; border-radius: var(--radius);
             border: none; cursor: pointer;
             background: #c0392b; color: white;
             transition: background .2s, transform .1s;
+            text-decoration: none;
         }
         .btn-salir:hover { background: #27ae60; transform: scale(1.04); }
 
