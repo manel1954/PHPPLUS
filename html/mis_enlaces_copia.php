@@ -22,7 +22,7 @@ foreach ($enlaces as $e) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MIS ENLACES · EA3EIZ</title>
+    <title>MIS ENLACES</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -164,7 +164,7 @@ foreach ($enlaces as $e) {
 <header>
     <div class="logo-badge">PANEL</div>
     <h1>MIS ENLACES</h1>
-    <span class="callsign">EA3EIZ</span>
+    <span class="callsign"></span>
     <a href="editor_enlaces.php" class="btn-editor">✏ EDITOR</a>
 </header>
 
