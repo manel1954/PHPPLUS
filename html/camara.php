@@ -7,7 +7,7 @@ define('HLS_URL',    '/hls');
 define('PID_FILE',   '/tmp/camara_ffmpeg.pid');
 define('LOG_FILE',   '/tmp/camara_ffmpeg.log');
 define('FFMPEG',     '/usr/bin/ffmpeg');
-define('CAM_INI',    '/home/pi/.local/camara.ini');
+// define('CAM_INI',    '/home/pi/.local/camara.ini');
 set_time_limit(60);
 
 // Leer desde camara.ini si viene ?cam=CLAVE
