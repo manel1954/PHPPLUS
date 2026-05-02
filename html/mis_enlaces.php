@@ -197,8 +197,8 @@ foreach ($enlaces as $e) {
 // Renderizar: primero los botones reales con posición explícita
 foreach ($enlaces as $idx => $e):
     $rawUrl  = $e['url'] ?? '';
-    $esCmd   = (strpos($rawUrl, 'cmd:') === 0);
-    $cmdText = $esCmd ? htmlspecialchars(trim(substr($rawUrl, 4))) : '';
+    $esCmd   = (strpos($rawUrl, 'cmd:') === 0) || (strpos($rawUrl, ' ') !== false);
+    $cmdText = $esCmd ? htmlspecialchars(strpos($rawUrl,'cmd:')===0 ? trim(substr($rawUrl,4)) : $rawUrl) : '';
     $nombre  = htmlspecialchars($e['nombre'] ?? '');
     $url     = htmlspecialchars($rawUrl);
     $bg      = htmlspecialchars($e['bg']     ?? '#333');
@@ -214,7 +214,7 @@ foreach ($enlaces as $idx => $e):
             <button class="btn-link btn-cmd"
                     style="background:<?= $bg ?>;color:<?= $fg ?>;"
                     title="Ejecutar: <?= $cmdText ?>"
-                    onclick="ejecutarCmd(this, <?= json_encode(trim(substr($rawUrl, 4))) ?>)">
+                    onclick="ejecutarCmd(this, <?= json_encode(strpos($rawUrl,'cmd:')===0 ? trim(substr($rawUrl,4)) : $rawUrl) ?>)">
                 <?= $nombre ?>
             </button>
         <?php elseif ($local || $rawUrl === ''): ?>
