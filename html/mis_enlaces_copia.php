@@ -107,7 +107,7 @@ foreach ($enlaces as $e) {
             display: block;
             padding: 7px 10px;
             border: none; border-radius: var(--radius);
-            font-family: 'Share Tech Mono', monospace; font-size: 11.5px;
+            font-family: 'Share Tech Mono', monospace; font-size: 14px;
             text-align: center; text-decoration: none;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
             cursor: pointer;
@@ -130,17 +130,6 @@ foreach ($enlaces as $e) {
             font-size: 9px; opacity: .7;
         }
 
-        /* Botón de comando local ejecutable */
-        .btn-cmd { cursor: pointer; border: none; }
-        .btn-cmd::after {
-            content: '⚡ cmd';
-            position: absolute; right: 6px; top: 50%;
-            transform: translateY(-50%);
-            font-size: 9px; opacity: .7;
-        }
-        .btn-cmd.running { opacity: .6; cursor: wait; }
-        .btn-cmd.ok-flash { filter: brightness(1.6); }
-
         /* Celda vacía – ocupa el espacio pero no se ve */
         .cell-empty { visibility: hidden; }
 
@@ -156,6 +145,7 @@ foreach ($enlaces as $e) {
             border: none; cursor: pointer;
             background: #c0392b; color: white;
             transition: background .2s, transform .1s;
+            text-decoration: none;
         }
         .btn-salir:hover { background: #27ae60; transform: scale(1.04); }
 
@@ -196,28 +186,18 @@ foreach ($enlaces as $e) {
 
 // Renderizar: primero los botones reales con posición explícita
 foreach ($enlaces as $idx => $e):
-    $rawUrl  = $e['url'] ?? '';
-    $esCmd   = (strpos($rawUrl, 'cmd:') === 0);
-    $cmdText = $esCmd ? htmlspecialchars(trim(substr($rawUrl, 4))) : '';
-    $nombre  = htmlspecialchars($e['nombre'] ?? '');
-    $url     = htmlspecialchars($rawUrl);
-    $bg      = htmlspecialchars($e['bg']     ?? '#333');
-    $fg      = htmlspecialchars($e['fg']     ?? '#fff');
-    $local   = !empty($e['local']);
-    $fila    = (int)($e['fila']    ?? 1);
-    $col     = (int)($e['columna'] ?? 1);
-    $key     = strtolower($e['nombre'] ?? '');
-    $style   = "grid-row:$fila;grid-column:$col;";
+    $nombre = htmlspecialchars($e['nombre'] ?? '');
+    $url    = htmlspecialchars($e['url']    ?? '');
+    $bg     = htmlspecialchars($e['bg']     ?? '#333');
+    $fg     = htmlspecialchars($e['fg']     ?? '#fff');
+    $local  = !empty($e['local']);
+    $fila   = (int)($e['fila']    ?? 1);
+    $col    = (int)($e['columna'] ?? 1);
+    $key    = strtolower($e['nombre'] ?? '');
+    $style  = "grid-row:$fila;grid-column:$col;";
 ?>
     <div class="btn-wrap" data-nombre="<?= htmlspecialchars($key) ?>" style="<?= $style ?>">
-        <?php if ($esCmd): ?>
-            <button class="btn-link btn-cmd"
-                    style="background:<?= $bg ?>;color:<?= $fg ?>;"
-                    title="Ejecutar: <?= $cmdText ?>"
-                    onclick="ejecutarCmd(this, <?= json_encode(trim(substr($rawUrl, 4))) ?>)">
-                <?= $nombre ?>
-            </button>
-        <?php elseif ($local || $rawUrl === ''): ?>
+        <?php if ($local || $url === ''): ?>
             <span class="btn-link btn-local"
                   style="background:<?= $bg ?>;color:<?= $fg ?>;"
                   title="Acción local – no disponible en web">
@@ -248,7 +228,12 @@ endfor;
 </div>
 
 <footer>
-    <button class="btn-salir" onclick="window.close()">✕ &nbsp;CERRAR</button>
+
+
+    <a href="mmdvm.php" class="btn-salir btn-header red">✕ &nbsp;CERRAR</a>
+
+
+
 </footer>
 
 <script>
@@ -271,28 +256,6 @@ endfor;
     }
 
     actualizar();
-
-    async function ejecutarCmd(btn, cmd) {
-        btn.classList.add('running');
-        try {
-            const r = await fetch('ejecutar.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ cmd })
-            });
-            const d = await r.json();
-            btn.classList.remove('running');
-            if (d.ok) {
-                btn.classList.add('ok-flash');
-                setTimeout(() => btn.classList.remove('ok-flash'), 800);
-            } else {
-                alert('Error: ' + d.msg);
-            }
-        } catch(e) {
-            btn.classList.remove('running');
-            alert('Error de conexión');
-        }
-    }
 </script>
 </body>
 </html>
