@@ -139,7 +139,7 @@ foreach ($enlaces as $e) {
         /* ── Footer ── */
         footer { margin-top: 24px; display: flex; justify-content: center; }
         .btn-salir {
-            font-family: 'Orbitron', sans-serif;
+            /* font-family: 'Orbitron', sans-serif; */
             font-size: 11px; letter-spacing: 3px;
             padding: 9px 40px; border-radius: var(--radius);
             border: none; cursor: pointer;
