@@ -147,6 +147,19 @@ foreach ($enlaces as $e) {
         /* Ocultar al filtrar */
         .btn-wrap.hidden .btn-link { opacity: .1; pointer-events: none; }
 
+        /* ── Toast ── */
+        #toast {
+            position: fixed; bottom: 22px; right: 22px; z-index: 9999;
+            background: #1e1e1e; border: 1px solid #444; border-radius: 5px;
+            font-family: 'Share Tech Mono', monospace; font-size: 12px;
+            padding: 10px 18px; color: #ccc; max-width: 380px;
+            transform: translateY(12px); opacity: 0;
+            transition: all .3s; pointer-events: none; line-height: 1.5;
+        }
+        #toast.show { transform: translateY(0); opacity: 1; }
+        #toast.ok   { border-color: #43a047; color: #81c784; }
+        #toast.err  { border-color: #e53935; color: #ef9a9a; }
+
         /* ── Footer ── */
         footer { margin-top: 24px; display: flex; justify-content: center; }
         .btn-salir {
@@ -272,27 +285,43 @@ endfor;
 
     actualizar();
 
+    let toastTimer;
+    function showToast(msg, type) {
+        const el = document.getElementById('toast');
+        el.innerHTML = msg;
+        el.className = 'show ' + (type || '');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => el.className = '', 4000);
+    }
+
     async function ejecutarCmd(btn, cmd) {
         btn.classList.add('running');
+        showToast('⏳ Lanzando: <b>' + cmd.substring(0,60) + '</b>…', '');
         try {
             const r = await fetch('ejecutar.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ cmd })
             });
+            if (!r.ok) throw new Error('HTTP ' + r.status);
             const d = await r.json();
             btn.classList.remove('running');
             if (d.ok) {
                 btn.classList.add('ok-flash');
                 setTimeout(() => btn.classList.remove('ok-flash'), 800);
+                const logInfo = d.log && d.log !== '(sin salida inmediata — proceso en marcha)'
+                    ? '<br><small style="opacity:.7">' + d.log.substring(0,120) + '</small>'
+                    : '';
+                showToast('✅ ' + d.msg + logInfo, 'ok');
             } else {
-                alert('Error: ' + d.msg);
+                showToast('❌ Error: ' + d.msg, 'err');
             }
         } catch(e) {
             btn.classList.remove('running');
-            alert('Error de conexión');
+            showToast('❌ No se pudo conectar con ejecutar.php<br><small>' + e.message + '</small>', 'err');
         }
     }
 </script>
+<div id="toast"></div>
 </body>
 </html>
