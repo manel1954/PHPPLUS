@@ -229,7 +229,8 @@ endfor;
 <footer>
 
 
-    <a href="mmdvm.php" class="btn-salir btn-header red">✕ &nbsp;CERRAR</a>
+    <button class="btn-salir" <a href="mmdvm.php" class="btn-header red"></a>✕ &nbsp;CERRAR</button>
+
 
 </footer>
 
