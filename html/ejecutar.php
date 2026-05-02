@@ -42,9 +42,9 @@ foreach ($cmdsGraficos as $cg) {
 // Construir comando completo
 if ($necesitaDisplay) {
     // DISPLAY=:0 para que abra en la pantalla local de la Pi
-    $cmdFull = 'DISPLAY=:0 nohup ' . $cmd . ' > /tmp/cmd_last.log 2>&1 &';
+    $cmdFull = 'DISPLAY=:0 PATH=/usr/bin:/usr/local/bin:/bin nohup ' . $cmd . ' > /tmp/cmd_last.log 2>&1 &';
 } else {
-    $cmdFull = 'nohup ' . $cmd . ' > /tmp/cmd_last.log 2>&1 &';
+    $cmdFull = 'PATH=/usr/bin:/usr/local/bin:/bin nohup ' . $cmd . ' > /tmp/cmd_last.log 2>&1 &';
 }
 
 // Ejecutar
