@@ -107,7 +107,7 @@ foreach ($enlaces as $e) {
             display: block;
             padding: 7px 10px;
             border: none; border-radius: var(--radius);
-            font-family: 'Share Tech Mono', monospace; font-size: 11.5px;
+            font-family: 'Share Tech Mono', monospace; font-size: 14px;
             text-align: center; text-decoration: none;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
             cursor: pointer;
