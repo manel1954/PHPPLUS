@@ -115,9 +115,7 @@ frbm=`sed -n '13p'  $usuario/MMDVMHost/MMDVMHost.ini`
 frplus=`sed -n '13p'  $usuario/MMDVMHost/MMDVMHost.ini`
 sudo wget -post-data http://associacioader.com/prueba1.php?callBM=$bm'&'callPLUS=$plus'&'masterBM=$masterbm'&'masterPLUS=$masterplus'&'radio=$masterradio'&'version=$version'&'ESPECIAL=$masterespecial'&'YSFGateway=$masterYSFGateway                  
 
-
+sudo rm -R /home/pi/associacioader.com
 sudo rm -R /home/pi/A108/associacioader.com
-sudo rm -R /home/pi/PHPPLUS/associacioader.com
-sudo rm /home/pi/PHPPLUS/Desktop/st-data
 sudo rm /home/pi/Desktop/st-data
  
