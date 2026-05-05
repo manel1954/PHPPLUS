@@ -232,10 +232,19 @@ if ($action === 'backup-configs') {
     '/usr/local/etc/svxlink/svxlink.d/ModuleEchoLink.conf',
     '/usr/local/etc/svxlink/svxlink.conf',
     '/home/pi/.local/enlaces.json',
-    '/home/pi/radiosonde_auto_rx/auto_rx/logs/*.*',
+    // '/home/pi/radiosonde_auto_rx/auto_rx/logs/*.*',
 ];
     $fileList = implode(' ', array_map('escapeshellarg', $files));
     shell_exec("zip -j ".escapeshellarg($zipPath)." {$fileList} 2>/dev/null");
+
+
+$fileList = implode(' ', array_map('escapeshellarg', $files));
+shell_exec("zip -j ".escapeshellarg($zipPath)." {$fileList} 2>/dev/null");
+// Añadir carpeta logs completa con estructura
+shell_exec("cd /home/pi/radiosonde_auto_rx/auto_rx && zip -r ".escapeshellarg($zipPath)." logs/ 2>/dev/null");
+
+
+
     if (file_exists($zipPath)) { header('Content-Type: application/zip'); header('Content-Disposition: attachment; filename="'.$zipName.'"'); header('Content-Length: '.filesize($zipPath)); header('Pragma: no-cache'); header('Expires: 0'); readfile($zipPath); unlink($zipPath); } else { header('Content-Type: text/plain'); echo 'Error: No se pudo crear el ZIP.'; }
     exit;
 }
