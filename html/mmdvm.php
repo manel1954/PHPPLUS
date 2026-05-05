@@ -238,6 +238,7 @@ if ($action === 'backup-configs') {
     shell_exec("zip -j ".escapeshellarg($zipPath)." {$fileList} 2>/dev/null");
 
 
+
 $fileList = implode(' ', array_map('escapeshellarg', $files));
 shell_exec("zip -j ".escapeshellarg($zipPath)." {$fileList} 2>/dev/null");
 // Añadir carpeta logs completa con estructura
