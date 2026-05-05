@@ -215,38 +215,40 @@ if ($action === 'display-restart') { shell_exec('sudo systemctl daemon-reload 2>
 if ($action === 'install-display') { $output = shell_exec('sudo /home/pi/A108/instalar_displaydriver.sh 2>&1'); header('Content-Type: application/json'); echo json_encode(['ok'=>true,'output'=>htmlspecialchars($output??'')]); exit; }
 
 if ($action === 'backup-configs') {
-    $zipName = 'Copia_PHPPLUS.zip'; $zipPath = '/tmp/'.$zipName;
+    $zipName = 'Copia_PHPPLUS.zip';
+    $zipPath = '/tmp/'.$zipName;
     $files = [
-    '/home/pi/MMDVMHost/MMDVMHost.ini',
-    '/home/pi/MMDVMHost/MMDVMYSF.ini',
-    '/home/pi/MMDVMHost/MMDVMDSTAR.ini',
-    '/home/pi/MMDVMHost/MMDVMNXDN.ini',
-    '/home/pi/Display-Driver/DisplayDriver.ini',
-    '/home/pi/YSFClients/YSFGateway/YSFGateway.ini',
-    '/home/pi/DMRGateway/DMRGateway.ini',
-    '/home/pi/DStarGateway/DStarGateway.ini',
-    '/home/pi/NXDNClients/NXDNGateway/NXDNGateway.ini',
-    '/home/pi/radiosonde_auto_rx/auto_rx/station.cfg',
-    '/etc/rbfeeder.ini',
-    '/etc/fr24feed.ini',
-    '/usr/local/etc/svxlink/svxlink.d/ModuleEchoLink.conf',
-    '/usr/local/etc/svxlink/svxlink.conf',
-    '/home/pi/.local/enlaces.json',
-    // '/home/pi/radiosonde_auto_rx/auto_rx/logs/*.*',
-];
+        '/home/pi/MMDVMHost/MMDVMHost.ini',
+        '/home/pi/MMDVMHost/MMDVMYSF.ini',
+        '/home/pi/MMDVMHost/MMDVMDSTAR.ini',
+        '/home/pi/MMDVMHost/MMDVMNXDN.ini',
+        '/home/pi/Display-Driver/DisplayDriver.ini',
+        '/home/pi/YSFClients/YSFGateway/YSFGateway.ini',
+        '/home/pi/DMRGateway/DMRGateway.ini',
+        '/home/pi/DStarGateway/DStarGateway.ini',
+        '/home/pi/NXDNClients/NXDNGateway/NXDNGateway.ini',
+        '/home/pi/radiosonde_auto_rx/auto_rx/station.cfg',
+        '/etc/rbfeeder.ini',
+        '/etc/fr24feed.ini',
+        '/usr/local/etc/svxlink/svxlink.d/ModuleEchoLink.conf',
+        '/usr/local/etc/svxlink/svxlink.conf',
+        '/home/pi/.local/enlaces.json',
+    ];
     $fileList = implode(' ', array_map('escapeshellarg', $files));
     shell_exec("zip -j ".escapeshellarg($zipPath)." {$fileList} 2>/dev/null");
-
-
-
-$fileList = implode(' ', array_map('escapeshellarg', $files));
-shell_exec("zip -j ".escapeshellarg($zipPath)." {$fileList} 2>/dev/null");
-// Añadir carpeta logs completa con estructura
-shell_exec("cd /home/pi/radiosonde_auto_rx/auto_rx && zip -r ".escapeshellarg($zipPath)." logs/ 2>/dev/null");
-
-
-
-    if (file_exists($zipPath)) { header('Content-Type: application/zip'); header('Content-Disposition: attachment; filename="'.$zipName.'"'); header('Content-Length: '.filesize($zipPath)); header('Pragma: no-cache'); header('Expires: 0'); readfile($zipPath); unlink($zipPath); } else { header('Content-Type: text/plain'); echo 'Error: No se pudo crear el ZIP.'; }
+    shell_exec("cd /home/pi/radiosonde_auto_rx/auto_rx && zip -r ".escapeshellarg($zipPath)." logs/ 2>/dev/null");
+    if (file_exists($zipPath)) {
+        header('Content-Type: application/zip');
+        header('Content-Disposition: attachment; filename="'.$zipName.'"');
+        header('Content-Length: '.filesize($zipPath));
+        header('Pragma: no-cache');
+        header('Expires: 0');
+        readfile($zipPath);
+        unlink($zipPath);
+    } else {
+        header('Content-Type: text/plain');
+        echo 'Error: No se pudo crear el ZIP.';
+    }
     exit;
 }
 
