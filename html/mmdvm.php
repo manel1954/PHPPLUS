@@ -234,6 +234,7 @@ if ($action === 'backup-configs') {
     '/home/pi/.local/enlaces.json',
     '/home/pi/AMBE_SERVER/AMBEserver.ini',
     '/home/pi/dump1090-fa/dump1090.args',
+    '/home/pi/.local/bluetooth.sh',
 
 ];
     $fileList = implode(' ', array_map('escapeshellarg', $files));
@@ -266,6 +267,8 @@ if ($action === 'restore-configs') {
     'enlaces.json'         => '/home/pi/.local/enlaces.json',
     'ambeserver.ini'       => '/home/pi/AMBE_SERVER/AMBEserver.ini',
     'dump1090.args'        => '/home/pi/dump1090-fa/dump1090.args',
+    'bluetooth.sh'         => '/home/pi/.local/bluetooth.sh',
+    
 ];
     $zip = new ZipArchive(); $openResult = $zip->open($tmpZip);
     if ($openResult !== true) { ob_end_clean(); header('Content-Type: application/json'); echo json_encode(['ok'=>false,'msg'=>'No se pudo abrir el ZIP. Código: '.$openResult]); exit; }
