@@ -265,7 +265,7 @@ if ($action === 'restore-configs') {
     'ModuleEchoLink.conf'  => '/usr/local/etc/svxlink/svxlink.d/ModuleEchoLink.conf',
     'svxlink.conf'         => '/usr/local/etc/svxlink/svxlink.conf',
     'enlaces.json'         => '/home/pi/.local/enlaces.json',
-    'ambeserver.ini'       => '/home/pi/AMBE_SERVER/AMBEserver.ini',
+    'AMBEserver.ini'       => '/home/pi/AMBE_SERVER/AMBEserver.ini',
     'dump1090.args'        => '/home/pi/dump1090-fa/dump1090.args',
     'bluetooth.sh'         => '/home/pi/.local/bluetooth.sh',
     
