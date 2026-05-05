@@ -235,10 +235,10 @@ if ($action === 'backup-configs') {
     '/home/pi/AMBE_SERVER/AMBEserver.ini',
     '/home/pi/dump1090-fa/dump1090.args',
     '/home/pi/.local/bluetooth.sh',
-
 ];
     $fileList = implode(' ', array_map('escapeshellarg', $files));
     shell_exec("zip -j ".escapeshellarg($zipPath)." {$fileList} 2>/dev/null");
+    shell_exec("cd /home/pi/radiosonde_auto_rx/auto_rx && zip -r ".escapeshellarg($zipPath)." logs/ 2>/dev/null");
     if (file_exists($zipPath)) { header('Content-Type: application/zip'); header('Content-Disposition: attachment; filename="'.$zipName.'"'); header('Content-Length: '.filesize($zipPath)); header('Pragma: no-cache'); header('Expires: 0'); readfile($zipPath); unlink($zipPath); } else { header('Content-Type: text/plain'); echo 'Error: No se pudo crear el ZIP.'; }
     exit;
 }
@@ -249,7 +249,7 @@ if ($action === 'restore-configs') {
     if (!$uploadOk) { $errCode = $_FILES['zipfile']['error']??-1; ob_end_clean(); header('Content-Type: application/json'); echo json_encode(['ok'=>false,'msg'=>'No se recibió el fichero. Error: '.$errCode]); exit; }
     $tmpZip = $_FILES['zipfile']['tmp_name'];
     if (!file_exists($tmpZip)||filesize($tmpZip)===0) { ob_end_clean(); header('Content-Type: application/json'); echo json_encode(['ok'=>false,'msg'=>'Fichero vacío.']); exit; }
-   $destMap = [
+    $destMap = [
     'MMDVMHost.ini'        => '/home/pi/MMDVMHost/MMDVMHost.ini',
     'MMDVMYSF.ini'         => '/home/pi/MMDVMHost/MMDVMYSF.ini',
     'DisplayDriver.ini'    => '/home/pi/Display-Driver/DisplayDriver.ini',
@@ -268,12 +268,31 @@ if ($action === 'restore-configs') {
     'AMBEserver.ini'       => '/home/pi/AMBE_SERVER/AMBEserver.ini',
     'dump1090.args'        => '/home/pi/dump1090-fa/dump1090.args',
     'bluetooth.sh'         => '/home/pi/.local/bluetooth.sh',
-    
 ];
     $zip = new ZipArchive(); $openResult = $zip->open($tmpZip);
     if ($openResult !== true) { ob_end_clean(); header('Content-Type: application/json'); echo json_encode(['ok'=>false,'msg'=>'No se pudo abrir el ZIP. Código: '.$openResult]); exit; }
     $restored = []; $errors = [];
-    for ($i=0;$i<$zip->numFiles;$i++) { $name=basename($zip->getNameIndex($i)); if(isset($destMap[$name])){$result=file_put_contents($destMap[$name],$zip->getFromIndex($i));if($result!==false)$restored[]=$name;else $errors[]=$name;} }
+    for ($i=0;$i<$zip->numFiles;$i++) {
+        $entry = $zip->getNameIndex($i);
+        $name = basename($entry);
+        if (isset($destMap[$name])) {
+            $result = file_put_contents($destMap[$name], $zip->getFromIndex($i));
+            if ($result !== false) { $restored[] = $name; chmod($destMap[$name], 0664); }
+            else $errors[] = $name;
+        }
+    }
+    // Restaurar carpeta logs/ con estructura completa
+    $logsBase = '/home/pi/radiosonde_auto_rx/auto_rx/';
+    for ($i=0;$i<$zip->numFiles;$i++) {
+        $entry = $zip->getNameIndex($i);
+        if (strpos($entry, 'logs/') === 0 && substr($entry, -1) !== '/') {
+            $destFile = $logsBase . $entry;
+            $destDir  = dirname($destFile);
+            if (!is_dir($destDir)) mkdir($destDir, 0755, true);
+            file_put_contents($destFile, $zip->getFromIndex($i));
+            chmod($destFile, 0664);
+        }
+    }
     $zip->close(); ob_end_clean();
     if (empty($restored)) { header('Content-Type: application/json'); echo json_encode(['ok'=>false,'msg'=>'No se encontraron ficheros compatibles.']); exit; }
     $msg = 'Restaurados: '.implode(', ',$restored); if($errors)$msg.=' | Errores: '.implode(', ',$errors);
