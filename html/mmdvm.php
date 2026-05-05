@@ -928,7 +928,11 @@ button.btn-header { font-family: var(--font-mono); }
       <div class="nx-vu" id="dstarVuLeft"></div><div class="nx-vu right" id="dstarVuRight"></div>
       <div class="nx-center" id="dstarNxCenter"><div class="nx-clock" id="dstarNxClock" style="color:#00e5ff;">00:00:00</div><div class="nx-date" id="dstarNxDate" style="color:#009090;">—</div></div>
       <div class="nx-txbar" id="dstarTxBar"></div>
-      <div class="nx-botbar dstar-bar"><span style="color:#006070;font-family:var(--font-mono);font-size:.65rem;">D-STAR · DIGITAL VOICE</span><span style="color:#006070;font-family:var(--font-mono);font-size:.65rem;">XRF266 B</span><span class="nx-source" id="dstarSource"></span></div>
+      <div class="nx-botbar dstar-bar">
+        <span style="color:#006070;font-family:var(--font-mono);font-size:.65rem;">D-STAR · DIGITAL VOICE</span>
+        <span style="color:#006070;font-family:var(--font-mono);font-size:.65rem;"><?php $dgwIni=parseMMDVMIni('/home/pi/DStarGateway/DStarGateway.ini');$dstarRef=trim($dgwIni['Repeater1']['Reflector']??'—');echo htmlspecialchars($dstarRef); ?></span>
+        <span class="nx-source" id="dstarSource"></span>
+      </div>
     </div>
   </div>
   <div id="nxdnDisplayPanel">
@@ -939,10 +943,17 @@ button.btn-header { font-family: var(--font-mono); }
       <div class="nx-vu" id="nxdnVuLeft"></div><div class="nx-vu right" id="nxdnVuRight"></div>
       <div class="nx-center" id="nxdnNxCenter"><div class="nx-clock" id="nxdnNxClock" style="color:#ffd700;">00:00:00</div><div class="nx-date" id="nxdnNxDate" style="color:#b8a000;">—</div></div>
       <div class="nx-txbar" id="nxdnTxBar"></div>
-      <div class="nx-botbar nxdn-bar"><span style="color:#707000;font-family:var(--font-mono);font-size:.65rem;">NXDN · DIGITAL VOICE</span><span style="color:#707000;font-family:var(--font-mono);font-size:.65rem;">NXDN REF 21465</span><span class="nx-source" id="nxdnSource"></span></div>
+      <div class="nx-botbar nxdn-bar">
+        <span style="color:#707000;font-family:var(--font-mono);font-size:.65rem;">NXDN · DIGITAL VOICE</span>
+        <span style="color:#707000;font-family:var(--font-mono);font-size:.65rem;"><?php $nxdnGwIni=parseMMDVMIni('/home/pi/NXDNClients/NXDNGateway/NXDNGateway.ini');$nxdnRef=trim($nxdnGwIni['Network']['Static']??'—');echo 'NXDN REF '.htmlspecialchars($nxdnRef); ?></span>
+        <span class="nx-source" id="nxdnSource"></span>
+      </div>
     </div>
   </div>
 </div>
+
+
+
 
 
 <!-- ── Fila 1: Últimos DMR (izq) + Últimos C4FM (dcha) ── -->
