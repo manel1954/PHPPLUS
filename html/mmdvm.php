@@ -329,7 +329,7 @@ if ($action === 'restore-configs') {
     if (empty($restored)) { header('Content-Type: application/json'); echo json_encode(['ok'=>false,'msg'=>'No se encontraron ficheros compatibles.']); exit; }
     $msg = 'Restaurados: '.implode(', ',$restored); if($errors)$msg.=' | Errores: '.implode(', ',$errors);
     header('Content-Type: application/json'); echo json_encode(['ok'=>true,'msg'=>$msg]); exit;
-}
+
 
 if ($action === 'logs') {
     $lines = intval($_GET['lines']??15);
