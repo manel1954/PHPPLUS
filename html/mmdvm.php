@@ -231,6 +231,8 @@ if ($action === 'backup-configs') {
     '/etc/fr24feed.ini',
     '/usr/local/etc/svxlink/svxlink.d/ModuleEchoLink.conf',
     '/usr/local/etc/svxlink/svxlink.conf',
+    '/home/pi/.local/enlaces.json',
+    '/home/pi/radiosonde_auto_rx/auto_rx/logs',
 ];
     $fileList = implode(' ', array_map('escapeshellarg', $files));
     shell_exec("zip -j ".escapeshellarg($zipPath)." {$fileList} 2>/dev/null");
@@ -259,6 +261,8 @@ if ($action === 'restore-configs') {
     'fr24feed.ini'         => '/etc/fr24feed.ini',
     'ModuleEchoLink.conf'  => '/usr/local/etc/svxlink/svxlink.d/ModuleEchoLink.conf',
     'svxlink.conf'         => '/usr/local/etc/svxlink/svxlink.conf',
+    '/home/pi/.local/enlaces.json' => '/home/pi/.local/enlaces.json',
+    '/home/pi/radiosonde_auto_rx/auto_rx/logs' => '/home/pi/radiosonde_auto_rx/auto_rx/logs',
 ];
     $zip = new ZipArchive(); $openResult = $zip->open($tmpZip);
     if ($openResult !== true) { ob_end_clean(); header('Content-Type: application/json'); echo json_encode(['ok'=>false,'msg'=>'No se pudo abrir el ZIP. Código: '.$openResult]); exit; }
