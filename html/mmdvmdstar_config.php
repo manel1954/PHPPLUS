@@ -79,15 +79,19 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ui);min-heigh
 .alert{font-family:var(--font-mono);font-size:.82rem;padding:.7rem 2rem;border-bottom:1px solid;}
 .alert.ok{background:rgba(0,255,159,.07);border-color:var(--green);color:var(--green);}
 .alert.err{background:rgba(255,69,96,.07);border-color:var(--red);color:var(--red);}
-.body{padding:2rem;max-width:1100px;margin:0 auto;}
+.body{padding:2rem;max-width:1200px;margin:0 auto;}
 .section-block{background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:1.5rem;overflow:hidden;}
 .section-title{background:linear-gradient(90deg,#0d1e2a,#111720);border-bottom:1px solid var(--border);padding:.55rem 1.2rem;font-family:var(--font-mono);font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:var(--dstar);display:flex;align-items:center;gap:.5rem;}
 .section-title::before{content:'▸';}
-.fields-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;}
-@media(max-width:700px){.fields-grid{grid-template-columns:1fr;}}
+.fields-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:0;
+}
+@media(max-width:900px){.fields-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:600px){.fields-grid{grid-template-columns:1fr;}}
 .field-row{display:flex;flex-direction:column;gap:.3rem;padding:.75rem 1.2rem;border-bottom:1px solid rgba(30,45,61,.5);border-right:1px solid rgba(30,45,61,.5);}
-.field-row:nth-child(even){border-right:none;}
-.field-row:last-child,.field-row:nth-last-child(2):nth-child(odd){border-bottom:none;}
+.field-row:nth-child(3n){border-right:none;}
 .field-label{font-family:var(--font-mono);font-size:.65rem;color:var(--text-dim);letter-spacing:.12em;text-transform:uppercase;}
 .field-input{background:#0a1018;border:1px solid #1e2d3d;border-radius:3px;color:var(--dstar);font-family:var(--font-mono);font-size:.85rem;padding:.35rem .6rem;width:100%;transition:border-color .2s;}
 .field-input:focus{outline:none;border-color:var(--dstar);background:#0d1e2a;}
@@ -119,7 +123,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ui);min-heigh
 $skipSections = [''];
 foreach ($parsed as $section => $lines) {
     if (in_array($section, $skipSections)) continue;
-    $kvLines = array_filter($lines, fn($l) => $l['type'] === 'kv');
+    $kvLines      = array_filter($lines, fn($l) => $l['type'] === 'kv');
     $commentLines = array_filter($lines, fn($l) => $l['type'] === 'comment' && trim($l['raw']) !== '');
     if (empty($kvLines) && empty($commentLines)) continue;
     echo '<div class="section-block">';
@@ -131,8 +135,8 @@ foreach ($parsed as $section => $lines) {
         echo '<div class="fields-grid">';
         foreach ($kvLines as $entry) {
             $fieldKey = htmlspecialchars($section . '__' . $entry['key']);
-            $val = htmlspecialchars($entry['value']);
-            $isBool = in_array(strtolower($entry['value']), ['true','false','1','0','yes','no','enable','disable','enabled','disabled']);
+            $val      = htmlspecialchars($entry['value']);
+            $isBool   = in_array(strtolower($entry['value']), ['true','false','1','0','yes','no','enable','disable','enabled','disabled']);
             echo '<div class="field-row">';
             echo '<label class="field-label">' . htmlspecialchars($entry['key']) . '</label>';
             if ($isBool) {
