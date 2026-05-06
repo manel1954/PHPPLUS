@@ -832,18 +832,18 @@ button.btn-header { font-family: var(--font-mono); }
   <div id="dmrDisplayPanel">
     <div class="panel-label">▸ DMR Display</div>
     <div class="nextion">
-      <div class="nx-topbar"><span class="nx-mode">DMR · SIMPLEX</span><span id="nxStationLabel">EA3EIZ · ADER</span><span class="nx-tg" id="nxTG">—</span></div>
+      <div class="nx-topbar"><span class="nx-mode">DMR · SIMPLEX</span><span id="nxStationLabel" style="display:none"></span><span class="nx-tg" id="nxTG">—</span></div>
       <div class="nx-infobar"><span class="nx-info-item"><span class="nx-info-lbl">PORT</span><span class="nx-info-val" id="nxPort">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">FRX</span><span class="nx-info-val cyan" id="nxFrx">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">FTX</span><span class="nx-info-val amber" id="nxFtx">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">IP</span><span class="nx-info-val green" id="nxIp">—</span></span></div>
       <div class="nx-vu" id="vuLeft"></div><div class="nx-vu right" id="vuRight"></div>
       <div class="nx-center" id="nxCenter"><div class="nx-clock" id="nxClock">00:00:00</div><div class="nx-date" id="nxDate">—</div></div>
       <div class="nx-txbar" id="nxTxBar"></div>
-      <div class="nx-botbar"><span class="nx-dmrid" id="nxDmrid">—</span><span>SLOT <span id="nxSlot">—</span></span><span class="nx-source" id="nxSource"></span></div>
+      <div class="nx-botbar"><span class="nx-dmrid" id="nxDmrid">—</span><span>DMR · DIGITAL VOICE</span><span id="nxSlot" style="display:none">—</span><span class="nx-source" id="nxSource"></span></div>
     </div>
   </div>
   <div id="ysfDisplayPanel">
     <div class="panel-label ysf-label">▸ C4FM Display</div>
     <div class="nextion-ysf">
-      <div class="nx-topbar ysf-bar"><span class="nx-mode">C4FM · YSF</span><span style="color:#6a3a9a" id="ysfStationLabel">EA3EIZ · ADER</span><span class="nx-dest" id="ysfDest">—</span></div>
+      <div class="nx-topbar ysf-bar"><span class="nx-mode">C4FM · YSF</span><span style="color:#6a3a9a;display:none" id="ysfStationLabel"></span><span class="nx-dest" id="ysfDest">—</span></div>
       <div class="nx-infobar nx-infobar-ysf"><span class="nx-info-item"><span class="nx-info-lbl">PORT</span><span class="nx-info-val" id="ysfNxPort">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">FRX</span><span class="nx-info-val" style="color:#d4a8ff" id="ysfNxFrx">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">FTX</span><span class="nx-info-val" style="color:#c084ff" id="ysfNxFtx">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">IP</span><span class="nx-info-val" style="color:#9b6dff" id="ysfNxIp">—</span></span></div>
       <div class="nx-vu" id="ysfVuLeft"></div><div class="nx-vu right" id="ysfVuRight"></div>
       <div class="nx-center" id="ysfNxCenter"><div class="nx-clock" id="ysfNxClock" style="color:#c084ff;">00:00:00</div><div class="nx-date" id="ysfNxDate" style="color:#9b59d4;">—</div></div>
@@ -856,7 +856,7 @@ button.btn-header { font-family: var(--font-mono); }
   <div id="dstarDisplayPanel">
     <div class="panel-label" style="color:#00e5ff;">▸ D-STAR Display</div>
     <div class="nextion-dstar">
-      <div class="nx-topbar dstar-bar"><span class="nx-mode">D-STAR · DIGITAL</span><span style="color:#006070" id="dstarStationLabel">EA3EIZ · ADER</span><span style="color:#00b0c0;opacity:.85;min-width:5rem;text-align:right;font-size:.6rem;" id="dstarDest">CQCQCQ</span></div>
+      <div class="nx-topbar dstar-bar"><span class="nx-mode">D-STAR · DIGITAL</span><span style="color:#006070;display:none" id="dstarStationLabel"></span><span style="color:#00b0c0;opacity:.85;min-width:5rem;text-align:right;font-size:.6rem;" id="dstarDest">CQCQCQ</span></div>
       <div class="nx-infobar nx-infobar-dstar"><span class="nx-info-item"><span class="nx-info-lbl">PORT</span><span class="nx-info-val" id="dstarNxPort">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">FRX</span><span class="nx-info-val" style="color:#00e5ff" id="dstarNxFrx">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">FTX</span><span class="nx-info-val" style="color:#00b0c0" id="dstarNxFtx">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">IP</span><span class="nx-info-val" style="color:#80f0ff" id="dstarNxIp">—</span></span></div>
       <div class="nx-vu" id="dstarVuLeft"></div><div class="nx-vu right" id="dstarVuRight"></div>
       <div class="nx-center" id="dstarNxCenter"><div class="nx-clock" id="dstarNxClock" style="color:#00e5ff;">00:00:00</div><div class="nx-date" id="dstarNxDate" style="color:#009090;">—</div></div>
