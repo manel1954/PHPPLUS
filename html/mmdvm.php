@@ -214,70 +214,59 @@ if ($action === 'reboot')          { shell_exec('sudo /usr/bin/systemctl reboot 
 if ($action === 'display-restart') { shell_exec('sudo systemctl daemon-reload 2>/dev/null'); shell_exec('sudo systemctl enable displaydriver 2>/dev/null'); shell_exec('sudo systemctl restart displaydriver 2>/dev/null'); header('Content-Type: application/json'); echo json_encode(['ok'=>true]); exit; }
 if ($action === 'install-display') { $output = shell_exec('sudo /home/pi/A108/instalar_displaydriver.sh 2>&1'); header('Content-Type: application/json'); echo json_encode(['ok'=>true,'output'=>htmlspecialchars($output??'')]); exit; }
 
+// ── BACKUP: llama a copiar.sh y sirve el ZIP resultante ──────────────────────
 if ($action === 'backup-configs') {
-    $zipName = 'Copia_PHPPLUS.zip'; $zipPath = '/tmp/'.$zipName;
-    $files = [
-    '/home/pi/MMDVMHost/MMDVMHost.ini',
-    '/home/pi/MMDVMHost/MMDVMYSF.ini',
-    '/home/pi/MMDVMHost/MMDVMDSTAR.ini',
-    '/home/pi/MMDVMHost/MMDVMNXDN.ini',
-    '/home/pi/Display-Driver/DisplayDriver.ini',
-    '/home/pi/YSFClients/YSFGateway/YSFGateway.ini',
-    '/home/pi/DMRGateway/DMRGateway.ini',
-    '/home/pi/DStarGateway/DStarGateway.ini',
-    '/home/pi/NXDNClients/NXDNGateway/NXDNGateway.ini',
-    '/home/pi/radiosonde_auto_rx/auto_rx/station.cfg',
-    '/etc/rbfeeder.ini',
-    '/etc/fr24feed.ini',
-    '/usr/local/etc/svxlink/svxlink.d/ModuleEchoLink.conf',
-    '/usr/local/etc/svxlink/svxlink.conf',
-    '/home/pi/.local/enlaces.json',
-    '/home/pi/AMBE_SERVER/AMBEserver.ini',
-    '/home/pi/dump1090-fa/dump1090.args',
-    '/home/pi/.local/bluetooth.sh',
-
-];
-    $fileList = implode(' ', array_map('escapeshellarg', $files));
-    shell_exec("zip -j ".escapeshellarg($zipPath)." {$fileList} 2>/dev/null");
-    if (file_exists($zipPath)) { header('Content-Type: application/zip'); header('Content-Disposition: attachment; filename="'.$zipName.'"'); header('Content-Length: '.filesize($zipPath)); header('Pragma: no-cache'); header('Expires: 0'); readfile($zipPath); unlink($zipPath); } else { header('Content-Type: text/plain'); echo 'Error: No se pudo crear el ZIP.'; }
+    $zipPath = '/tmp/Copia_PHPPLUS.zip';
+    $zipName = 'Copia_PHPPLUS.zip';
+    shell_exec('sudo /home/pi/A108/copiar.sh 2>/dev/null');
+    if (file_exists($zipPath)) {
+        header('Content-Type: application/zip');
+        header('Content-Disposition: attachment; filename="'.$zipName.'"');
+        header('Content-Length: '.filesize($zipPath));
+        header('Pragma: no-cache');
+        header('Expires: 0');
+        readfile($zipPath);
+        unlink($zipPath);
+    } else {
+        header('Content-Type: text/plain');
+        echo 'Error: No se pudo crear el ZIP.';
+    }
     exit;
 }
 
+// ── RESTORE: recibe el ZIP, lo pasa a restaurar.sh y devuelve JSON ───────────
 if ($action === 'restore-configs') {
     ob_start(); error_reporting(0);
     $uploadOk = isset($_FILES['zipfile']) && $_FILES['zipfile']['error'] === UPLOAD_ERR_OK;
-    if (!$uploadOk) { $errCode = $_FILES['zipfile']['error']??-1; ob_end_clean(); header('Content-Type: application/json'); echo json_encode(['ok'=>false,'msg'=>'No se recibió el fichero. Error: '.$errCode]); exit; }
+    if (!$uploadOk) {
+        $errCode = $_FILES['zipfile']['error'] ?? -1;
+        ob_end_clean();
+        header('Content-Type: application/json');
+        echo json_encode(['ok'=>false,'msg'=>'No se recibió el fichero. Error: '.$errCode]);
+        exit;
+    }
     $tmpZip = $_FILES['zipfile']['tmp_name'];
-    if (!file_exists($tmpZip)||filesize($tmpZip)===0) { ob_end_clean(); header('Content-Type: application/json'); echo json_encode(['ok'=>false,'msg'=>'Fichero vacío.']); exit; }
-   $destMap = [
-    'MMDVMHost.ini'        => '/home/pi/MMDVMHost/MMDVMHost.ini',
-    'MMDVMYSF.ini'         => '/home/pi/MMDVMHost/MMDVMYSF.ini',
-    'DisplayDriver.ini'    => '/home/pi/Display-Driver/DisplayDriver.ini',
-    'YSFGateway.ini'       => '/home/pi/YSFClients/YSFGateway/YSFGateway.ini',
-    'DMRGateway.ini'       => '/home/pi/DMRGateway/DMRGateway.ini',
-    'DStarGateway.ini'     => '/home/pi/DStarGateway/DStarGateway.ini',
-    'NXDNGateway.ini'      => '/home/pi/NXDNClients/NXDNGateway/NXDNGateway.ini',
-    'MMDVMDSTAR.ini'       => '/home/pi/MMDVMHost/MMDVMDSTAR.ini',
-    'MMDVMNXDN.ini'        => '/home/pi/MMDVMHost/MMDVMNXDN.ini',
-    'station.cfg'          => '/home/pi/radiosonde_auto_rx/auto_rx/station.cfg',
-    'rbfeeder.ini'         => '/etc/rbfeeder.ini',
-    'fr24feed.ini'         => '/etc/fr24feed.ini',
-    'ModuleEchoLink.conf'  => '/usr/local/etc/svxlink/svxlink.d/ModuleEchoLink.conf',
-    'svxlink.conf'         => '/usr/local/etc/svxlink/svxlink.conf',
-    'enlaces.json'         => '/home/pi/.local/enlaces.json',
-    'AMBEserver.ini'       => '/home/pi/AMBE_SERVER/AMBEserver.ini',
-    'dump1090.args'        => '/home/pi/dump1090-fa/dump1090.args',
-    'bluetooth.sh'         => '/home/pi/.local/bluetooth.sh',
-    
-];
-    $zip = new ZipArchive(); $openResult = $zip->open($tmpZip);
-    if ($openResult !== true) { ob_end_clean(); header('Content-Type: application/json'); echo json_encode(['ok'=>false,'msg'=>'No se pudo abrir el ZIP. Código: '.$openResult]); exit; }
-    $restored = []; $errors = [];
-    for ($i=0;$i<$zip->numFiles;$i++) { $name=basename($zip->getNameIndex($i)); if(isset($destMap[$name])){$result=file_put_contents($destMap[$name],$zip->getFromIndex($i));if($result!==false)$restored[]=$name;else $errors[]=$name;} }
-    $zip->close(); ob_end_clean();
-    if (empty($restored)) { header('Content-Type: application/json'); echo json_encode(['ok'=>false,'msg'=>'No se encontraron ficheros compatibles.']); exit; }
-    $msg = 'Restaurados: '.implode(', ',$restored); if($errors)$msg.=' | Errores: '.implode(', ',$errors);
-    header('Content-Type: application/json'); echo json_encode(['ok'=>true,'msg'=>$msg]); exit;
+    if (!file_exists($tmpZip) || filesize($tmpZip) === 0) {
+        ob_end_clean();
+        header('Content-Type: application/json');
+        echo json_encode(['ok'=>false,'msg'=>'Fichero vacío.']);
+        exit;
+    }
+    $destZip = '/tmp/restore_upload_'.time().'.zip';
+    move_uploaded_file($tmpZip, $destZip);
+    $output = trim(shell_exec('sudo /home/pi/A108/restaurar.sh '.escapeshellarg($destZip).' 2>&1'));
+    @unlink($destZip);
+    ob_end_clean();
+    if (strpos($output, 'OK:') === 0) {
+        $msg = substr($output, 3);
+        header('Content-Type: application/json');
+        echo json_encode(['ok'=>true,'msg'=>$msg]);
+    } else {
+        $msg = strpos($output, 'ERROR:') === 0 ? substr($output, 6) : ($output ?: 'Error desconocido.');
+        header('Content-Type: application/json');
+        echo json_encode(['ok'=>false,'msg'=>$msg]);
+    }
+    exit;
 }
 
 if ($action === 'logs') {
@@ -580,21 +569,14 @@ button.btn-header { font-family: var(--font-mono); }
 .nx-name { font-family: var(--font-ui); font-weight: 500; font-size: 1.2rem; color: var(--cyan); letter-spacing: .18em; text-transform: uppercase; opacity: .9; margin-top: .15rem; }
 .nx-name.ysf { color: #d4a8ff; }
 .nx-name.nxdn { color: #ffc400; }
-
-
-/* ── Barra Display PORT FRX FTX IP ── */
 .nx-infobar { position: absolute; top: 30px; left: 0; right: 0; height: 26px; background: rgba(0,0,0,.35); border-bottom: 1px solid #0d2030; display: flex; align-items: center; justify-content: space-around; padding: 0 8rem; gap: 1rem; z-index: 2; }
 .nx-info-item { display: flex; align-items: center; gap: .4rem; }
 .nx-info-lbl { font-family: var(--font-mono); font-size: 10px; color:#999; text-transform: uppercase; }
-.nx-info-val { font-family: var(--font-mono); font-size: 10px; color:#ff0;font-weight: bold;  }
-
-
-
+.nx-info-val { font-family: var(--font-mono); font-size: 10px; color:#ff0;font-weight: bold; }
 .nx-info-val.cyan { color: var(--cyan); }
 .nx-info-val.amber { color: var(--amber); }
 .nx-info-val.green { color: var(--green); }
 .nx-infobar-ysf { background: rgba(0,0,0,.4); border-bottom: 1px solid #1a0d30; }
-/* ── Nextion D-STAR ── */
 .nextion-dstar { background: #06100e; border: 2px solid #004a4a; border-radius: 6px; box-shadow: 0 0 0 1px #002030, inset 0 0 40px rgba(0,229,255,.04), 0 0 30px rgba(0,229,255,.12); position: relative; overflow: hidden; height: 240px; display: flex; align-items: center; justify-content: center; }
 .nextion-dstar::before,.nextion-dstar::after { content: '◈'; position: absolute; font-size: .6rem; color: #004a4a; }
 .nextion-dstar::before { top: .5rem; left: .7rem; }
@@ -605,7 +587,6 @@ button.btn-header { font-family: var(--font-mono); }
 .nx-infobar-dstar { background: rgba(0,0,0,.4); border-bottom: 1px solid #003040; }
 .nx-callsign.dstar { color: #00e5ff; text-shadow: 0 0 20px rgba(0,229,255,.6); }
 .nx-name.dstar { color: #80f0ff; }
-/* ── Nextion NXDN ── */
 .nextion-nxdn { background: #0e0e06; border: 2px solid #4a4a00; border-radius: 6px; box-shadow: 0 0 0 1px #303000, inset 0 0 40px rgba(255,215,0,.04), 0 0 30px rgba(255,215,0,.12); position: relative; overflow: hidden; height: 240px; display: flex; align-items: center; justify-content: center; }
 .nextion-nxdn::before,.nextion-nxdn::after { content: '◈'; position: absolute; font-size: .6rem; color: #4a4a00; }
 .nextion-nxdn::before { top: .5rem; left: .7rem; }
@@ -641,7 +622,6 @@ button.btn-header { font-family: var(--font-mono); }
 .lh-row-ysf.lh-active { background: rgba(181,122,255,.08); }
 .lh-tx-dot-ysf { width: 6px; height: 6px; border-radius: 50%; background: var(--violet); box-shadow: 0 0 6px var(--violet); animation: pulse 1s infinite; flex-shrink: 0; }
 .lh-call-ysf { font-family: var(--font-mono); font-size: .82rem; color: var(--violet); letter-spacing: .05em; font-weight: bold; }
-/* NXDN last heard */
 .lh-panel-nxdn { background: var(--surface); border: 3px solid #4a4a00; border-radius: 6px; display: flex; flex-direction: column; }
 .lh-header-nxdn { background: #1a1a0a; border-bottom: 1px solid #4a4a00; padding: .4rem 1rem; display: grid; grid-template-columns: 1.2fr 1.8fr .8fr 1fr .6fr; gap: .3rem; font-family: var(--font-mono); font-size: .6rem; color: #707000; letter-spacing: .1em; text-transform: uppercase; }
 .lh-row-nxdn { display: grid; grid-template-columns: 1.2fr 1.8fr .8fr 1fr .6fr; gap: .3rem; padding: .45rem 1rem; border-bottom: 1px solid rgba(74,74,0,.5); align-items: center; transition: background .2s; }
@@ -721,22 +701,8 @@ button.btn-header { font-family: var(--font-mono); }
 .fedit-msg{font-family:var(--font-mono);font-size:.75rem;display:none;padding:.4rem .8rem;border-radius:4px;border:1px solid;}
 .fedit-msg.ok{color:var(--green);border-color:var(--green);background:rgba(0,255,159,.06);}
 .fedit-msg.err{color:var(--red);border-color:var(--red);background:rgba(255,69,96,.06);}
-.flag-emoji {
-    font-family: 'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;
-    font-size: 1.6rem;
-    display: inline-block;
-    vertical-align: middle;
-    margin-right: 4px;
-    line-height: 1;
-}
-.flag-emoji-img {
-    height: 20px;
-    width: auto;
-    vertical-align: middle;
-    margin-right: 4px;
-    border-radius: 2px;
-}
-/* Bandera más grande en el display Nextion */
+.flag-emoji { font-family: 'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif; font-size: 1.6rem; display: inline-block; vertical-align: middle; margin-right: 4px; line-height: 1; }
+.flag-emoji-img { height: 20px; width: auto; vertical-align: middle; margin-right: 4px; border-radius: 2px; }
 .nx-callsign .flag-emoji { font-size: 3.2rem; }
 .nx-callsign .flag-emoji-img { height: 42px; }
 </style>
@@ -775,8 +741,6 @@ button.btn-header { font-family: var(--font-mono); }
     <div class="station-meta-item"><span class="station-meta-label">💿 Disco usado</span><span class="station-meta-value" id="siDisk" style="color:var(--amber);">—</span></div>
     <div class="station-meta-item"><span class="station-meta-label">💿 Disco libre</span><span class="station-meta-value" id="siDiskFree" style="color:var(--green);">—</span></div>
 </div>
-
-<!-- Status bar -->
 <div class="status-bar">
 <div class="status-item"><div class="dot" id="dot-mosquitto"></div><span>Mosquitto</span></div>
 <div class="status-item"><div class="dot" id="dot-mmdvm"></div><span>MMDVMHost</span></div>
@@ -791,10 +755,7 @@ button.btn-header { font-family: var(--font-mono); }
 <div class="status-item"><div class="dot" id="dot-nxdnmmd"></div><span style="color:#ffd700">MMDVMHost NXDN</span></div>
 <div class="status-item"><div class="dot" id="dot-nxdngw"></div><span style="color:#ffd700">NXDNGateway</span></div>
 </div>
-
-<!-- Service cards -->
 <div class="controls-section">
-  <!-- DMR -->
   <div class="service-card">
     <div class="service-card-label dmr" style="color:#fff;">▸ DMR · MMDVMHost + DMRGateway</div>
     <div class="toggle-row">
@@ -812,7 +773,6 @@ button.btn-header { font-family: var(--font-mono); }
       <a href="edit_ini.php?file=dmrgateway" class="ini-btn view" style="flex:1;color:#00e5ff;justify-content:center;color:var(--amber);border-color:rgba(255,179,0,.3);color:#fff;">📄 EDITAR FICHERO DMRGateway.ini</a>
     </div>
   </div>
-  <!-- C4FM -->
   <div class="service-card">
     <div class="service-card-label ysf">▸ C4FM · MMDVMHOST + YSFGATEWAY</div>
     <div class="toggle-row">
@@ -830,7 +790,6 @@ button.btn-header { font-family: var(--font-mono); }
       <a href="edit_ini.php?file=ysfgateway" class="ini-btn view ysf" style="flex:1;justify-content:center;">📄 editar fichero YSFGateway.ini</a>
     </div>
   </div>
-  <!-- D-STAR -->
   <div class="service-card" style="border-color:rgba(0,229,255,.25);">
     <div class="service-card-label" style="color:#00ff9f;">▸ D-STAR · MMDVMHost + DStarGateway</div>
     <div class="toggle-row">
@@ -848,7 +807,6 @@ button.btn-header { font-family: var(--font-mono); }
       <a href="edit_ini.php?file=dstargateway" class="ini-btn view" style="flex:1;justify-content:center;color:#00ff9f;border-color:rgba(0,255,159,.3);">📄 editar fichero DStarGateway.ini</a>
     </div>
   </div>
-  <!-- NXDN -->
   <div class="service-card" style="border-color:rgba(255,215,0,.25);">
     <div class="service-card-label" style="color:#ffd700;">▸ NXDN · MMDVMHost + NXDNGateway</div>
     <div class="toggle-row">
@@ -870,10 +828,6 @@ button.btn-header { font-family: var(--font-mono); }
     </div>
   </div>
 </div>
-
-<!-- ── Row 1: DMR Display ── -->
-
-<!-- ── Fila 1: DMR Display (izq) + C4FM Display (dcha) ── -->
 <div class="display-row">
   <div id="dmrDisplayPanel">
     <div class="panel-label">▸ DMR Display</div>
@@ -898,8 +852,6 @@ button.btn-header { font-family: var(--font-mono); }
     </div>
   </div>
 </div>
-
-<!-- ── Fila 2: D-STAR Display (izq) + NXDN Display (dcha) ── -->
 <div class="display-row" style="margin-top:1.2rem;">
   <div id="dstarDisplayPanel">
     <div class="panel-label" style="color:#00e5ff;">▸ D-STAR Display</div>
@@ -909,7 +861,7 @@ button.btn-header { font-family: var(--font-mono); }
       <div class="nx-vu" id="dstarVuLeft"></div><div class="nx-vu right" id="dstarVuRight"></div>
       <div class="nx-center" id="dstarNxCenter"><div class="nx-clock" id="dstarNxClock" style="color:#00e5ff;">00:00:00</div><div class="nx-date" id="dstarNxDate" style="color:#009090;">—</div></div>
       <div class="nx-txbar" id="dstarTxBar"></div>
-      <div class="nx-botbar dstar-bar"><span style="color:#006070;font-family:var(--font-mono);font-size:.65rem;">D-STAR · DIGITAL VOICE</span><span style="color:#006070;font-family:var(--font-mono);font-size:.65rem;">XRF266 B</span><span class="nx-source" id="dstarSource"></span></div>
+      <div class="nx-botbar dstar-bar"><span style="color:#006070;font-family:var(--font-mono);font-size:.65rem;">D-STAR · DIGITAL VOICE</span><span style="color:#006070;font-family:var(--font-mono);font-size:.65rem;"><?php $dgwIni=parseMMDVMIni('/home/pi/DStarGateway/DStarGateway.ini');$dstarRef=trim($dgwIni['Repeater1']['Reflector']??'—');echo htmlspecialchars($dstarRef); ?></span><span class="nx-source" id="dstarSource"></span></div>
     </div>
   </div>
   <div id="nxdnDisplayPanel">
@@ -920,13 +872,10 @@ button.btn-header { font-family: var(--font-mono); }
       <div class="nx-vu" id="nxdnVuLeft"></div><div class="nx-vu right" id="nxdnVuRight"></div>
       <div class="nx-center" id="nxdnNxCenter"><div class="nx-clock" id="nxdnNxClock" style="color:#ffd700;">00:00:00</div><div class="nx-date" id="nxdnNxDate" style="color:#b8a000;">—</div></div>
       <div class="nx-txbar" id="nxdnTxBar"></div>
-      <div class="nx-botbar nxdn-bar"><span style="color:#707000;font-family:var(--font-mono);font-size:.65rem;">NXDN · DIGITAL VOICE</span><span style="color:#707000;font-family:var(--font-mono);font-size:.65rem;">NXDN REF 21465</span><span class="nx-source" id="nxdnSource"></span></div>
+      <div class="nx-botbar nxdn-bar"><span style="color:#707000;font-family:var(--font-mono);font-size:.65rem;">NXDN · DIGITAL VOICE</span><span style="color:#707000;font-family:var(--font-mono);font-size:.65rem;"><?php $nxdnGwIni=parseMMDVMIni('/home/pi/NXDNClients/NXDNGateway/NXDNGateway.ini');$nxdnRef=trim($nxdnGwIni['Network']['Static']??'—');echo 'NXDN REF '.htmlspecialchars($nxdnRef); ?></span><span class="nx-source" id="nxdnSource"></span></div>
     </div>
   </div>
 </div>
-
-
-<!-- ── Fila 1: Últimos DMR (izq) + Últimos C4FM (dcha) ── -->
 <div class="display-row" style="margin-top:1rem;">
   <div id="dmrLastHeardPanel">
     <div class="panel-label">▸ Últimos escuchados DMR</div>
@@ -943,8 +892,6 @@ button.btn-header { font-family: var(--font-mono); }
     </div>
   </div>
 </div>
-
-<!-- ── Fila 2: Últimos D-STAR (izq) + Últimos NXDN (dcha) ── -->
 <div class="display-row" style="margin-top:1rem;">
   <div id="dstarLastHeardPanel">
     <div class="panel-label" style="color:#00e5ff;">▸ Últimos escuchados D-STAR</div>
@@ -963,7 +910,6 @@ button.btn-header { font-family: var(--font-mono); }
     </div>
   </div>
 </div>
-
 <div class="log-grid" style="margin-top:2rem;">
 <div id="dmrLogPanels" style="display:contents;">
 <div class="log-panel"><div class="log-panel-header"><span class="svc-name">▸ MMDVMHost</span><button class="btn-clear" onclick="clearLog('logMmd')">limpiar</button></div><div class="log-output" id="logMmd">Esperando servicios…</div></div>
@@ -1065,9 +1011,7 @@ const DMR_IDLE_TIMEOUT=12000,YSF_IDLE_TIMEOUT=12000;
 
 async function fetchStationInfo(){try{const r=await fetch('?action=station-info');const d=await r.json();document.getElementById('scCallsign').textContent='📡 '+d.callsign;const nxPort=document.getElementById('nxPort');if(nxPort)nxPort.textContent=d.port||'—';const nxFrx=document.getElementById('nxFrx');if(nxFrx)nxFrx.textContent=d.freqRX||'—';const nxFtx=document.getElementById('nxFtx');if(nxFtx)nxFtx.textContent=d.freq||'—';const nxIp=document.getElementById('nxIp');if(nxIp)nxIp.textContent=d.ip||'—';const yNxPort=document.getElementById('ysfNxPort');if(yNxPort)yNxPort.textContent=d.ysfPort||'—';const yNxFrx=document.getElementById('ysfNxFrx');if(yNxFrx)yNxFrx.textContent=d.ysfFreqRX||'—';const yNxFtx=document.getElementById('ysfNxFtx');if(yNxFtx)yNxFtx.textContent=d.ysfFreqTX||'—';const yNxIp=document.getElementById('ysfNxIp');if(yNxIp)yNxIp.textContent=d.ysfIp||'—';const label=d.callsign+' · ADER';const nx=document.getElementById('nxStationLabel');if(nx)nx.textContent=label;const yx=document.getElementById('ysfStationLabel');if(yx)yx.textContent=label;const dx=document.getElementById('dstarStationLabel');if(dx)dx.textContent=label;const nxdnLbl=document.getElementById('nxdnStationLabel');if(nxdnLbl)nxdnLbl.textContent=label;const dNxPort=document.getElementById('dstarNxPort');if(dNxPort)dNxPort.textContent=d.dstarPort||'—';const dNxFrx=document.getElementById('dstarNxFrx');if(dNxFrx)dNxFrx.textContent=d.dstarFreqRX||'—';const dNxFtx=document.getElementById('dstarNxFtx');if(dNxFtx)dNxFtx.textContent=d.dstarFreqTX||'—';const dNxIp=document.getElementById('dstarNxIp');if(dNxIp)dNxIp.textContent=d.dstarIp||'—';const nNxPort=document.getElementById('nxdnNxPort');if(nNxPort)nNxPort.textContent=d.nxdnPort||'—';const nNxFrx=document.getElementById('nxdnNxFrx');if(nNxFrx)nNxFrx.textContent=d.nxdnFreqRX||'—';const nNxFtx=document.getElementById('nxdnNxFtx');if(nNxFtx)nNxFtx.textContent=d.nxdnFreqTX||'—';const nNxIp=document.getElementById('nxdnNxIp');if(nNxIp)nNxIp.textContent=d.nxdnIp||'—';}catch(e){console.warn('station-info error:',e);}}
 
-// Detección única al cargar: Windows no soporta emoji de bandera regional
 const _winOS = /Windows/i.test(navigator.userAgent);
-// URL base Twemoji PNG para fallback Windows
 const _TBASE = 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/';
 const _FLAGS = [
     {re:/^E[ABCDEFGH][1-9]/,  e:'🇪🇸', t:'1f1ea-1f1f8'},
@@ -1158,7 +1102,6 @@ async function fetchDStarLogs(){try{const r=await fetch('?action=dstar-logs&line
 function startDStarLogs(){fetchDStarLogs();dstarTimer=setInterval(fetchDStarLogs,5000);}
 function stopDStarLogs(){clearInterval(dstarTimer);dstarTimer=null;}
 
-// ── NXDN ──────────────────────────────────────────────────────────────────────
 let nxdnRunning=false,nxdnTimer=null,nxdnTxTimer=null,nxdnCurrentlyActive=false,nxdnLastActiveTs=0;
 const NXDN_IDLE_TIMEOUT=12000;
 
@@ -1172,8 +1115,6 @@ function setNXDNToggle(on){
     document.getElementById('nxdnDisplayPanel').style.display=on?'':'none';
     document.getElementById('nxdnLastHeardPanel').style.display=on?'':'none';
 }
-
-// ── Fin NXDN ──
 
 function updateNXDNClock(){if(!nxdnCurrentlyActive){const now=new Date();const clk=document.getElementById('nxdnNxClock');if(clk){clk.textContent=now.toLocaleTimeString('es-ES');document.getElementById('nxdnNxDate').textContent=now.toLocaleDateString('es-ES',{weekday:'short',day:'2-digit',month:'short',year:'numeric'}).toUpperCase();}}}
 setInterval(updateNXDNClock,1000);updateNXDNClock();
@@ -1209,7 +1150,6 @@ function startNXDNLogs(){fetchNXDNLogs();nxdnTimer=setInterval(fetchNXDNLogs,500
 function stopNXDNLogs(){clearInterval(nxdnTimer);nxdnTimer=null;}
 function startNXDNTxPoll(){fetchNXDNTransmission();nxdnTxTimer=setInterval(fetchNXDNTransmission,4000);}
 function stopNXDNTxPoll(){clearInterval(nxdnTxTimer);nxdnTxTimer=null;}
-// ── Fin NXDN ──────────────────────────────────────────────────────────────────
 
 async function toggleServices(chk){const wasOn=!chk.checked;const sw=document.getElementById('swDMR');chk.checked=wasOn;sw.classList.add('busy');try{await fetch(wasOn?'?action=stop':'?action=start');await new Promise(r=>setTimeout(r,2200));const r=await fetch('?action=status');const d=await r.json();const gw=d.gateway==='active',mmd=d.mmdvm==='active';running=gw||mmd;setDot('dot-gateway',gw?'active':'off');setDot('dot-mmdvm',mmd?'active':'off');setDot('dot-mosquitto',gw?'active':'off');setDMRToggle(running);if(wasOn){stopRefresh();clearLog('logGw');clearLog('logMmd');showIdle();document.getElementById('lhBody').innerHTML='<div class="lh-empty">Sin actividad reciente</div>';}else startRefresh();}finally{sw.classList.remove('busy');}}
 async function toggleYSF(chk){const wasOn=!chk.checked;const sw=document.getElementById('swYSF');chk.checked=wasOn;sw.classList.add('busy');try{if(wasOn){await fetch('?action=ysf-stop');await new Promise(r=>setTimeout(r,1000));await fetch('?action=mmdvmysf-stop');await new Promise(r=>setTimeout(r,2000));clearLog('logYsf');clearLog('logMmdvmYsf');stopYSFLogs();stopMMDVMYSFLogs();showYSFIdle();document.getElementById('ysfLhBody').innerHTML='<div class="lh-empty">Sin actividad C4FM</div>';}else{await fetch('?action=mmdvmysf-start');await new Promise(r=>setTimeout(r,2000));await fetch('?action=ysf-start');await new Promise(r=>setTimeout(r,1500));startYSFLogs();startMMDVMYSFLogs();}await checkYSFStatus();await checkMMDVMYSFStatus();}finally{sw.classList.remove('busy');}}
@@ -1242,7 +1182,6 @@ function startYSFTransmissionPoll(){fetchYSFTransmission();ysfTxTimer=setInterva
 async function fetchSysInfo(){try{const r=await fetch('?action=sysinfo');const d=await r.json();const cpuEl=document.getElementById('siCpu');cpuEl.textContent=d.cpu+' %';cpuEl.style.color=d.cpu>80?'var(--red)':d.cpu>50?'var(--amber)':'var(--green)';const tempEl=document.getElementById('siTemp');tempEl.textContent=d.temp||'—';const t=parseFloat(d.temp);tempEl.style.color=t>75?'var(--red)':t>60?'var(--amber)':'var(--green)';document.getElementById('siRam').textContent=d.ramUsed+' GB / '+d.ramTotal+' GB';document.getElementById('siRamFree').textContent=d.ramFree+' GB';document.getElementById('siDisk').textContent=d.diskUsed+' GB / '+d.diskTotal+' GB';document.getElementById('siDiskFree').textContent=d.diskFree+' GB';}catch(e){}}
 fetchSysInfo();setInterval(fetchSysInfo,8000);
 
-/* ── Editor ficheros ── */
 async function feditOpen(path){
     const msg=document.getElementById('feditMsg');
     msg.style.display='none';
@@ -1271,7 +1210,6 @@ async function feditSave(){
 }
 function feditClose(){document.getElementById('feditModal').classList.remove('open');}
 
-/* ── Terminal ttyd ── */
 function xtTtydOpen(){
     var url='http://'+window.location.hostname+':7681';
     document.getElementById('xtTtydFrame').src=url;
@@ -1282,7 +1220,6 @@ function xtTtydClose(){
     document.getElementById('xtTtydFrame').src='';
 }
 
-/* ── Terminal ── */
 (function(){
 var xtHist=[],xtHidx=-1,xtCwd='/home/pi';
 function xtPr(){return 'pi@raspberry:'+xtCwd.replace('/home/pi','~')+'$';}
@@ -1326,19 +1263,16 @@ document.getElementById('xtInp').addEventListener('keydown',async function(e){
 (async()=>{
     await fetchStationInfo();
     setInterval(fetchStationInfo,60000);
-
     await checkStatus();
     await checkYSFStatus();
     await checkMMDVMYSFStatus();
     await checkDStarStatus();
     await checkNXDNStatus();
-
     setInterval(checkStatus,10000);
     setInterval(checkYSFStatus,8000);
     setInterval(checkMMDVMYSFStatus,8000);
     setInterval(checkDStarStatus,10000);
     setInterval(checkNXDNStatus,10000);
-
     if(!running){showIdle();fetchTransmission();}
     showYSFIdle();
     showNXDNIdle();
