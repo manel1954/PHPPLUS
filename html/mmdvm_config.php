@@ -435,11 +435,12 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-ui); m
 
 .field-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 1rem;
 }
-@media (max-width: 900px) { .field-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 600px) { .field-grid { grid-template-columns: 1fr; } }
+@media (max-width: 1100px) { .field-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 750px)  { .field-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 500px)  { .field-grid { grid-template-columns: 1fr; } }
 
 .field-item { display: flex; flex-direction: column; }
 
