@@ -734,12 +734,12 @@ button.btn-header { font-family: var(--font-mono); }
 <div class="station-card" style="justify-content:space-between;">
     <div class="station-card-main"><div class="station-callsign" id="scCallsign">📡 —</div></div>
     <div class="station-divider" style="height:50px;"></div>
-    <div class="station-meta-item" style="flex:1;align-items:center;"><span class="station-meta-label" style="font-size:.55rem;">🖥️ CPU</span><span class="station-meta-value" id="siCpu" style="color:var(--green);font-size:.75rem;">—</span></div>
-    <div class="station-meta-item" style="flex:1;align-items:center;"><span class="station-meta-label" style="font-size:.55rem;">🌡️ Temp</span><span class="station-meta-value" id="siTemp" style="color:var(--amber);font-size:.75rem;">—</span></div>
-    <div class="station-meta-item" style="flex:1;align-items:center;"><span class="station-meta-label" style="font-size:.55rem;">💾 RAM usada</span><span class="station-meta-value" id="siRam" style="color:var(--cyan);font-size:.75rem;">—</span></div>
-    <div class="station-meta-item" style="flex:1;align-items:center;"><span class="station-meta-label" style="font-size:.55rem;">💾 RAM libre</span><span class="station-meta-value" id="siRamFree" style="color:var(--text);font-size:.75rem;">—</span></div>
-    <div class="station-meta-item" style="flex:1;align-items:center;"><span class="station-meta-label" style="font-size:.55rem;">💿 Disco usado</span><span class="station-meta-value" id="siDisk" style="color:var(--amber);font-size:.75rem;">—</span></div>
-    <div class="station-meta-item" style="flex:1;align-items:center;"><span class="station-meta-label" style="font-size:.55rem;">💿 Disco libre</span><span class="station-meta-value" id="siDiskFree" style="color:var(--green);font-size:.75rem;">—</span></div>
+    <div class="station-meta-item" style="flex:1;align-items:center;"><span class="station-meta-label" style="font-size:.55rem;">🖥️ CPU</span><span class="station-meta-value" id="siCpu" style="color:var(--green);font-size:.75rem;min-width:4.5rem;">—</span></div>
+    <div class="station-meta-item" style="flex:1;align-items:center;"><span class="station-meta-label" style="font-size:.55rem;">🌡️ Temp</span><span class="station-meta-value" id="siTemp" style="color:var(--amber);font-size:.75rem;min-width:4.5rem;">—</span></div>
+    <div class="station-meta-item" style="flex:1;align-items:center;"><span class="station-meta-label" style="font-size:.55rem;">💾 RAM usada</span><span class="station-meta-value" id="siRam" style="color:var(--cyan);font-size:.75rem;min-width:4.5rem;">—</span></div>
+    <div class="station-meta-item" style="flex:1;align-items:center;"><span class="station-meta-label" style="font-size:.55rem;">💾 RAM libre</span><span class="station-meta-value" id="siRamFree" style="color:var(--text);font-size:.75rem;min-width:4.5rem;">—</span></div>
+    <div class="station-meta-item" style="flex:1;align-items:center;"><span class="station-meta-label" style="font-size:.55rem;">💿 Disco usado</span><span class="station-meta-value" id="siDisk" style="color:var(--amber);font-size:.75rem;min-width:4.5rem;">—</span></div>
+    <div class="station-meta-item" style="flex:1;align-items:center;"><span class="station-meta-label" style="font-size:.55rem;">💿 Disco libre</span><span class="station-meta-value" id="siDiskFree" style="color:var(--green);font-size:.75rem;min-width:4.5rem;">—</span></div>
     <div class="station-meta-item" style="flex:1;align-items:center;">
         <span class="station-meta-label" id="siModelLabel" style="font-size:.55rem;"><?php
             $model = '';
@@ -750,7 +750,7 @@ button.btn-header { font-family: var(--font-mono); }
             echo str_contains($ml, 'raspberry') ? '🍓' : (str_contains($ml, 'orange') ? '🍊' : '🖥️');
         ?></span>
         <span class="station-meta-value" id="siModel" style="color:var(--violet);font-size:.7rem;"><?php
-            $modelShort = str_contains(strtolower($model), 'raspberry') ? substr($model, 0, 13) : $model;
+            $modelShort = str_contains(strtolower($model), 'raspberry') ? substr($model, 0, 18) : $model;
             echo htmlspecialchars($modelShort);
         ?></span>
     </div>
