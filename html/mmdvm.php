@@ -473,7 +473,7 @@ button.btn-header { font-family: var(--font-mono); }
 .station-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg,transparent,var(--cyan),var(--violet),transparent); }
 .station-card-main { display: flex; flex-direction: column; align-items: flex-start; gap: .3rem; }
 .station-callsign { font-family: var(--font-orb); font-size: 2.4rem; font-weight: 900; color: var(--cyan); letter-spacing: .08em; line-height: 1; text-shadow: 0 0 20px rgba(0,212,255,.4); }
-.station-divider { width: 1px; height: 70px; background: var(--border); flex-shrink: 0; }
+.station-divider { width: 1px; height: 70px; padding-left: 0px; background: var(--border); flex-shrink: 0; }
 .station-meta-item { display: flex; flex-direction: column; gap: .15rem; }
 .station-meta-label { font-family: var(--font-mono); font-size: .6rem; color: var(--text-dim); letter-spacing: .15em; text-transform: uppercase; }
 .station-meta-value { font-family: var(--font-mono); font-size: .95rem; color: var(--amber); letter-spacing: .06em; font-weight: bold; }
