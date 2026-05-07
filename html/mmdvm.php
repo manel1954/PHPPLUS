@@ -872,7 +872,7 @@ button.btn-header { font-family: var(--font-mono); }
       <div class="nx-vu" id="nxdnVuLeft"></div><div class="nx-vu right" id="nxdnVuRight"></div>
       <div class="nx-center" id="nxdnNxCenter"><div class="nx-clock" id="nxdnNxClock" style="color:#ffd700;">00:00:00</div><div class="nx-date" id="nxdnNxDate" style="color:#b8a000;">—</div></div>
       <div class="nx-txbar" id="nxdnTxBar"></div>
-      <div class="nx-botbar nxdn-bar"><span style="color:#707000;font-family:var(--font-mono);font-size:.65rem;">NXDN · DIGITAL VOICE</span><span style="color:#707000;font-family:var(--font-mono);font-size:.65rem;"><?php $nxdnGwIni=parseMMDVMIni('/home/pi/NXDNClients/NXDNGateway/NXDNGateway.ini');$nxdnRef=trim($nxdnGwIni['Network']['Static']??'—');echo 'Reflector: ' . htmlspecialchars($nxdnRef); ?></span><span class="nx-source" id="nxdnSource"></span></div>
+      <div class="nx-botbar nxdn-bar"><span style="color:#707000;font-family:var(--font-mono);font-size:.65rem;">NXDN · DIGITAL VOICE</span><span style="color:#ff0;font-family:var(--font-mono);font-size:.80rem;"><?php $nxdnGwIni=parseMMDVMIni('/home/pi/NXDNClients/NXDNGateway/NXDNGateway.ini');$nxdnRef=trim($nxdnGwIni['Network']['Static']??'—');echo 'Reflector: ' . htmlspecialchars($nxdnRef); ?></span><span class="nx-source" id="nxdnSource"></span></div>
     </div>
   </div>
 </div>
