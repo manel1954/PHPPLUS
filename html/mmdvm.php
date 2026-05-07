@@ -741,7 +741,7 @@ button.btn-header { font-family: var(--font-mono); }
     <div class="station-meta-item" style="flex:1;align-items:center;"><span class="station-meta-label" style="font-size:.55rem;">💿 Disco usado</span><span class="station-meta-value" id="siDisk" style="color:var(--amber);font-size:.75rem;min-width:4.5rem;white-space:nowrap;">—</span></div>
     <div class="station-meta-item" style="flex:1;align-items:center;"><span class="station-meta-label" style="font-size:.55rem;">💿 Disco libre</span><span class="station-meta-value" id="siDiskFree" style="color:var(--green);font-size:.75rem;min-width:4.5rem;white-space:nowrap;">—</span></div>
     <div class="station-meta-item" style="flex:1;align-items:center;">
-        <span class="station-meta-label" id="siModelLabel" style="font-size:.55rem;"><?php
+        <span class="station-meta-label" id="siModelLabel" style="font-size:.69rem;"><?php
             $model = '';
             if (file_exists('/proc/device-tree/model'))
                 $model = trim(str_replace("\0", '', file_get_contents('/proc/device-tree/model')));
