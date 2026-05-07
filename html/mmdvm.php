@@ -739,7 +739,7 @@ button.btn-header { font-family: var(--font-mono); }
     <div class="station-meta-item" style="flex:1;align-items:flex-start;"><span class="station-meta-label" style="font-size:.55rem;">💾 RAM usada</span><span class="station-meta-value" id="siRam" style="color:var(--cyan);font-size:.75rem;min-width:4.5rem;white-space:nowrap;">—</span></div>
     <div class="station-meta-item" style="flex:1;align-items:flex-start;"><span class="station-meta-label" style="font-size:.55rem;">💾 RAM libre</span><span class="station-meta-value" id="siRamFree" style="color:var(--text);font-size:.75rem;min-width:4.5rem;white-space:nowrap;">—</span></div>
     <div class="station-meta-item" style="flex:1;align-items:flex-start;"><span class="station-meta-label" style="font-size:.55rem;">💿 Disco usado</span><span class="station-meta-value" id="siDisk" style="color:var(--amber);font-size:.75rem;min-width:4.5rem;white-space:nowrap;">—</span></div>
-    <div class="station-meta-item" style="flex:1;align-items:flex-start;"><span class="station-meta-label" style="font-size:.55rem;">💿 Libre</span><span 
+    <div class="station-meta-item" style="flex:1;align-items:flex-start;"><span class="station-meta-label" style="font-size:.55rem;">💿 Disco libre</span><span 
     
     class="station-meta-value" id="siDiskFree" style="color:var(--green);font-size:.75rem;min-width:4.5rem;white-space:nowrap;">—</span></div>
     <div class="station-divider" style="height:50px;"></div>
