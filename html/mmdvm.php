@@ -867,10 +867,7 @@ button.btn-header { font-family: var(--font-mono); }
     <div class="panel-label" style="color:#ffd700;">▸ NXDN Display</div>
     <div class="nextion-nxdn">
       <div class="nx-topbar nxdn-bar"><span class="nx-mode">NXDN · DIGITAL</span>
-      
-      <!-- <span style="color:#707000" id="nxdnStationLabel">EA3EIZ · ADER</span><span style="color:#ffd700;opacity:.85;min-width:5rem;text-align:right;font-size:.6rem;" id="nxdnTGLabel">—</span></div> -->
-
-
+      <span style="color:#707000" id="nxdnStationLabel"></span><span style="color:#ffd700;opacity:.85;min-width:5rem;text-align:right;font-size:.6rem;" id="nxdnTGLabel">—</span></div>
       <div class="nx-infobar nx-infobar-nxdn"><span class="nx-info-item"><span class="nx-info-lbl">PORT</span><span class="nx-info-val" id="nxdnNxPort">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">FRX</span><span class="nx-info-val" style="color:#ffd700" id="nxdnNxFrx">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">FTX</span><span class="nx-info-val" style="color:#ffc400" id="nxdnNxFtx">—</span></span><span class="nx-info-item"><span class="nx-info-lbl">IP</span><span class="nx-info-val" style="color:#ffe066" id="nxdnNxIp">—</span></span></div>
       <div class="nx-vu" id="nxdnVuLeft"></div><div class="nx-vu right" id="nxdnVuRight"></div>
       <div class="nx-center" id="nxdnNxCenter"><div class="nx-clock" id="nxdnNxClock" style="color:#ffd700;">00:00:00</div><div class="nx-date" id="nxdnNxDate" style="color:#b8a000;">—</div></div>
