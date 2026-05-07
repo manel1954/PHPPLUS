@@ -731,17 +731,17 @@ button.btn-header { font-family: var(--font-mono); }
 </div>
 </header>
 <main class="ctrl-body">
-<div class="station-card">
+<div class="station-card" style="gap:1rem;">
     <div class="station-card-main"><div class="station-callsign" id="scCallsign">📡 —</div></div>
     <div class="station-divider" style="height:50px;"></div>
-    <div class="station-meta-item"><span class="station-meta-label" style="font-size:.6rem;">🖥️ CPU</span><span class="station-meta-value" id="siCpu" style="color:var(--green);font-size:.8rem;">—</span></div>
-    <div class="station-meta-item"><span class="station-meta-label" style="font-size:.6rem;">🌡️ Temp</span><span class="station-meta-value" id="siTemp" style="color:var(--amber);font-size:.8rem;">—</span></div>
-    <div class="station-meta-item"><span class="station-meta-label" style="font-size:.6rem;">💾 RAM usada</span><span class="station-meta-value" id="siRam" style="color:var(--cyan);font-size:.8rem;">—</span></div>
-    <div class="station-meta-item"><span class="station-meta-label" style="font-size:.6rem;">💾 RAM libre</span><span class="station-meta-value" id="siRamFree" style="color:var(--text);font-size:.8rem;">—</span></div>
-    <div class="station-meta-item"><span class="station-meta-label" style="font-size:.6rem;">💿 Disco usado</span><span class="station-meta-value" id="siDisk" style="color:var(--amber);font-size:.8rem;">—</span></div>
-    <div class="station-meta-item"><span class="station-meta-label" style="font-size:.6rem;">💿 Disco libre</span><span class="station-meta-value" id="siDiskFree" style="color:var(--green);font-size:.8rem;">—</span></div>
+    <div class="station-meta-item"><span class="station-meta-label" style="font-size:.55rem;">🖥️ CPU</span><span class="station-meta-value" id="siCpu" style="color:var(--green);font-size:.75rem;">—</span></div>
+    <div class="station-meta-item"><span class="station-meta-label" style="font-size:.55rem;">🌡️ Temp</span><span class="station-meta-value" id="siTemp" style="color:var(--amber);font-size:.75rem;">—</span></div>
+    <div class="station-meta-item"><span class="station-meta-label" style="font-size:.55rem;">💾 RAM usada</span><span class="station-meta-value" id="siRam" style="color:var(--cyan);font-size:.75rem;">—</span></div>
+    <div class="station-meta-item"><span class="station-meta-label" style="font-size:.55rem;">💾 RAM libre</span><span class="station-meta-value" id="siRamFree" style="color:var(--text);font-size:.75rem;">—</span></div>
+    <div class="station-meta-item"><span class="station-meta-label" style="font-size:.55rem;">💿 Disco usado</span><span class="station-meta-value" id="siDisk" style="color:var(--amber);font-size:.75rem;">—</span></div>
+    <div class="station-meta-item"><span class="station-meta-label" style="font-size:.55rem;">💿 Disco libre</span><span class="station-meta-value" id="siDiskFree" style="color:var(--green);font-size:.75rem;">—</span></div>
     <div class="station-meta-item">
-        <span class="station-meta-label" id="siModelLabel" style="font-size:.6rem;"><?php
+        <span class="station-meta-label" id="siModelLabel" style="font-size:.55rem;"><?php
             $model = '';
             if (file_exists('/proc/device-tree/model'))
                 $model = trim(str_replace("\0", '', file_get_contents('/proc/device-tree/model')));
@@ -749,7 +749,10 @@ button.btn-header { font-family: var(--font-mono); }
             $ml = strtolower($model);
             echo str_contains($ml, 'raspberry') ? '🍓' : (str_contains($ml, 'orange') ? '🍊' : '🖥️');
         ?></span>
-        <span class="station-meta-value" id="siModel" style="color:var(--violet);font-size:.7rem;"><?php echo htmlspecialchars($model); ?></span>
+        <span class="station-meta-value" id="siModel" style="color:var(--violet);font-size:.7rem;"><?php
+            $modelShort = str_contains(strtolower($model), 'raspberry') ? substr($model, 0, 13) : $model;
+            echo htmlspecialchars($modelShort);
+        ?></span>
     </div>
 </div>
 <div class="status-bar">
