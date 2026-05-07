@@ -744,7 +744,7 @@ button.btn-header { font-family: var(--font-mono); }
     <div class="station-meta-item"><span class="station-meta-label">💾 RAM libre</span><span class="station-meta-value" id="siRamFree" style="color:var(--text);">—</span></div>
     <div class="station-meta-item"><span class="station-meta-label">💿 Disco usado</span><span class="station-meta-value" id="siDisk" style="color:var(--amber);">—</span></div>
     <div class="station-meta-item"><span class="station-meta-label">💿 Disco libre</span><span class="station-meta-value" id="siDiskFree" style="color:var(--green);">—</span></div>
-    <div class="station-meta-item"><span class="station-meta-label">🖥️ Máquina</span><span class="station-meta-value" id="siModel" style="color:var(--violet);font-size:.75rem;">—</span></div>
+    <div class="station-meta-item"><span class="station-meta-label" id="siModelLabel">🖥️</span><span class="station-meta-value" id="siModel" style="color:var(--violet);font-size:.75rem;">—</span></div>
 </div>
 <div class="status-bar">
 <div class="status-item"><div class="dot" id="dot-mosquitto"></div><span>Mosquitto</span></div>
@@ -1185,7 +1185,8 @@ function startMMDVMYSFLogs(){fetchMMDVMYSFLogs();mmdvmYsfTimer=setInterval(fetch
 function stopMMDVMYSFLogs(){clearInterval(mmdvmYsfTimer);mmdvmYsfTimer=null;}
 function startYSFTransmissionPoll(){fetchYSFTransmission();ysfTxTimer=setInterval(fetchYSFTransmission,4000);}
 async function fetchSysInfo(){try{const r=await fetch('?action=sysinfo');const d=await r.json();const cpuEl=document.getElementById('siCpu');cpuEl.textContent=d.cpu+' %';cpuEl.style.color=d.cpu>80?'var(--red)':d.cpu>50?'var(--amber)':'var(--green)';const tempEl=document.getElementById('siTemp');tempEl.textContent=d.temp||'—';const t=parseFloat(d.temp);tempEl.style.color=t>75?'var(--red)':t>60?'var(--amber)':'var(--green)';document.getElementById('siRam').textContent=d.ramUsed+' GB / '+d.ramTotal+' GB';document.getElementById('siRamFree').textContent=d.ramFree+' GB';document.getElementById('siDisk').textContent=d.diskUsed+' GB / '+d.diskTotal+' GB';document.getElementById('siDiskFree').textContent=d.diskFree+' GB';
-        const mEl=document.getElementById('siModel');if(mEl)mEl.textContent=d.model||'—';}catch(e){}}
+        const mEl=document.getElementById('siModel');if(mEl)mEl.textContent=d.model||'—';
+        const mLbl=document.getElementById('siModelLabel');if(mLbl){const ml=(d.model||'').toLowerCase();mLbl.textContent=ml.includes('raspberry')?'🍓':ml.includes('orange')?'🍊':'🖥️';}}catch(e){}}
 fetchSysInfo();setInterval(fetchSysInfo,8000);
 
 async function feditOpen(path){
