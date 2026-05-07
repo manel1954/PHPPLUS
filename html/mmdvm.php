@@ -740,19 +740,17 @@ button.btn-header { font-family: var(--font-mono); }
     <div class="station-meta-item" style="flex:1;align-items:center;"><span class="station-meta-label" style="font-size:.55rem;">💾 RAM libre</span><span class="station-meta-value" id="siRamFree" style="color:var(--text);font-size:.75rem;min-width:4.5rem;white-space:nowrap;">—</span></div>
     <div class="station-meta-item" style="flex:1;align-items:center;"><span class="station-meta-label" style="font-size:.55rem;">💿 Disco usado</span><span class="station-meta-value" id="siDisk" style="color:var(--amber);font-size:.75rem;min-width:4.5rem;white-space:nowrap;">—</span></div>
     <div class="station-meta-item" style="flex:1;align-items:center;"><span class="station-meta-label" style="font-size:.55rem;">💿 Disco libre</span><span class="station-meta-value" id="siDiskFree" style="color:var(--green);font-size:.75rem;min-width:4.5rem;white-space:nowrap;">—</span></div>
-    <div class="station-meta-item" style="flex:1;align-items:center;">
-        <span class="station-meta-label" id="siModelLabel" style="font-size:.69rem;"><?php
+    <div style="flex:1;display:flex;flex-direction:row;align-items:center;gap:.4rem;"><?php
             $model = '';
             if (file_exists('/proc/device-tree/model'))
                 $model = trim(str_replace("\0", '', file_get_contents('/proc/device-tree/model')));
             if ($model === '') $model = trim(shell_exec('uname -m 2>/dev/null') ?? '');
             $ml = strtolower($model);
-            echo str_contains($ml, 'raspberry') ? '🍓' : (str_contains($ml, 'orange') ? '🍊' : '🖥️');
-        ?></span>
-        <span class="station-meta-value" id="siModel" style="color:var(--violet);font-size:.7rem;white-space:nowrap;"><?php
-            $modelShort = str_contains(strtolower($model), 'raspberry') ? substr($model, 0, 14) : $model;
-            echo htmlspecialchars($modelShort);
-        ?></span>
+            $icon = str_contains($ml, 'raspberry') ? '🍓' : (str_contains($ml, 'orange') ? '🍊' : '🖥️');
+            $modelShort = str_contains($ml, 'raspberry') ? substr($model, 0, 14) : $model;
+        ?>
+        <span id="siModelLabel" style="font-size:1.4rem;line-height:1;"><?php echo $icon; ?></span>
+        <span class="station-meta-value" id="siModel" style="color:var(--violet);font-size:.7rem;white-space:nowrap;"><?php echo htmlspecialchars($modelShort); ?></span>
     </div>
 </div>
 <div class="status-bar">
