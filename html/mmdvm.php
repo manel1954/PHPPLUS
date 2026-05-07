@@ -731,16 +731,16 @@ button.btn-header { font-family: var(--font-mono); }
 </div>
 </header>
 <main class="ctrl-body">
-<div class="station-card" style="gap:1rem;">
+<div class="station-card" style="justify-content:space-between;">
     <div class="station-card-main"><div class="station-callsign" id="scCallsign">📡 —</div></div>
     <div class="station-divider" style="height:50px;"></div>
-    <div class="station-meta-item"><span class="station-meta-label" style="font-size:.55rem;">🖥️ CPU</span><span class="station-meta-value" id="siCpu" style="color:var(--green);font-size:.75rem;">—</span></div>
-    <div class="station-meta-item"><span class="station-meta-label" style="font-size:.55rem;">🌡️ Temp</span><span class="station-meta-value" id="siTemp" style="color:var(--amber);font-size:.75rem;">—</span></div>
-    <div class="station-meta-item"><span class="station-meta-label" style="font-size:.55rem;">💾 RAM usada</span><span class="station-meta-value" id="siRam" style="color:var(--cyan);font-size:.75rem;">—</span></div>
-    <div class="station-meta-item"><span class="station-meta-label" style="font-size:.55rem;">💾 RAM libre</span><span class="station-meta-value" id="siRamFree" style="color:var(--text);font-size:.75rem;">—</span></div>
-    <div class="station-meta-item"><span class="station-meta-label" style="font-size:.55rem;">💿 Disco usado</span><span class="station-meta-value" id="siDisk" style="color:var(--amber);font-size:.75rem;">—</span></div>
-    <div class="station-meta-item"><span class="station-meta-label" style="font-size:.55rem;">💿 Disco libre</span><span class="station-meta-value" id="siDiskFree" style="color:var(--green);font-size:.75rem;">—</span></div>
-    <div class="station-meta-item">
+    <div class="station-meta-item" style="flex:1;align-items:center;"><span class="station-meta-label" style="font-size:.55rem;">🖥️ CPU</span><span class="station-meta-value" id="siCpu" style="color:var(--green);font-size:.75rem;">—</span></div>
+    <div class="station-meta-item" style="flex:1;align-items:center;"><span class="station-meta-label" style="font-size:.55rem;">🌡️ Temp</span><span class="station-meta-value" id="siTemp" style="color:var(--amber);font-size:.75rem;">—</span></div>
+    <div class="station-meta-item" style="flex:1;align-items:center;"><span class="station-meta-label" style="font-size:.55rem;">💾 RAM usada</span><span class="station-meta-value" id="siRam" style="color:var(--cyan);font-size:.75rem;">—</span></div>
+    <div class="station-meta-item" style="flex:1;align-items:center;"><span class="station-meta-label" style="font-size:.55rem;">💾 RAM libre</span><span class="station-meta-value" id="siRamFree" style="color:var(--text);font-size:.75rem;">—</span></div>
+    <div class="station-meta-item" style="flex:1;align-items:center;"><span class="station-meta-label" style="font-size:.55rem;">💿 Disco usado</span><span class="station-meta-value" id="siDisk" style="color:var(--amber);font-size:.75rem;">—</span></div>
+    <div class="station-meta-item" style="flex:1;align-items:center;"><span class="station-meta-label" style="font-size:.55rem;">💿 Disco libre</span><span class="station-meta-value" id="siDiskFree" style="color:var(--green);font-size:.75rem;">—</span></div>
+    <div class="station-meta-item" style="flex:1;align-items:center;">
         <span class="station-meta-label" id="siModelLabel" style="font-size:.55rem;"><?php
             $model = '';
             if (file_exists('/proc/device-tree/model'))
