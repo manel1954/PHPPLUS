@@ -740,6 +740,17 @@ button.btn-header { font-family: var(--font-mono); }
     <div class="station-meta-item"><span class="station-meta-label">💾 RAM libre</span><span class="station-meta-value" id="siRamFree" style="color:var(--text);">—</span></div>
     <div class="station-meta-item"><span class="station-meta-label">💿 Disco usado</span><span class="station-meta-value" id="siDisk" style="color:var(--amber);">—</span></div>
     <div class="station-meta-item"><span class="station-meta-label">💿 Disco libre</span><span class="station-meta-value" id="siDiskFree" style="color:var(--green);">—</span></div>
+    <div class="station-meta-item">
+        <span class="station-meta-label" id="siModelLabel"><?php
+            $model = '';
+            if (file_exists('/proc/device-tree/model'))
+                $model = trim(str_replace("\0", '', file_get_contents('/proc/device-tree/model')));
+            if ($model === '') $model = trim(shell_exec('uname -m 2>/dev/null') ?? '');
+            $ml = strtolower($model);
+            echo str_contains($ml, 'raspberry') ? '🍓' : (str_contains($ml, 'orange') ? '🍊' : '🖥️');
+        ?></span>
+        <span class="station-meta-value" id="siModel" style="color:var(--violet);font-size:.75rem;"><?php echo htmlspecialchars($model); ?></span>
+    </div>
 </div>
 <div class="status-bar">
 <div class="status-item"><div class="dot" id="dot-mosquitto"></div><span>Mosquitto</span></div>
