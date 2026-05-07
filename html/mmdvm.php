@@ -469,11 +469,11 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-ui); f
 .btn-header.red:hover { background: rgba(255,69,96,.15); }
 button.btn-header { font-family: var(--font-mono); }
 .ctrl-body { padding: 2rem; max-width: 1400px; margin: 0 auto; }
-.station-card { background: linear-gradient(135deg,#111720 60%,#0d1e2a 100%); border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem 2rem; display: flex; align-items: center; gap: 2.5rem; margin-bottom: 1.8rem; flex-wrap: wrap; position: relative; overflow: hidden; }
+.station-card { background: linear-gradient(135deg,#111720 60%,#0d1e2a 100%); border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem 2rem; display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.8rem; flex-wrap: wrap; position: relative; overflow: hidden; }
 .station-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg,transparent,var(--cyan),var(--violet),transparent); }
 .station-card-main { display: flex; flex-direction: column; align-items: flex-start; gap: .3rem; }
 .station-callsign { font-family: var(--font-orb); font-size: 2.4rem; font-weight: 900; color: var(--cyan); letter-spacing: .08em; line-height: 1; text-shadow: 0 0 20px rgba(0,212,255,.4); }
-.station-divider { width: 5px; height: 70px; background: var(--border); flex-shrink: 0; }
+.station-divider { width: 2px; height: 70px; background: var(--border); flex-shrink: 0; }
 .station-meta-item { display: flex; flex-direction: column; gap: .15rem; }
 .station-meta-label { font-family: var(--font-mono); font-size: .6rem; color: var(--text-dim); letter-spacing: .15em; text-transform: uppercase; }
 .station-meta-value { font-family: var(--font-mono); font-size: .95rem; color: var(--amber); letter-spacing: .06em; font-weight: bold; }
