@@ -718,7 +718,7 @@ button.btn-header { font-family: var(--font-mono); }
     if ($model === '') $model = trim(shell_exec('uname -m 2>/dev/null') ?? '');
     $ml = strtolower($model);
     $icon = str_contains($ml, 'raspberry') ? '🍓' : (str_contains($ml, 'orange') ? '🍊' : '🖥️');
-    $modelShort = str_contains($ml, 'raspberry') ? substr($model, 0, 18) : $model;
+    $modelShort = str_contains($ml, 'raspberry') ? substr($model, 0, 14) : $model;
 ?>
 <h1><?php echo $icon; ?> PANEL CONTROL PHPPLUS · <?php echo htmlspecialchars($modelShort); ?></h1>
 </div>
