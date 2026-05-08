@@ -710,17 +710,8 @@ button.btn-header { font-family: var(--font-mono); }
 <body>
 <header class="ctrl-header">
 <div class="ctrl-header-top">
-<!-- <img src="Logo_ea3eiz.png" alt="EA3EIZ" style="height:40px;width:auto;"> -->
-<?php
-    $model = '';
-    if (file_exists('/proc/device-tree/model'))
-        $model = trim(str_replace("\0", '', file_get_contents('/proc/device-tree/model')));
-    if ($model === '') $model = trim(shell_exec('uname -m 2>/dev/null') ?? '');
-    $ml = strtolower($model);
-    $icon = str_contains($ml, 'raspberry') ? '🍓' : (str_contains($ml, 'orange') ? '🍊' : '🖥️');
-    $modelShort = str_contains($ml, 'raspberry') ? substr($model, 0, 14) : $model;
-?>
-<h1><?php echo $icon; ?> PANEL CONTROL PHPPLUS · <?php echo htmlspecialchars($modelShort); ?></h1>
+<img src="Logo_ea3eiz.png" alt="EA3EIZ" style="height:40px;width:auto;">
+<h1>PANEL SISTEMAS DIGITALES RADIOAFICIONADOS PHPPLUS</h1>
 </div>
 <div class="ctrl-header-btns">
 <a href="editor_general_config.php" class="btn-header red"> 📄 editor general </a>
