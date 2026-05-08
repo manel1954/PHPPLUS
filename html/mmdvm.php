@@ -710,7 +710,7 @@ button.btn-header { font-family: var(--font-mono); }
 <body>
 <header class="ctrl-header">
 <div class="ctrl-header-top">
-<img src="Logo_ea3eiz.png" alt="EA3EIZ" style="height:40px;width:auto;">
+<!-- <img src="Logo_ea3eiz.png" alt="EA3EIZ" style="height:40px;width:auto;"> -->
 <?php
     $model = '';
     if (file_exists('/proc/device-tree/model'))
