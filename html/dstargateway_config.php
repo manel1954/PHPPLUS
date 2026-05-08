@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     foreach ($parsed as $section => &$lines) {
         foreach ($lines as &$entry) {
             if ($entry['type'] === 'kv') {
-                $fieldKey = $section . '__' . $entry['key'];
+                $fieldKey = str_replace(' ', '_', $section) . '__' . $entry['key'];
                 if (isset($_POST[$fieldKey])) {
                     $entry['value'] = $_POST[$fieldKey];
                 }
@@ -144,12 +144,12 @@ foreach ($parsed as $section => $lines) {
     if (!empty($kvLines)) {
         echo '<div class="fields-grid">';
         foreach ($kvLines as $entry) {
-            $fieldKey = htmlspecialchars($section . '__' . $entry['key']);
+            $fieldKey = htmlspecialchars(str_replace(' ', '_', $section) . '__' . $entry['key']);
             $val = htmlspecialchars($entry['value']);
             $hint = $entry['comment'] ?? '';
-$isBool = !is_numeric($entry['value'])
-    && in_array(strtolower($entry['value']), ['true','false','yes','no','enable','disable','enabled','disabled']);            
-    echo '<div class="field-row">';
+            $isBool = !is_numeric($entry['value'])
+                && in_array(strtolower($entry['value']), ['true','false','yes','no','enable','disable','enabled','disabled']);
+            echo '<div class="field-row">';
             echo '<label class="field-label">' . htmlspecialchars($entry['key']) . '</label>';
             if ($isBool) {
                 echo '<select name="' . $fieldKey . '" class="field-input bool">';
