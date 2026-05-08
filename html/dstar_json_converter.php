@@ -54,25 +54,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'download') {
     $jsonOut = $result['json'];
 }
 
-// ── Acción: subir ficheros manualmente ───────────────────────────────────────
-if (isset($_POST['action']) && $_POST['action'] === 'upload') {
-    $all = [];
-    $map = [
-        'file_dextra' => 'XRF',
-        'file_dcs'    => 'DCS',
-        'file_xlx'    => 'XRF',
-    ];
-    foreach ($map as $field => $type) {
-        if (!empty($_FILES[$field]['tmp_name']) && $_FILES[$field]['error'] === UPLOAD_ERR_OK) {
-            $all = array_merge($all, parseTxt(file_get_contents($_FILES[$field]['tmp_name']), $type));
-        }
-    }
-    if (!empty($all)) {
-        $jsonOut = buildJson($all);
-    } else {
-        $errors[] = 'No se procesó ningún fichero. Sube al menos uno.';
-    }
-}
+
 
 // ── Acción: guardar en el servidor ───────────────────────────────────────────
 if (isset($_POST['action']) && $_POST['action'] === 'save') {
@@ -129,10 +111,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ui);min-heigh
 .btn-violet{background:var(--violet);color:#000;}
 .btn:hover{opacity:.85;}
 .desc{font-family:var(--font-mono);font-size:.75rem;color:var(--text-dim);margin-bottom:1rem;line-height:1.6;}
-.upload-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;}
-@media(max-width:600px){.upload-grid{grid-template-columns:1fr;}}
-.upload-item label{font-family:var(--font-mono);font-size:.65rem;color:var(--text-dim);letter-spacing:.12em;text-transform:uppercase;display:block;margin-bottom:.3rem;}
-.upload-item input[type=file]{background:#0a1018;border:1px solid var(--border);border-radius:3px;color:var(--dstar);font-family:var(--font-mono);font-size:.75rem;padding:.35rem .6rem;width:100%;}
+
 .badge{display:inline-block;font-family:var(--font-mono);font-size:.6rem;padding:.15rem .4rem;border-radius:2px;margin-left:.4rem;vertical-align:middle;}
 .badge-xrf{background:rgba(0,229,255,.15);color:var(--dstar);border:1px solid rgba(0,229,255,.3);}
 .badge-dcs{background:rgba(0,255,159,.15);color:var(--green);border:1px solid rgba(0,255,159,.3);}
@@ -183,31 +162,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ui);min-heigh
     </div>
   </div>
 
-  <!-- OPCIÓN 2: Subir ficheros manualmente -->
-  <div class="card">
-    <div class="card-title">Opción 2 · Subir ficheros .txt manualmente</div>
-    <div class="card-body">
-      <p class="desc">Si la Pi no tiene acceso a internet, sube los ficheros desde tu ordenador. Puedes subir solo los que tengas.</p>
-      <form method="POST" enctype="multipart/form-data">
-        <input type="hidden" name="action" value="upload">
-        <div class="upload-grid">
-          <div class="upload-item">
-            <label>DExtra_Hosts.txt <span class="badge badge-xrf">XRF</span></label>
-            <input type="file" name="file_dextra" accept=".txt">
-          </div>
-          <div class="upload-item">
-            <label>DCS_Hosts.txt <span class="badge badge-dcs">DCS</span></label>
-            <input type="file" name="file_dcs" accept=".txt">
-          </div>
-          <div class="upload-item">
-            <label>XLXHosts.txt <span class="badge badge-xrf">XRF</span></label>
-            <input type="file" name="file_xlx" accept=".txt">
-          </div>
-        </div>
-        <button type="submit" class="btn btn-cyan">⚙ Convertir ficheros</button>
-      </form>
-    </div>
-  </div>
+
 
   <!-- ERRORES -->
   <?php foreach ($errors as $e): ?>
