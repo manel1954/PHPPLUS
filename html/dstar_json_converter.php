@@ -1,13 +1,14 @@
 <?php
 require_once __DIR__ . '/auth.php';
 
+$iniPath = '/usr/local/share/dstargateway.d/DStar_Hosts.json';
+
 // ── Conversión de TXT a array de reflectores ──────────────────────────────────
 function parseTxt($content, $type) {
     $reflectors = [];
     foreach (explode("\n", $content) as $line) {
         $line = trim($line);
         if ($line === '' || $line[0] === '#') continue;
-        // Separar por tabulador o espacios múltiples
         $parts = preg_split('/[\t ]+/', $line, 2);
         if (count($parts) < 2) continue;
         $name = strtoupper(trim($parts[0]));
@@ -18,12 +19,18 @@ function parseTxt($content, $type) {
     return $reflectors;
 }
 
+function buildJson($all) {
+    $unique = [];
+    foreach ($all as $r) $unique[$r['name']] = $r;
+    ksort($unique);
+    return json_encode(['reflectors' => array_values($unique)], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+}
+
 // ── Descarga desde pistar.uk y convierte ─────────────────────────────────────
 function downloadAndConvert() {
     $sources = [
         ['url' => 'http://www.pistar.uk/downloads/DExtra_Hosts.txt', 'type' => 'XRF'],
         ['url' => 'http://www.pistar.uk/downloads/DCS_Hosts.txt',    'type' => 'DCS'],
-        ['url' => 'http://www.pistar.uk/downloads/DPlus_Hosts.txt',  'type' => 'REF'],
         ['url' => 'http://www.pistar.uk/downloads/XLXHosts.txt',     'type' => 'XRF'],
     ];
     $all = []; $errors = [];
@@ -33,23 +40,18 @@ function downloadAndConvert() {
             $errors[] = 'No se pudo descargar: ' . $src['url'];
             continue;
         }
-        $parsed = parseTxt($content, $src['type']);
-        $all = array_merge($all, $parsed);
+        $all = array_merge($all, parseTxt($content, $src['type']));
     }
-    // Eliminar duplicados por nombre (el último gana)
-    $unique = [];
-    foreach ($all as $r) $unique[$r['name']] = $r;
-    ksort($unique);
-    return ['reflectors' => array_values($unique), 'errors' => $errors];
+    return ['json' => buildJson($all), 'errors' => $errors];
 }
 
-$result = null; $jsonOut = ''; $errors = [];
+$jsonOut = ''; $errors = []; $saveMsg = ''; $saveMsgType = '';
 
 // ── Acción: descarga automática ───────────────────────────────────────────────
 if (isset($_POST['action']) && $_POST['action'] === 'download') {
-    $result = downloadAndConvert();
+    $result  = downloadAndConvert();
     $errors  = $result['errors'];
-    $jsonOut = json_encode(['reflectors' => $result['reflectors']], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+    $jsonOut = $result['json'];
 }
 
 // ── Acción: subir ficheros manualmente ───────────────────────────────────────
@@ -58,22 +60,35 @@ if (isset($_POST['action']) && $_POST['action'] === 'upload') {
     $map = [
         'file_dextra' => 'XRF',
         'file_dcs'    => 'DCS',
-        'file_dplus'  => 'REF',
         'file_xlx'    => 'XRF',
     ];
     foreach ($map as $field => $type) {
         if (!empty($_FILES[$field]['tmp_name']) && $_FILES[$field]['error'] === UPLOAD_ERR_OK) {
-            $content = file_get_contents($_FILES[$field]['tmp_name']);
-            $all = array_merge($all, parseTxt($content, $type));
+            $all = array_merge($all, parseTxt(file_get_contents($_FILES[$field]['tmp_name']), $type));
         }
     }
     if (!empty($all)) {
-        $unique = [];
-        foreach ($all as $r) $unique[$r['name']] = $r;
-        ksort($unique);
-        $jsonOut = json_encode(['reflectors' => array_values($unique)], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        $jsonOut = buildJson($all);
     } else {
         $errors[] = 'No se procesó ningún fichero. Sube al menos uno.';
+    }
+}
+
+// ── Acción: guardar en el servidor ───────────────────────────────────────────
+if (isset($_POST['action']) && $_POST['action'] === 'save') {
+    $json = $_POST['json_content'] ?? '';
+    if ($json === '') {
+        $saveMsg = 'No hay JSON que guardar.'; $saveMsgType = 'err';
+    } else {
+        $jsonOut = $json;
+        $dir = dirname($iniPath);
+        if (!is_dir($dir)) {
+            $saveMsg = 'El directorio ' . $dir . ' no existe.'; $saveMsgType = 'err';
+        } elseif (file_put_contents($iniPath, $json) !== false) {
+            $saveMsg = '✔ Guardado correctamente en ' . $iniPath; $saveMsgType = 'ok';
+        } else {
+            $saveMsg = '✖ Error al escribir en ' . $iniPath . '. Comprueba permisos.'; $saveMsgType = 'err';
+        }
     }
 }
 
@@ -106,12 +121,13 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ui);min-heigh
 .card-title{background:linear-gradient(90deg,#0d1e2a,#111720);border-bottom:1px solid var(--border);padding:.6rem 1.2rem;font-family:var(--font-mono);font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:var(--dstar);}
 .card-title::before{content:'▸ ';}
 .card-body{padding:1.2rem;}
-.btn{font-family:var(--font-mono);font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;border:none;border-radius:6px;padding:.6rem 1.8rem;cursor:pointer;transition:opacity .2s;}
+.btn{font-family:var(--font-mono);font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;border:none;border-radius:6px;padding:.6rem 1.8rem;cursor:pointer;transition:opacity .2s;display:inline-block;}
 .btn-green{background:var(--green);color:#000;}
 .btn-cyan{background:var(--dstar);color:#000;}
 .btn-amber{background:var(--amber);color:#000;}
+.btn-red{background:var(--red);color:#fff;}
+.btn-violet{background:var(--violet);color:#000;}
 .btn:hover{opacity:.85;}
-.btn:disabled{opacity:.4;cursor:not-allowed;}
 .desc{font-family:var(--font-mono);font-size:.75rem;color:var(--text-dim);margin-bottom:1rem;line-height:1.6;}
 .upload-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;}
 @media(max-width:600px){.upload-grid{grid-template-columns:1fr;}}
@@ -120,11 +136,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ui);min-heigh
 .badge{display:inline-block;font-family:var(--font-mono);font-size:.6rem;padding:.15rem .4rem;border-radius:2px;margin-left:.4rem;vertical-align:middle;}
 .badge-xrf{background:rgba(0,229,255,.15);color:var(--dstar);border:1px solid rgba(0,229,255,.3);}
 .badge-dcs{background:rgba(0,255,159,.15);color:var(--green);border:1px solid rgba(0,255,159,.3);}
-.badge-ref{background:rgba(255,179,0,.15);color:var(--amber);border:1px solid rgba(255,179,0,.3);}
 .alert{font-family:var(--font-mono);font-size:.78rem;padding:.6rem 1rem;border-radius:4px;border:1px solid;margin-bottom:.8rem;}
 .alert-err{background:rgba(255,69,96,.07);border-color:var(--red);color:var(--red);}
 .alert-ok{background:rgba(0,255,159,.07);border-color:var(--green);color:var(--green);}
-.json-output{font-family:var(--font-mono);font-size:.72rem;color:#7a9ab5;background:#060c10;border:1px solid var(--border);border-radius:4px;padding:.8rem;height:320px;overflow-y:auto;white-space:pre;word-break:break-all;margin-bottom:1rem;}
+.json-output{font-family:var(--font-mono);font-size:.72rem;color:#7a9ab5;background:#060c10;border:1px solid var(--border);border-radius:4px;padding:.8rem;height:320px;overflow-y:auto;white-space:pre;margin-bottom:1rem;}
 .json-output::-webkit-scrollbar{width:4px;}
 .json-output::-webkit-scrollbar-thumb{background:var(--border);}
 .stats{display:flex;gap:1.5rem;flex-wrap:wrap;margin-bottom:1rem;}
@@ -132,9 +147,17 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ui);min-heigh
 .stat span{font-weight:bold;}
 .stat-xrf span{color:var(--dstar);}
 .stat-dcs span{color:var(--green);}
-.stat-ref span{color:var(--amber);}
 .stat-total span{color:#fff;}
-.divider{border:none;border-top:1px solid var(--border);margin:1.2rem 0;}
+.btn-row{display:flex;gap:.8rem;flex-wrap:wrap;align-items:center;}
+.path-note{font-family:var(--font-mono);font-size:.65rem;color:var(--text-dim);margin-top:.5rem;}
+/* Modal confirmación */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9000;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:2rem;min-width:380px;max-width:90vw;}
+.modal-title{font-family:var(--font-mono);font-size:.8rem;color:var(--amber);letter-spacing:.12em;text-transform:uppercase;margin-bottom:1rem;}
+.modal-body{font-family:var(--font-mono);font-size:.78rem;color:var(--text);margin-bottom:1.5rem;line-height:1.6;}
+.modal-body strong{color:var(--dstar);}
+.modal-btns{display:flex;gap:.8rem;}
 </style>
 </head>
 <body>
@@ -152,7 +175,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ui);min-heigh
   <div class="card">
     <div class="card-title">Opción 1 · Descarga automática desde pistar.uk</div>
     <div class="card-body">
-      <p class="desc">Descarga directamente DExtra_Hosts.txt, DCS_Hosts.txt, DPlus_Hosts.txt y XLXHosts.txt desde pistar.uk y los convierte al formato DStar_Hosts.json en un solo click. La Pi necesita acceso a internet.</p>
+      <p class="desc">Descarga DExtra_Hosts.txt, DCS_Hosts.txt y XLXHosts.txt desde pistar.uk y los convierte al formato DStar_Hosts.json. La Pi necesita acceso a internet.</p>
       <form method="POST">
         <input type="hidden" name="action" value="download">
         <button type="submit" class="btn btn-green">⬇ Descargar y convertir ahora</button>
@@ -164,7 +187,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ui);min-heigh
   <div class="card">
     <div class="card-title">Opción 2 · Subir ficheros .txt manualmente</div>
     <div class="card-body">
-      <p class="desc">Si la Pi no tiene acceso a internet, sube los ficheros desde tu ordenador. Puedes subir solo los que tengas, no es obligatorio subir los cuatro.</p>
+      <p class="desc">Si la Pi no tiene acceso a internet, sube los ficheros desde tu ordenador. Puedes subir solo los que tengas.</p>
       <form method="POST" enctype="multipart/form-data">
         <input type="hidden" name="action" value="upload">
         <div class="upload-grid">
@@ -177,10 +200,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ui);min-heigh
             <input type="file" name="file_dcs" accept=".txt">
           </div>
           <div class="upload-item">
-            <label>DPlus_Hosts.txt <span class="badge badge-ref">REF</span></label>
-            <input type="file" name="file_dplus" accept=".txt">
-          </div>
-          <div class="upload-item">
             <label>XLXHosts.txt <span class="badge badge-xrf">XRF</span></label>
             <input type="file" name="file_xlx" accept=".txt">
           </div>
@@ -190,20 +209,23 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ui);min-heigh
     </div>
   </div>
 
-  <!-- RESULTADO -->
-  <?php if (!empty($errors)): ?>
-    <?php foreach ($errors as $e): ?>
-      <div class="alert alert-err">✖ <?= htmlspecialchars($e) ?></div>
-    <?php endforeach; ?>
+  <!-- ERRORES -->
+  <?php foreach ($errors as $e): ?>
+    <div class="alert alert-err">✖ <?= htmlspecialchars($e) ?></div>
+  <?php endforeach; ?>
+
+  <!-- MENSAJE GUARDADO -->
+  <?php if ($saveMsg !== ''): ?>
+    <div class="alert alert-<?= $saveMsgType ?>"><?= htmlspecialchars($saveMsg) ?></div>
   <?php endif; ?>
 
+  <!-- RESULTADO -->
   <?php if ($jsonOut !== ''): ?>
   <?php
     $decoded = json_decode($jsonOut, true);
     $total = count($decoded['reflectors'] ?? []);
-    $cXRF = count(array_filter($decoded['reflectors'] ?? [], fn($r) => $r['reflector_type'] === 'XRF'));
-    $cDCS = count(array_filter($decoded['reflectors'] ?? [], fn($r) => $r['reflector_type'] === 'DCS'));
-    $cREF = count(array_filter($decoded['reflectors'] ?? [], fn($r) => $r['reflector_type'] === 'REF'));
+    $cXRF  = count(array_filter($decoded['reflectors'] ?? [], fn($r) => $r['reflector_type'] === 'XRF'));
+    $cDCS  = count(array_filter($decoded['reflectors'] ?? [], fn($r) => $r['reflector_type'] === 'DCS'));
   ?>
   <div class="card">
     <div class="card-title">Resultado · DStar_Hosts.json generado</div>
@@ -213,17 +235,48 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ui);min-heigh
         <div class="stat stat-total">Total: <span><?= $total ?></span></div>
         <div class="stat stat-xrf">XRF/XLX: <span><?= $cXRF ?></span></div>
         <div class="stat stat-dcs">DCS: <span><?= $cDCS ?></span></div>
-        <div class="stat stat-ref">REF: <span><?= $cREF ?></span></div>
       </div>
       <div class="json-output"><?= htmlspecialchars($jsonOut) ?></div>
-      <form method="POST" action="?dl=1">
-        <input type="hidden" name="json_content" value="<?= htmlspecialchars($jsonOut) ?>">
-        <button type="submit" class="btn btn-amber">💾 Descargar DStar_Hosts.json</button>
-      </form>
+      <div class="btn-row">
+        <!-- Descargar en el Mac -->
+        <form method="POST" action="?dl=1" style="display:inline;">
+          <input type="hidden" name="json_content" value="<?= htmlspecialchars($jsonOut) ?>">
+          <button type="submit" class="btn btn-amber">💾 Descargar DStar_Hosts.json</button>
+        </form>
+        <!-- Guardar en el servidor -->
+        <button class="btn btn-violet" onclick="openModal()">📂 Guardar en el servidor</button>
+      </div>
+      <p class="path-note">Ruta servidor: <?= htmlspecialchars($iniPath) ?></p>
+    </div>
+  </div>
+
+  <!-- Modal confirmación guardar -->
+  <div id="modalOverlay" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-title">⚠ Confirmar guardado</div>
+      <div class="modal-body">
+        ¿Quieres guardar el JSON generado en el servidor?<br><br>
+        Ruta: <strong><?= htmlspecialchars($iniPath) ?></strong><br><br>
+        Esto <strong>sobreescribirá</strong> el fichero actual si existe.
+      </div>
+      <div class="modal-btns">
+        <form method="POST">
+          <input type="hidden" name="action" value="save">
+          <input type="hidden" name="json_content" value="<?= htmlspecialchars($jsonOut) ?>">
+          <button type="submit" class="btn btn-green">✔ Sí, guardar</button>
+        </form>
+        <button class="btn btn-red" onclick="closeModal()">✖ Cancelar</button>
+      </div>
     </div>
   </div>
   <?php endif; ?>
 
 </div>
+
+<script>
+function openModal(){document.getElementById('modalOverlay').classList.add('open');}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('open');}
+document.getElementById('modalOverlay')?.addEventListener('click',function(e){if(e.target===this)closeModal();});
+</script>
 </body>
 </html>
