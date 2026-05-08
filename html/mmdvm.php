@@ -720,7 +720,7 @@ button.btn-header { font-family: var(--font-mono); }
     $icon = str_contains($ml, 'raspberry') ? '🍓' : (str_contains($ml, 'orange') ? '🍊' : '🖥️');
     $modelShort = str_contains($ml, 'raspberry') ? substr($model, 0, 14) : $model;
 ?>
-<h1><?php echo $icon; ?> PANEL CONTROL PHPPLUS · <?php style="color:#f00" echo htmlspecialchars($modelShort); ?></h1>
+<h1><?php echo $icon; ?> PANEL CONTROL PHPPLUS · <?php echo htmlspecialchars($modelShort); ?></h1>
 </div>
 <div class="ctrl-header-btns">
 <a href="editor_general_config.php" class="btn-header red"> 📄 editor general </a>
