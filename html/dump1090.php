@@ -232,7 +232,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-ui); h
 .status-dot.activating { background: var(--amber); box-shadow: 0 0 4px var(--amber); animation: pulse-amber 1s infinite; }
 </style>
 </head>
-<body>
+<body class="bg-dark text-white">
 <!-- HEADER -->
 
 <nav class="navbar navbar-expand-md navbar-granate">
@@ -251,7 +251,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-ui); h
     </div>
     
 </nav>
-<div class="container py-4">
+
     <div>
         <div class="ex-title">✈ dump1090-fa · Control</div>
         <div class="ex-subtitle">SDR · FlightAware · dump1090-fa.service</div>
