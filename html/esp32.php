@@ -51,6 +51,16 @@ button{ background:var(--primary); color:white; } button:hover{ opacity:.9; } bu
 </head>
 <body>
 <header>
+
+
+<div style="margin-bottom: 16px; display:flex; justify-content:center;">
+    <a href="mmdvm.php" class="btn btn-outline-light btn-sm">
+    <i class="bi bi-house-fill me-1"></i> Panel PHPPLUS
+</a>
+
+
+
+
     <h1>Programador WEB-ESP32 by @ REM . ADER</h1>
     <div class="env-info">
         <span class="badge badge-success">IP: <?php echo $server_ip; ?></span>
@@ -62,10 +72,7 @@ button{ background:var(--primary); color:white; } button:hover{ opacity:.9; } bu
 
 
 
-<div style="margin-bottom: 16px; display:flex; justify-content:center;">
-    <a href="mmdvm.php" class="btn btn-outline-light btn-sm">
-    <i class="bi bi-house-fill me-1"></i> Panel PHPPLUS
-</a>
+
 
 
 
