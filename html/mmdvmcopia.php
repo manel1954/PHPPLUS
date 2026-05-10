@@ -469,11 +469,11 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-ui); f
 .btn-header.red:hover { background: rgba(255,69,96,.15); }
 button.btn-header { font-family: var(--font-mono); }
 .ctrl-body { padding: 2rem; max-width: 1400px; margin: 0 auto; }
-.station-card { background: linear-gradient(135deg,#111720 60%,#0d1e2a 100%); border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem 2rem; display: flex; align-items: center; gap: 2.5rem; margin-bottom: 1.8rem; flex-wrap: wrap; position: relative; overflow: hidden; }
+.station-card { background: linear-gradient(135deg,#111720 60%,#0d1e2a 100%); border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem 2rem; display: flex; align-items: center; gap: 2.0rem; margin-bottom: 1.8rem; flex-wrap: wrap; position: relative; overflow: hidden; }
 .station-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg,transparent,var(--cyan),var(--violet),transparent); }
 .station-card-main { display: flex; flex-direction: column; align-items: flex-start; gap: .3rem; }
 .station-callsign { font-family: var(--font-orb); font-size: 2.4rem; font-weight: 900; color: var(--cyan); letter-spacing: .08em; line-height: 1; text-shadow: 0 0 20px rgba(0,212,255,.4); }
-.station-divider { width: 1px; height: 70px; background: var(--border); flex-shrink: 0; }
+.station-divider { width: 2px; height: 70px; background: var(--border); flex-shrink: 0; }
 .station-meta-item { display: flex; flex-direction: column; gap: .15rem; }
 .station-meta-label { font-family: var(--font-mono); font-size: .6rem; color: var(--text-dim); letter-spacing: .15em; text-transform: uppercase; }
 .station-meta-value { font-family: var(--font-mono); font-size: .95rem; color: var(--amber); letter-spacing: .06em; font-weight: bold; }
@@ -670,7 +670,7 @@ button.btn-header { font-family: var(--font-mono); }
 .dropdown-menu-custom { display: none; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); background: var(--surface); border: 1px solid var(--border); border-radius: 6px; min-width: 270px; z-index: 1000; box-shadow: 0 8px 24px rgba(0,0,0,.5); overflow: hidden; padding-top: .4rem; }
 .dropdown-wrap:hover .dropdown-menu-custom { display: block; }
 .dropdown-wrap::after { content: ''; position: absolute; top: 100%; left: 0; right: 0; height: .4rem; }
-.dropdown-item-custom { display: block; width: 100%; padding: .55rem 1rem; font-family: var(--font-mono); font-size: .75rem; letter-spacing: .07em; text-transform: uppercase; color: var(--text); background: none; border: none; cursor: pointer; text-align: left; transition: background .15s, color .15s; border-bottom: 1px solid var(--border); }
+.dropdown-item-custom { display: block; width: 100%; padding: .55rem 1rem; font-family: var(--font-mono); font-size: .75rem; letter-spacing: .04em; text-transform: uppercase; color: var(--text); background: none; border: none; cursor: pointer; text-align: left; transition: background .15s, color .15s; border-bottom: 1px solid var(--border); }
 .dropdown-item-custom:last-child { border-bottom: none; }
 .dropdown-item-custom:hover { background: rgba(0,212,255,.08); color: var(--cyan); }
 .update-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.8); z-index: 9500; align-items: center; justify-content: center; }
@@ -711,7 +711,7 @@ button.btn-header { font-family: var(--font-mono); }
 <header class="ctrl-header">
 <div class="ctrl-header-top">
 <img src="Logo_ea3eiz.png" alt="EA3EIZ" style="height:40px;width:auto;">
-<h1>PANEL SISTEMAS DIGITALES RADIOAFICIONADOS PHPPLUS</h1>
+<h1>PANEL SISTEMAS DIGITALES PARA RADIOAFICIONADOS PHPPLUS</h1>
 </div>
 <div class="ctrl-header-btns">
 <a href="editor_general_config.php" class="btn-header red"> 📄 editor general </a>
@@ -723,6 +723,7 @@ button.btn-header { font-family: var(--font-mono); }
     <button class="dropdown-item-custom" onclick="runUpdate('imagen')">🖼 Actualizar Imagen</button>
     <button class="dropdown-item-custom" onclick="runUpdate('ids')">📋 Actualizar IDs</button>
     <button class="dropdown-item-custom" onclick="runUpdate('ysf')">📡 Actualizar Reflectores YSF</button>
+    <button class="dropdown-item-custom" onclick="window.location.href='dstar_json_converter.php'">📡 Actualizar Reflectores D-STAR</button>
   </div>
 </div>
 <button class="btn-header cyan" onclick="xtTtydOpen()">⌨ Terminal</button>
@@ -731,25 +732,29 @@ button.btn-header { font-family: var(--font-mono); }
 </div>
 </header>
 <main class="ctrl-body">
-<div class="station-card">
+<div class="station-card" style="justify-content:space-between;">
     <div class="station-card-main"><div class="station-callsign" id="scCallsign">📡 —</div></div>
     <div class="station-divider" style="height:50px;"></div>
-    <div class="station-meta-item"><span class="station-meta-label">🖥️ CPU</span><span class="station-meta-value" id="siCpu" style="color:var(--green);">—</span></div>
-    <div class="station-meta-item"><span class="station-meta-label">🌡️ Temp</span><span class="station-meta-value" id="siTemp" style="color:var(--amber);">—</span></div>
-    <div class="station-meta-item"><span class="station-meta-label">💾 RAM usada</span><span class="station-meta-value" id="siRam" style="color:var(--cyan);">—</span></div>
-    <div class="station-meta-item"><span class="station-meta-label">💾 RAM libre</span><span class="station-meta-value" id="siRamFree" style="color:var(--text);">—</span></div>
-    <div class="station-meta-item"><span class="station-meta-label">💿 Disco usado</span><span class="station-meta-value" id="siDisk" style="color:var(--amber);">—</span></div>
-    <div class="station-meta-item"><span class="station-meta-label">💿 Disco libre</span><span class="station-meta-value" id="siDiskFree" style="color:var(--green);">—</span></div>
-    <div class="station-meta-item">
-        <span class="station-meta-label" id="siModelLabel"><?php
+    <div class="station-meta-item" style="flex:1;align-items:flex-start;"><span class="station-meta-label" style="font-size:.55rem;">🖥️ CPU</span><span class="station-meta-value" id="siCpu" style="color:var(--green);font-size:.75rem;min-width:4.5rem;white-space:nowrap;">—</span></div>
+    <div class="station-meta-item" style="flex:1;align-items:flex-start;"><span class="station-meta-label" style="font-size:.55rem;">🌡️ Temp</span><span class="station-meta-value" id="siTemp" style="color:var(--amber);font-size:.75rem;min-width:4.5rem;white-space:nowrap;">—</span></div>
+    <div class="station-meta-item" style="flex:1;align-items:flex-start;"><span class="station-meta-label" style="font-size:.55rem;">💾 RAM usada</span><span class="station-meta-value" id="siRam" style="color:var(--cyan);font-size:.75rem;min-width:4.5rem;white-space:nowrap;">—</span></div>
+    <div class="station-meta-item" style="flex:1;align-items:flex-start;"><span class="station-meta-label" style="font-size:.55rem;">💾 RAM libre</span><span class="station-meta-value" id="siRamFree" style="color:var(--text);font-size:.75rem;min-width:4.5rem;white-space:nowrap;">—</span></div>
+    <div class="station-meta-item" style="flex:1;align-items:flex-start;"><span class="station-meta-label" style="font-size:.55rem;">💿 Disco usado</span><span class="station-meta-value" id="siDisk" style="color:var(--amber);font-size:.75rem;min-width:4.5rem;white-space:nowrap;">—</span></div>
+    <div class="station-meta-item" style="flex:1;align-items:flex-start;"><span class="station-meta-label" style="font-size:.55rem;">💿 Libre</span><span 
+    
+    class="station-meta-value" id="siDiskFree" style="color:var(--green);font-size:.75rem;min-width:4.5rem;white-space:nowrap;">—</span></div>
+    <div class="station-divider" style="height:50px;"></div>
+    <div style="flex:1;display:flex;flex-direction:row;align-items:center;gap:.4rem;"><?php
             $model = '';
             if (file_exists('/proc/device-tree/model'))
                 $model = trim(str_replace("\0", '', file_get_contents('/proc/device-tree/model')));
             if ($model === '') $model = trim(shell_exec('uname -m 2>/dev/null') ?? '');
             $ml = strtolower($model);
-            echo str_contains($ml, 'raspberry') ? '🍓' : (str_contains($ml, 'orange') ? '🍊' : '🖥️');
-        ?></span>
-        <span class="station-meta-value" id="siModel" style="color:var(--violet);font-size:.75rem;"><?php echo htmlspecialchars($model); ?></span>
+            $icon = str_contains($ml, 'raspberry') ? '🍓' : (str_contains($ml, 'orange') ? '🍊' : '🖥️');
+            $modelShort = str_contains($ml, 'raspberry') ? substr($model, 0, 14) : $model;
+        ?>
+        <span id="siModelLabel" style="font-size:1.4rem;line-height:1;"><?php echo $icon; ?></span>
+        <span class="station-meta-value" id="siModel" style="color:var(--violet);font-size:.7rem;white-space:nowrap;"><?php echo htmlspecialchars($modelShort); ?></span>
     </div>
 </div>
 <div class="status-bar">
