@@ -53,10 +53,6 @@ button{ background:var(--primary); color:white; } button:hover{ opacity:.9; } bu
 <header>
 
 
-<div style="margin-bottom: 16px; display:flex; justify-content:center;">
-    <a href="mmdvm.php" class="btn btn-outline-light btn-sm">
-    <i class="bi bi-house-fill me-1"></i> Panel PHPPLUS
-</a>
 
 
 
@@ -79,6 +75,15 @@ button{ background:var(--primary); color:white; } button:hover{ opacity:.9; } bu
 <div class="card">
     <div id="status" class="status">Esperando conexión...</div>
     <div class="btn-group">
+
+
+
+
+    <div style="margin-bottom: 16px; display:flex; justify-content:center;">
+    <a href="mmdvm.php" class="btn btn-outline-light btn-sm">
+    <i class="bi bi-house-fill me-1"></i> Panel PHPPLUS
+</a>
+
         <button id="connectBtn">🔌 Conectar</button>
         <button id="disconnectBtn" class="danger hidden">❌ Desconectar</button>
         <button id="eraseBtn" class="warning">🗑️ Borrar Flash</button>
