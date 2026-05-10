@@ -227,6 +227,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-ui); h
 </head>
 <body>
 <!-- HEADER -->
+
 <nav class="navbar navbar-expand-md navbar-granate">
     <div class="container">
         <a class="navbar-brand" href="#">
@@ -242,7 +243,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-ui); h
         </a>
     </div>
 </nav>
-<!-- <header class="ex-header"> -->
+
     <div>
         <div class="ex-title">✈ dump1090-fa · Control</div>
         <div class="ex-subtitle">SDR · FlightAware · dump1090-fa.service</div>
@@ -258,7 +259,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-ui); h
         <button class="btn-ex btn-green" onclick="fetchDump1090Log()">⟳ Log</button>
         <button class="btn-ex btn-red"   onclick="cerrarVentana()">✖ Cerrar</button>
     </div>
-</header>
+
 
 <div class="auto-bar">
     <span class="auto-label">🔌 Autostart</span>
