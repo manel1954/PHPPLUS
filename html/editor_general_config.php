@@ -353,13 +353,13 @@ body { background: var(--bg-base); color: var(--text-main); font-family: var(--f
 
 <div class="page-header">
     <div class="page-header-inner" style="display:flex; flex-direction:column; align-items:center; text-align:center; gap:12px;">
-        <div>
+        <div style="display:flex; align-items:center; gap:16px;">
             <h1><i class="bi bi-sliders"></i> &nbsp;EDITOR GENERAL</h1>
-            <span class="badge-subtitle">MMDVMHost · YSF · D-STAR · NXDN</span>
+            <a href="mmdvm.php" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-house-fill me-1"></i> Panel PHPPLUS
+            </a>
         </div>
-        <a href="mmdvm.php" class="btn btn-outline-light btn-sm">
-            <i class="bi bi-house-fill me-1"></i> Panel PHPPLUS
-        </a>
+        <span class="badge-subtitle">MMDVMHost · YSF · D-STAR · NXDN</span>
     </div>
 </div>
 
