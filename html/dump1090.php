@@ -242,7 +242,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-ui); h
         </a>
     </div>
 </nav>
-<header class="ex-header">
+<!-- <header class="ex-header"> -->
     <div>
         <div class="ex-title">✈ dump1090-fa · Control</div>
         <div class="ex-subtitle">SDR · FlightAware · dump1090-fa.service</div>
