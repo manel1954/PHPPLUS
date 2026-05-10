@@ -249,6 +249,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-ui); h
             <i class="bi bi-house-fill me-1"></i> Panel PHPPLUS
         </a>
     </div>
+    </div>
 </nav>
 
     <div>
