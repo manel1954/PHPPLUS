@@ -249,9 +249,9 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-ui); h
             <i class="bi bi-house-fill me-1"></i> Panel PHPPLUS
         </a>
     </div>
-    </div>
+    
 </nav>
-
+<div class="container py-4">
     <div>
         <div class="ex-title">✈ dump1090-fa · Control</div>
         <div class="ex-subtitle">SDR · FlightAware · dump1090-fa.service</div>
