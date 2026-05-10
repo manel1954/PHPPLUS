@@ -131,13 +131,6 @@ if ($action === 'terminal') {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>✈ dump1090-fa · Control</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@500;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
-
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-
-
-
 <style>
 :root {
     --bg: #0a0e14; --surface: #111720; --border: #1e2d3d;
@@ -232,7 +225,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-ui); h
 .status-dot.activating { background: var(--amber); box-shadow: 0 0 4px var(--amber); animation: pulse-amber 1s infinite; }
 </style>
 </head>
-<body class="bg-dark text-white">
+<body>
 <!-- HEADER -->
 
 <nav class="navbar navbar-expand-md navbar-granate">
@@ -249,7 +242,6 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-ui); h
             <i class="bi bi-house-fill me-1"></i> Panel PHPPLUS
         </a>
     </div>
-    
 </nav>
 
     <div>
@@ -267,7 +259,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-ui); h
         <button class="btn-ex btn-green" onclick="fetchDump1090Log()">⟳ Log</button>
         <button class="btn-ex btn-red"   onclick="cerrarVentana()">✖ Cerrar</button>
     </div>
-
+</header>
 
 <div class="auto-bar">
     <span class="auto-label">🔌 Autostart</span>
