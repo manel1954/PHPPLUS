@@ -167,6 +167,12 @@ setInterval(() => {
 <button class="stop"    name="action" value="stop">⏹️ Parar</button>
 <button class="restart" name="action" value="restart">🔄 Reiniciar</button>
 
+
+<a href="mmdvm.php" class="btn btn-outline-light">
+        <i class="bi bi-house-door-fill me-1"></i>
+        Panel PHPPLUS
+    </a>
+
 <!-- 🔁 BOTÓN TOGGLE AUTOARRANQUE -->
 <?php if ($enabled): ?>
     <button class="autoarranque-on" name="action" value="disable">
