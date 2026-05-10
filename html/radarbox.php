@@ -168,10 +168,7 @@ setInterval(() => {
 <button class="restart" name="action" value="restart">🔄 Reiniciar</button>
 
 
-<a href="mmdvm.php" class="btn btn-outline-light">
-        <i class="bi bi-house-door-fill me-1"></i>
-        Panel PHPPLUS
-    </a>
+
 
 <!-- 🔁 BOTÓN TOGGLE AUTOARRANQUE -->
 <?php if ($enabled): ?>
@@ -183,7 +180,10 @@ setInterval(() => {
         ❌ Autoarranque OFF
     </button>
 <?php endif; ?>
-
+<a href="mmdvm.php" class="btn btn-outline-light">
+        <i class="bi bi-house-door-fill me-1"></i>
+        Panel PHPPLUS
+    </a>
 <!-- 📟 TERMINAL -->
 <button type="submit" name="view" value="<?php echo ($view=='terminal') ? 'none' : 'terminal'; ?>">
 📟 <?php echo ($view=='terminal') ? "Ocultar estado" : "Ver estado"; ?>
