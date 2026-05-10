@@ -131,6 +131,13 @@ if ($action === 'terminal') {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>✈ dump1090-fa · Control</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@500;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+
+
 <style>
 :root {
     --bg: #0a0e14; --surface: #111720; --border: #1e2d3d;
