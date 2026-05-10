@@ -211,10 +211,10 @@ if (isset($_GET['action'])) {
     </style>
 </head>
 <body>
-    <div class="wrap">
-        <div class="header">
+    <div class="page-header">
+    
 
-<
+
     <div class="page-header-inner">
         <a href="mmdvm.php" class="btn-back"><i class="bi bi-arrow-left"></i> Panel ADER</a>
         <div>
