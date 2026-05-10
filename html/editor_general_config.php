@@ -347,8 +347,9 @@ body { background: var(--bg-base); color: var(--text-main); font-family: var(--f
 </head>
 <body>
 
-<div class="page-header-inner">
-        <a href="mmdvm.php" class="btn-white"><i class="bi bi-arrow-left"></i> Panel ADER</a>
+<div class="page-header">
+    <div class="page-header-inner">
+        <a href="mmdvm.php" class="btn-back"><i class="bi bi-arrow-left"></i> Panel ADER</a>
         <div>
             <h1><i class="bi bi-sliders"></i> &nbsp;EDITOR GENERAL</h1>
             <span class="badge-subtitle">MMDVMHost · YSF · D-STAR · NXDN</span>
