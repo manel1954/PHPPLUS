@@ -12,6 +12,11 @@ $protocol = $is_https ? "HTTPS (Seguro)" : "HTTP (No seguro)";
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ESP32 Web Flash Tool</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+
+
 <style>
 :root{ --primary:#2196F3; --success:#4CAF50; --error:#f44336; --warning:#FF9800; --bg:#1e1e2e; --card:#2a2a3e; --text:#e0e0e0; --mono:'Fira Code', monospace; }
 *{ margin:0; padding:0; box-sizing:border-box; }
@@ -54,6 +59,15 @@ button{ background:var(--primary); color:white; } button:hover{ opacity:.9; } bu
         <span id="secureBadge" class="badge">Chequeando Seguridad...</span>
     </div>
 </header>
+
+
+
+<div style="margin-bottom: 16px; display:flex; justify-content:center;">
+    <a href="mmdvm.php" class="btn btn-outline-light btn-sm">
+    <i class="bi bi-house-fill me-1"></i> Panel PHPPLUS
+</a>
+
+
 
 <div class="card">
     <div id="status" class="status">Esperando conexión...</div>
