@@ -59,11 +59,9 @@
             <span class="navbar-toggler-icon" style="filter: invert(1);"></span>
         </button>
 
-        <div class="collapse navbar-collapse" id="mainNav">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link" href="mmdvm.php" target="_blank">VOLVER AL PANEL PHPPLUS</a></li>
-            </ul>
-        </div>
+<a href="mmdvm.php" class="btn btn-outline-light btn-sm">
+    <i class="bi bi-house-fill me-1"></i> Panel PHPPLUS
+</a>
     </div>
 </nav>
 
