@@ -211,15 +211,8 @@ if (isset($_GET['action'])) {
     </style>
 </head>
 <body>
-    <div class="page-header">
-    
-
-
-    <div class="page-header-inner">
-        <a href="mmdvm.php" class="btn-back"><i class="bi bi-arrow-left"></i> Panel ADER</a>
-        <div>
-
-</div>
+    <div class="wrap">
+        <div class="header">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12 2L12 22M12 2L5 9L9 13L5 17L12 22M12 2L19 9L15 13L19 17L12 22" stroke="#00d4ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
