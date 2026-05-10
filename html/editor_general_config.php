@@ -353,13 +353,14 @@ body { background: var(--bg-base); color: var(--text-main); font-family: var(--f
 
 <div class="page-header">
     <div class="page-header-inner">
-                <a href="mmdvm.php" class="btn btn-outline-light btn-sm">
-            <i class="bi bi-house-fill me-1"></i> Panel PHPPLUS
-        </a>
+                
         <div>
             <h1><i class="bi bi-sliders"></i> &nbsp;EDITOR GENERAL</h1>
             <span class="badge-subtitle">MMDVMHost · YSF · D-STAR · NXDN</span>
         </div>
+        <a href="mmdvm.php" class="btn btn-outline-light btn-sm">
+            <i class="bi bi-house-fill me-1"></i> Panel PHPPLUS
+        </a>
     </div>
 </div>
 
