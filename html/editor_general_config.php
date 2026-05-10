@@ -352,8 +352,7 @@ body { background: var(--bg-base); color: var(--text-main); font-family: var(--f
 
 
 <div class="page-header">
-    <div class="page-header-inner">
-                
+    <div class="page-header-inner" style="display:flex; flex-direction:column; align-items:center; text-align:center; gap:12px;">
         <div>
             <h1><i class="bi bi-sliders"></i> &nbsp;EDITOR GENERAL</h1>
             <span class="badge-subtitle">MMDVMHost · YSF · D-STAR · NXDN</span>
