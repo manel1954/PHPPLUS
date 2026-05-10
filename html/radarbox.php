@@ -180,10 +180,7 @@ setInterval(() => {
         ❌ Autoarranque OFF
     </button>
 <?php endif; ?>
-<a href="mmdvm.php" class="btn btn-outline-light">
-        <i class="bi bi-house-door-fill me-1"></i>
-        Panel PHPPLUS
-    </a>
+
 <!-- 📟 TERMINAL -->
 <button type="submit" name="view" value="<?php echo ($view=='terminal') ? 'none' : 'terminal'; ?>">
 📟 <?php echo ($view=='terminal') ? "Ocultar estado" : "Ver estado"; ?>
@@ -193,6 +190,18 @@ setInterval(() => {
 <button type="submit" name="view" value="<?php echo ($view=='editor') ? 'none' : 'editor'; ?>">
 📝 <?php echo ($view=='editor') ? "Cerrar config" : "Editar config"; ?>
 </button>
+
+
+
+<a href="mmdvm.php" class="btn btn-outline-light">
+        <i class="bi bi-house-door-fill me-1"></i>
+        Panel PHPPLUS
+    </a>
+
+
+
+
+
 
 </form>
 
