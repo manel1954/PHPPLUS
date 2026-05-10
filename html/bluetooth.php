@@ -172,6 +172,8 @@ if (isset($_GET['action'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>📡 Gestor Bluetooth</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         :root { --bg:#0f1115; --card:#181b21; --border:#2a2e36; --text:#e2e4e8; --muted:#8b909a; --accent:#00d4ff; --success:#2ecc71; --danger:#e74c3c; --warn:#f39c12; }
         * { box-sizing:border-box; margin:0; padding:0; }
@@ -214,12 +216,10 @@ if (isset($_GET['action'])) {
     
 
 <div style="margin-bottom: 16px; display:flex; justify-content:center;">
-    <a href="mmdvm.php" class="btn" style="display:inline-flex; align-items:center; gap:8px; text-decoration:none; background:#000; border-color:#000; color:#00d4ff;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        VOLVER AL PANEL PHPPLUS
-    </a>
+    <a href="mmdvm.php" class="btn btn-outline-light btn-sm">
+    <i class="bi bi-house-fill me-1"></i> Panel PHPPLUS
+</a>
+
 </div>
 
 
