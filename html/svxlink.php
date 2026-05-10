@@ -53,6 +53,9 @@ if ($action === 'log') {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>🎛️ svxlink · Control</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@500;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
 <style>
 :root{--bg:#0a0e14;--surface:#111720;--border:#1e2d3d;--green:#00ff9f;--red:#ff4560;--cyan:#00d4ff;--amber:#ffb300;--text:#a8b9cc;--text-dim:#4a5568;--font-mono:'Share Tech Mono',monospace;--font-ui:'Rajdhani',sans-serif;--font-orb:'Orbitron',monospace}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -121,7 +124,22 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ui);height:10
 </style>
 </head>
 <body>
+<!-- HEADER -->
+<nav class="navbar navbar-expand-md navbar-granate">
+    <div class="container">
+        <a class="navbar-brand" href="#">
+          <img src="Logo_ea3eiz.png" alt="Logo">
+        </a>
 
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+            <span class="navbar-toggler-icon" style="filter: invert(1);"></span>
+        </button>
+
+        <a href="mmdvm.php" class="btn btn-outline-light btn-sm">
+            <i class="bi bi-house-fill me-1"></i> Panel PHPPLUS
+        </a>
+    </div>
+</nav>
 <header class="ex-header">
     <div>
         <div class="ex-title">🎛️ svxlink · Control</div>
