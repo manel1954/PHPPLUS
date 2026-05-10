@@ -200,6 +200,7 @@ td{padding:.45rem .6rem;border-bottom:1px solid rgba(30,45,61,.4);vertical-align
     <button class="btn btn-alert" id="btnAlert" onclick="toggleAlerts()">🔔 Alertas: OFF</button>
     <button class="btn btn-map" onclick="showTab('map')">🗺 Mapa</button>
     <button class="btn btn-csv" onclick="exportCSV()">📥 CSV</button>
+        <button class="btn btn-alert" onclick="window.location.href='mmdvm.php'">✖ Cerrar</button>
     <button class="btn btn-stats" onclick="toggleStats()">📊 Estadísticas</button>
 </div>
 <div class="header">
