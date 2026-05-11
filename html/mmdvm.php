@@ -711,7 +711,7 @@ button.btn-header { font-family: var(--font-mono); }
 <header class="ctrl-header">
 <div class="ctrl-header-top">
 <img src="Logo_ea3eiz.png" alt="EA3EIZ" style="height:40px;width:auto;">
-<h1>PANEL SISTEMAS DIGITALES PARA RADIO AFICIONADOS PHPPLUS</h1>
+<h1>PANEL SISTEMAS DIGITALES PARA RADIOAFICIONADOS PHPPLUS</h1>
 </div>
 <div class="ctrl-header-btns">
 <a href="editor_general_config.php" class="btn-header red"> 📄 editor general </a>
