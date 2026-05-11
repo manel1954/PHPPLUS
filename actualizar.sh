@@ -4,7 +4,7 @@
 usuario="/home/pi"
 usuario="$usuario"
 fecha_imagen="10-05-26"
-nombre_imagen="PHPP-"
+nombre_imagen="OPIP-"
 version=$nombre_imagen$fecha_imagen
 
 # Añadir líneas vacías hasta tener al menos 58 líneas
