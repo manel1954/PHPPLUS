@@ -40,7 +40,7 @@ function writeIni($path, $data) {
     foreach ($data as $section => $lines) {
         foreach ($lines as $entry) {
             if ($entry['type'] === 'comment') { $out .= $entry['raw'] . "\n"; }
-            elseif ($entry['type'] === 'section') { $out .= "\n[" . $entry['name'] . "]\n"; }
+            elseif ($entry['type'] === 'section') { $out .= "[" . $entry['name'] . "]\n"; }
             elseif ($entry['type'] === 'kv') {
                 $line = $entry['key'] . '=' . $entry['value'];
                 if (!empty($entry['comment'])) $line .= "\t\t\t\t# " . $entry['comment'];
