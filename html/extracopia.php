@@ -80,7 +80,7 @@
             $modelShort = str_contains($ml, 'raspberry') ? substr($model, 0, 14) : $model;
         ?>
         <span id="siModelLabel" style="font-size:2.8rem;line-height:1;"><?php echo $icon; ?></span>
-        <span class="station-meta-value" id="siModel" style="color:var(--violet);font-size:.7rem;white-space:nowrap;"><?php echo htmlspecialchars($modelShort); ?></span>
+        <!-- <span class="station-meta-value" id="siModel" style="color:var(--violet);font-size:.7rem;white-space:nowrap;"><?php echo htmlspecialchars($modelShort); ?></span> -->
     </div>
 
     
