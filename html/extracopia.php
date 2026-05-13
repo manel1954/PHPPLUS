@@ -69,8 +69,20 @@
 <div class="container py-4">
 
     <h1 class="mb-4 text-center">
-        <i class="bi bi-grid-3x3-gap-fill me-2" style="color: #ff6600;"></i>
-        🍓&nbsp;MENU EXTRA
+        <div class="station-divider" style="height:50px;"></div>
+    <div style="flex:1;display:flex;flex-direction:row;align-items:center;gap:.4rem;"><?php
+            $model = '';
+            if (file_exists('/proc/device-tree/model'))
+                $model = trim(str_replace("\0", '', file_get_contents('/proc/device-tree/model')));
+            if ($model === '') $model = trim(shell_exec('uname -m 2>/dev/null') ?? '');
+            $ml = strtolower($model);
+            $icon = str_contains($ml, 'raspberry') ? '🍓' : (str_contains($ml, 'orange') ? '🍊' : '🖥️');
+            $modelShort = str_contains($ml, 'raspberry') ? substr($model, 0, 14) : $model;
+        ?>
+        <span id="siModelLabel" style="font-size:1.4rem;line-height:1;"><?php echo $icon; ?></span>
+        <span class="station-meta-value" id="siModel" style="color:var(--violet);font-size:.7rem;white-space:nowrap;"><?php echo htmlspecialchars($modelShort); ?></span>
+    </div>
+</div>
     </h1>
 
     <div class="row g-3 justify-content-start">
