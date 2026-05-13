@@ -347,16 +347,7 @@ body { background: var(--bg-base); color: var(--text-main); font-family: var(--f
 </head>
 <body>
 
-
-
-
-
-<div class="page-header">
-    <div class="page-header-inner" style="display:flex; flex-direction:column; align-items:center; text-align:center; gap:12px;">
-        
-    
-    
-    <div class="station-divider" style="height:50px;"></div>
+   <div class="station-divider" style="height:50px;"></div>
     <div style="flex:1;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:.4rem;"><?php
             $model = '';
             if (file_exists('/proc/device-tree/model'))
@@ -369,12 +360,21 @@ body { background: var(--bg-base); color: var(--text-main); font-family: var(--f
         <span id="siModelLabel" style="font-size:2.8rem;line-height:1;"><?php echo $icon; ?></span>
         <!-- <span class="station-meta-value" id="siModel" style="color:var(--violet);font-size:.7rem;white-space:nowrap;"><?php echo htmlspecialchars($modelShort); ?></span> -->
     </div>
+
+
+
+<div class="page-header">
+    <div class="page-header-inner" style="display:flex; flex-direction:column; align-items:center; text-align:center; gap:12px;">
+        
+    
+    
+ 
     
     
     
     
     <div style="display:flex; align-items:center; gap:16px;">
-            <h1><i class="bi bi-sliders"></i> 🍓&nbsp;EDITOR GENERAL</h1>
+            <h1><i class="bi bi-sliders"></i>&nbsp;EDITOR GENERAL</h1>
             <a href="mmdvm.php" class="btn btn-outline-light btn-sm">
                 <i class="bi bi-house-fill me-1"></i> Panel PHPPLUS
             </a>
