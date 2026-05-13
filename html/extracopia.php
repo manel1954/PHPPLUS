@@ -66,7 +66,7 @@
 </nav>
 
 <!-- CONTENIDO -->
-<div class="container py-4">
+
 
     
         <div class="station-divider" style="height:50px;"></div>
@@ -82,7 +82,7 @@
         <span id="siModelLabel" style="font-size:1.4rem;line-height:1;"><?php echo $icon; ?></span>
         <span class="station-meta-value" id="siModel" style="color:var(--violet);font-size:.7rem;white-space:nowrap;"><?php echo htmlspecialchars($modelShort); ?></span>
     </div>
-</div>
+
     
 
     <div class="row g-3 justify-content-start">
