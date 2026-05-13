@@ -68,7 +68,7 @@
 <!-- CONTENIDO -->
 <div class="container py-4">
 
-    <h1 class="mb-4 text-center">
+    
         <div class="station-divider" style="height:50px;"></div>
     <div style="flex:1;display:flex;flex-direction:row;align-items:center;gap:.4rem;"><?php
             $model = '';
@@ -83,7 +83,7 @@
         <span class="station-meta-value" id="siModel" style="color:var(--violet);font-size:.7rem;white-space:nowrap;"><?php echo htmlspecialchars($modelShort); ?></span>
     </div>
 </div>
-    </h1>
+    
 
     <div class="row g-3 justify-content-start">
 
