@@ -69,7 +69,7 @@
 <div class="container py-4">
 
     <h1 class="mb-4 text-center">
-        <i class="bi bi-grid-3x3-gap-fill me-2" style="color: #ff6600;"></i>
+        <!-- <i class="bi bi-grid-3x3-gap-fill me-2" style="color: #ff6600;"></i> -->
         🍓&nbsp;MENU EXTRA
     </h1>
 
