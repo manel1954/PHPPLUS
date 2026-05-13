@@ -353,7 +353,27 @@ body { background: var(--bg-base); color: var(--text-main); font-family: var(--f
 
 <div class="page-header">
     <div class="page-header-inner" style="display:flex; flex-direction:column; align-items:center; text-align:center; gap:12px;">
-        <div style="display:flex; align-items:center; gap:16px;">
+        
+    
+    
+    <div class="station-divider" style="height:50px;"></div>
+    <div style="flex:1;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:.4rem;"><?php
+            $model = '';
+            if (file_exists('/proc/device-tree/model'))
+                $model = trim(str_replace("\0", '', file_get_contents('/proc/device-tree/model')));
+            if ($model === '') $model = trim(shell_exec('uname -m 2>/dev/null') ?? '');
+            $ml = strtolower($model);
+            $icon = str_contains($ml, 'raspberry') ? '🍓' : (str_contains($ml, 'orange') ? '🍊' : '🖥️');
+            $modelShort = str_contains($ml, 'raspberry') ? substr($model, 0, 14) : $model;
+        ?>
+        <span id="siModelLabel" style="font-size:2.8rem;line-height:1;"><?php echo $icon; ?></span>
+        <!-- <span class="station-meta-value" id="siModel" style="color:var(--violet);font-size:.7rem;white-space:nowrap;"><?php echo htmlspecialchars($modelShort); ?></span> -->
+    </div>
+    
+    
+    
+    
+    <div style="display:flex; align-items:center; gap:16px;">
             <h1><i class="bi bi-sliders"></i> 🍓&nbsp;EDITOR GENERAL</h1>
             <a href="mmdvm.php" class="btn btn-outline-light btn-sm">
                 <i class="bi bi-house-fill me-1"></i> Panel PHPPLUS
