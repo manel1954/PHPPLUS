@@ -963,7 +963,7 @@ button.btn-header { font-family: var(--font-mono); }
       <div class="nx-vu" id="vuLeft"></div><div class="nx-vu right" id="vuRight"></div>
       <div class="nx-center" id="nxCenter"><div class="nx-clock" id="nxClock">00:00:00</div><div class="nx-date" id="nxDate">—</div></div>
       <div class="nx-txbar" id="nxTxBar"></div>
-      <div class="nx-botbar"><span class="nx-dmrid" id="nxDmrid">—</span><span>DMR · DIGITAL VOICE</span><span id="nxSlot" style="display:none">—</span><span class="nx-source" id="nxSource"></span></div>
+      <div class="nx-botbar"><span class="nx-dmrid" style="font-family:var(--font-mono);font-size:.65rem;" id="nxDmrid">—</span><span>DMR · DIGITAL VOICE</span><span id="nxSlot" style="display:none">—</span><span class="nx-source" id="nxSource"></span></div>
     </div>
   </div>
   <div id="ysfDisplayPanel">
