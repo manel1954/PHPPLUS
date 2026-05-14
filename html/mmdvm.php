@@ -403,8 +403,8 @@ if ($action === 'transmission') {
         }
     }
 
-    if (!empty($lastHeard)) $state['lastHeard'] = $lastHeard;
-elseif (!isset($state['lastHeard'])) $state['lastHeard'] = [];
+    $state['lastHeard'] = $lastHeard;
+
 
     header('Content-Type: application/json');
 
