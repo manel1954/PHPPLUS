@@ -976,11 +976,12 @@ button.btn-header { font-family: var(--font-mono); }
       <div class="nx-vu" id="ysfVuLeft"></div><div class="nx-vu right" id="ysfVuRight"></div>
       <div class="nx-center" id="ysfNxCenter"><div class="nx-clock" id="ysfNxClock" style="color:#c084ff;">00:00:00</div><div class="nx-date" id="ysfNxDate" style="color:#9b59d4;">—</div></div>
       <div class="nx-txbar" id="ysfTxBar"></div>
-      <div class="nx-botbar ysf-bar"><span style="color:#5a3a8a;font-family:var(--font-mono);font-size:.65rem;" id="ysfProto">YSF · DIGITAL VOICE</span><span style="color:#5a3a8a;font-family:var(--font-mono);font-size:.90rem;"><?php $ysfGwIni=parseMMDVMIni('/home/pi/YSFClients/YSFGateway/YSFGateway.ini');$ysfRefStart=trim($ysfGwIni['Network']['Startup']??'—');echo "Reflector: " . htmlspecialchars($ysfRefStart); ?></span><span class="nx-source" id="ysfSource"></span></div>
+      <div class="nx-botbar ysf-bar"><span style="color:#5a3a8a;font-family:var(--font-mono);font-size:.65rem;" id="ysfProto">YSF</span><span style="color:#5a3a8a;font-family:var(--font-mono);font-size:.90rem;"><?php $ysfGwIni=parseMMDVMIni('/home/pi/YSFClients/YSFGateway/YSFGateway.ini');$ysfRefStart=trim($ysfGwIni['Network']['Startup']??'—');echo "Reflector: " . htmlspecialchars($ysfRefStart); ?></span><span class="nx-source" id="ysfSource"></span></div>
     </div>
   </div>
 </div>
-<!-- <div class="display-row" style="margin-top:1.2rem;"> -->
+
+<div class="display-row" style="margin-top:1.2rem;">
   
 
 <div id="dstarDisplayPanel">
