@@ -652,7 +652,7 @@ button.btn-header { font-family: var(--font-mono); }
 .nx-botbar { position: absolute; bottom: 0; left: 0; right: 0; height: 28px; background: #0d1e2a; border-top: 1px solid #1a3a4a; display: flex; align-items: center; justify-content: space-between; padding: 0 1rem; font-family: var(--font-mono); font-size: .65rem; color: #2a5a7a; letter-spacing: .08em; }
 .nx-botbar.ysf-bar { background: #110d1e; border-top: 1px solid #2d1a4a; color: #4a2a7a; }
 
-.nx-botbar .nx-dmrid { color: #ffffff; min-width: 6rem; }
+.nx-botbar .nx-dmrid { color: #ffffff; font-size:.65rem; min-width: 6rem; }
 
 .nx-botbar .nx-source { padding: .1rem .45rem; border-radius: 2px; font-size: .6rem; letter-spacing: .1em; }
 .nx-botbar .nx-source.rf { background: rgba(0,255,159,.15); color: var(--green); border: 1px solid rgba(0,255,159,.3); }
