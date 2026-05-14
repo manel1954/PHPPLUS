@@ -980,8 +980,10 @@ button.btn-header { font-family: var(--font-mono); }
     </div>
   </div>
 </div>
-<div class="display-row" style="margin-top:1.2rem;">
-  <div id="dstarDisplayPanel">
+<!-- <div class="display-row" style="margin-top:1.2rem;"> -->
+  
+
+<div id="dstarDisplayPanel">
     <div class="panel-label" style="color:#00e5ff;">▸ D-STAR Display</div>
     <div class="nextion-dstar">
       <div class="nx-topbar dstar-bar"><span class="nx-mode">D-STAR · DIGITAL</span><span style="color:#006070;display:none" id="dstarStationLabel"></span><span style="color:#00b0c0;opacity:.85;min-width:5rem;text-align:right;font-size:.6rem;" id="dstarDest">CQCQCQ</span></div>
@@ -992,6 +994,8 @@ button.btn-header { font-family: var(--font-mono); }
       <div class="nx-botbar dstar-bar"><span style="color:#006070;font-family:var(--font-mono);font-size:.65rem;">D-STAR · DIGITAL VOICE</span><span style="color:green;font-family:var(--font-mono);font-size:.90rem;"><?php $dgwIni=parseMMDVMIni('/home/pi/DStarGateway/DStarGateway.ini');$dstarRef=trim($dgwIni['Repeater 1']['Reflector']??'—');echo "Reflector: " . htmlspecialchars($dstarRef); ?></span><span class="nx-source" id="dstarSource"></span></div>
     </div>
   </div>
+  
+  
   <div id="nxdnDisplayPanel">
     <div class="panel-label" style="color:#ffd700;">▸ NXDN Display</div>
     <div class="nextion-nxdn">
@@ -1004,6 +1008,8 @@ button.btn-header { font-family: var(--font-mono); }
     </div>
   </div>
 </div>
+
+
 <div class="display-row" style="margin-top:1rem;">
   <div id="dmrLastHeardPanel">
     <div class="panel-label">▸ Últimos escuchados DMR</div>
