@@ -403,7 +403,8 @@ if ($action === 'transmission') {
         }
     }
 
-    $state['lastHeard'] = $lastHeard;
+    if (!empty($lastHeard)) $state['lastHeard'] = $lastHeard;
+elseif (!isset($state['lastHeard'])) $state['lastHeard'] = [];
 
     header('Content-Type: application/json');
 
@@ -452,7 +453,8 @@ if ($action === 'dstar-transmission') {
             $seen[] = $cs; if (count($lastHeard) >= 5) break;
         }
     }
-    $state['lastHeard'] = $lastHeard;
+    if (!empty($lastHeard)) $state['lastHeard'] = $lastHeard;
+elseif (!isset($state['lastHeard'])) $state['lastHeard'] = [];
     header('Content-Type: application/json'); echo json_encode($state); exit;
 }
 
@@ -515,7 +517,8 @@ if ($action === 'ysf-transmission') {
             $seen[] = $cs; if (count($lastHeard) >= 5) break;
         }
     }
-    $state['lastHeard'] = $lastHeard;
+    if (!empty($lastHeard)) $state['lastHeard'] = $lastHeard;
+elseif (!isset($state['lastHeard'])) $state['lastHeard'] = [];
     header('Content-Type: application/json'); echo json_encode($state); exit;
 }
 
@@ -593,7 +596,8 @@ if ($action === 'nxdn-transmission') {
             $seen[] = $cs; if (count($lastHeard) >= 5) break;
         }
     }
-    $state['lastHeard'] = $lastHeard;
+    if (!empty($lastHeard)) $state['lastHeard'] = $lastHeard;
+elseif (!isset($state['lastHeard'])) $state['lastHeard'] = [];
     header('Content-Type: application/json'); echo json_encode($state); exit;
 }
 ?>
