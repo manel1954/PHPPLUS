@@ -297,119 +297,52 @@ function lookupCall($callsign) {
 }
 
 if ($action === 'transmission') {
-
     $stateFile = '/tmp/mmdvm_tx_state.json';
-
-    $log = shell_exec("sudo journalctl -u mmdvmhost -n 300 --no-pager --output=short 2>/dev/null");
-
+    $lhFile    = '/tmp/mmdvm_lastheard.json';
+    $log   = shell_exec("sudo journalctl -u mmdvmhost -n 500 --no-pager --output=short 2>/dev/null");
     $lines = array_reverse(explode("\n", $log));
 
-    // Estado por defecto
-    $state = [
-        'active' => false,
-        'callsign' => '',
-        'name' => '',
-        'dmrid' => '',
-        'tg' => '',
-        'slot' => '',
-        'source' => ''
-    ];
-
-    // Cargar estado anterior
+    $state = ['active'=>false,'callsign'=>'','name'=>'','dmrid'=>'','tg'=>'','slot'=>'','source'=>''];
     if (file_exists($stateFile)) {
-
         $saved = json_decode(file_get_contents($stateFile), true);
-
-        if (is_array($saved)) {
-            $state = $saved;
-        }
+        if (is_array($saved)) $state = $saved;
     }
-
     foreach ($lines as $line) {
-
-        // =========================
-        // INICIO TRANSMISIÓN
-        // =========================
-
         if (preg_match('/DMR Slot (\d), received (RF|network) voice header from (\S+) to TG (\d+)/i', $line, $m)) {
-
             $callsign = strtoupper(rtrim($m[3], ','));
-
             $info = lookupCall($callsign);
-
-            $state = [
-                'active' => true,
-                'callsign' => $callsign,
-                'name' => $info['name'],
-                'dmrid' => $info['dmrid'],
-                'tg' => $m[4],
-                'slot' => $m[1],
-                'source' => strtoupper($m[2])
-            ];
-
-            // Guardar estado
+            $state = ['active'=>true,'callsign'=>$callsign,'name'=>$info['name'],'dmrid'=>$info['dmrid'],'tg'=>$m[4],'slot'=>$m[1],'source'=>strtoupper($m[2])];
             file_put_contents($stateFile, json_encode($state));
-
             break;
         }
-
-        // =========================
-        // FIN TRANSMISIÓN
-        // =========================
-
         if (preg_match('/DMR Slot \d.*end of voice/i', $line)) {
-
             $state['active'] = false;
-
             file_put_contents($stateFile, json_encode($state));
-
             break;
         }
     }
 
-    // =========================
-    // LAST HEARD
-    // =========================
-
-    $lastHeard = [];
-    $seen = [];
-
+    $lastHeard = []; $seen = [];
     foreach ($lines as $line) {
-
         if (preg_match('/(\d{2}:\d{2}:\d{2})\.\d+\s+DMR Slot (\d), received (RF|network) voice header from (\S+) to TG (\d+)/i', $line, $m)) {
-
             $cs = strtoupper(rtrim($m[4], ','));
-
             if (!in_array($cs, $seen)) {
-
                 $inf = lookupCall($cs);
-
-                $lastHeard[] = [
-                    'callsign' => $cs,
-                    'name' => $inf['name'],
-                    'dmrid' => $inf['dmrid'],
-                    'tg' => $m[5],
-                    'slot' => $m[2],
-                    'source' => strtoupper($m[3]),
-                    'time' => $m[1]
-                ];
-
+                $lastHeard[] = ['callsign'=>$cs,'name'=>$inf['name'],'dmrid'=>$inf['dmrid'],'tg'=>$m[5],'slot'=>$m[2],'source'=>strtoupper($m[3]),'time'=>$m[1]];
                 $seen[] = $cs;
-
-                if (count($lastHeard) >= 5) {
-                    break;
-                }
+                if (count($lastHeard) >= 5) break;
             }
         }
     }
+    if (!empty($lastHeard)) {
+        file_put_contents($lhFile, json_encode($lastHeard));
+    } elseif (file_exists($lhFile)) {
+        $lastHeard = json_decode(file_get_contents($lhFile), true) ?: [];
+    }
 
     $state['lastHeard'] = $lastHeard;
-
-
     header('Content-Type: application/json');
-
     echo json_encode($state);
-
     exit;
 }
 
