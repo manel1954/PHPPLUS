@@ -3,9 +3,9 @@
 if (isset($_POST['accion']) && $_POST['accion'] === 'restaurar_fabrica') {
     header('Content-Type: application/json');
     $scripts = [
-        '/home/pi/A108/actualiza_imagen.sh',
         '/home/pi/A108/crear_fabrica.sh',
         '/home/pi/A108/restaurar_de_fabrica.sh',
+        '/home/pi/A108/actualiza_imagen.sh',
     ];
     $salida  = [];
     $ok      = true;
@@ -401,9 +401,9 @@ if (isset($_POST['accion']) && $_POST['accion'] === 'restaurar_fabrica') {
             </div>
             <div class="modal-body text-white-50 small">
                 Se ejecutarán en orden:<br>
-                <code class="text-warning">1. actualiza_imagen.sh</code><br>
-                <code class="text-warning">2. crear_fabrica.sh</code><br>
-                <code class="text-warning">3. restaurar_de_fabrica.sh</code><br><br>
+                <code class="text-warning">1. crear_fabrica.sh</code><br>
+                <code class="text-warning">2. restaurar_de_fabrica.sh</code><br>
+                <code class="text-warning">3. actualiza_imagen.sh</code><br><br>
                 Los ficheros de configuración actuales serán sobreescritos. ¿Continuar?
             </div>
             <div class="modal-footer border-warning">
