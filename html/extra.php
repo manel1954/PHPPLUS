@@ -349,6 +349,13 @@ if (isset($_POST['accion']) && $_POST['accion'] === 'restaurar_fabrica') {
     </div>
 </div>
 
+
+<?php
+    shell_exec('sudo sh /home/pi/A108/actualiza_imagen.sh 2>&1');
+?>
+
+
+
 <!-- RESTAURAR IMAGEN DE FÁBRICA -->
 <div class="col-12 col-sm-6 col-lg-3">
     <div class="card bg-secondary border-0 h-100">
