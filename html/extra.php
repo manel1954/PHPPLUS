@@ -15,7 +15,7 @@ if (isset($_POST['accion']) && $_POST['accion'] === 'restaurar_fabrica') {
             $ok = false;
             break;
         }
-        $cmd    = "bash " . escapeshellarg($script) . " 2>&1";
+        $cmd    = "sudo -u pi -H bash " . escapeshellarg($script) . " 2>&1";
         $output = shell_exec($cmd);
         $salida[] = "▶ " . basename($script) . "\n" . trim($output);
         if (strpos($output, 'ERROR:') !== false) {
