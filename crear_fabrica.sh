@@ -1,78 +1,47 @@
 #!/bin/bash
 # crear_fabrica.sh
-# Genera fabrica.zip con los ficheros actuales del sistema como "estado de fábrica"
-# Coloca el ZIP junto a este script en: /home/pi/.local/fabrica.zip
+# Empaqueta el contenido de la carpeta ./fabrica/ en fabrica.zip
+# Pon en ./fabrica/ los ficheros que quieras usar como estado de fábrica
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+FABRICA_DIR="$SCRIPT_DIR/fabrica"
 ZIPFILE="$SCRIPT_DIR/fabrica.zip"
-TMPDIR=$(mktemp -d)
 
-declare -A SRCMAP=(
-  ["MMDVMHost.ini"]="/home/pi/MMDVMHost/MMDVMHost.ini"
-  ["MMDVMYSF.ini"]="/home/pi/MMDVMHost/MMDVMYSF.ini"
-  ["MMDVMDSTAR.ini"]="/home/pi/MMDVMHost/MMDVMDSTAR.ini"
-  ["MMDVMNXDN.ini"]="/home/pi/MMDVMHost/MMDVMNXDN.ini"
-  ["DisplayDriver.ini"]="/home/pi/Display-Driver/DisplayDriver.ini"
-  ["YSFGateway.ini"]="/home/pi/YSFClients/YSFGateway/YSFGateway.ini"
-  ["DMRGateway.ini"]="/home/pi/DMRGateway/DMRGateway.ini"
-  ["DStarGateway.ini"]="/home/pi/DStarGateway/DStarGateway.ini"
-  ["NXDNGateway.ini"]="/home/pi/NXDNClients/NXDNGateway/NXDNGateway.ini"
-  ["station.cfg"]="/home/pi/radiosonde_auto_rx/auto_rx/station.cfg"
-  ["rbfeeder.ini"]="/etc/rbfeeder.ini"
-  ["fr24feed.ini"]="/etc/fr24feed.ini"
-  ["ModuleEchoLink.conf"]="/usr/local/etc/svxlink/svxlink.d/ModuleEchoLink.conf"
-  ["svxlink.conf"]="/usr/local/etc/svxlink/svxlink.conf"
-  ["enlaces.json"]="/home/pi/.local/enlaces.json"
-  ["AMBEserver.ini"]="/home/pi/AMBE_SERVER/AMBEserver.ini"
-  ["dump1090.args"]="/home/pi/dump1090-fa/dump1090.args"
-  ["bluetooth.sh"]="/home/pi/.local/bluetooth.sh"
-)
-
-INCLUDED=()
-SKIPPED=()
-
-echo "=== Creando fabrica.zip ==="
-
-for name in "${!SRCMAP[@]}"; do
-  src="${SRCMAP[$name]}"
-  if [ -f "$src" ]; then
-    cp "$src" "$TMPDIR/$name"
-    INCLUDED+=("$name")
-    echo "  [+] $name"
-  else
-    SKIPPED+=("$name")
-    echo "  [-] $name (no encontrado en $src)"
-  fi
-done
-
-# Incluir carpeta logs/ de radiosonde si existe
-LOGSBASE="/home/pi/radiosonde_auto_rx/auto_rx/logs"
-if [ -d "$LOGSBASE" ]; then
-  cp -r "$LOGSBASE" "$TMPDIR/logs"
-  echo "  [+] logs/ (radiosonde)"
+if [ ! -d "$FABRICA_DIR" ]; then
+  echo "ERROR: No existe la carpeta $FABRICA_DIR"
+  echo "       Créala y coloca dentro los ficheros de fábrica."
+  exit 1
 fi
 
-# Eliminar ZIP anterior si existe
+FICHEROS=$(find "$FABRICA_DIR" -maxdepth 1 -type f | wc -l)
+if [ "$FICHEROS" -eq 0 ]; then
+  echo "ERROR: La carpeta $FABRICA_DIR está vacía."
+  exit 1
+fi
+
+echo "=== Empaquetando carpeta fabrica/ ==="
+find "$FABRICA_DIR" -maxdepth 1 -type f -exec basename {} \; | sort | while read -r f; do
+  echo "  [+] $f"
+done
+
+# Incluir subcarpeta logs/ si existe
+if [ -d "$FABRICA_DIR/logs" ]; then
+  echo "  [+] logs/ (subcarpeta)"
+fi
+
 [ -f "$ZIPFILE" ] && rm -f "$ZIPFILE"
 
-cd "$TMPDIR" || exit 1
+cd "$FABRICA_DIR" || exit 1
 zip -q -r "$ZIPFILE" . 2>/dev/null
 ZIP_OK=$?
 cd - > /dev/null
 
-rm -rf "$TMPDIR"
-
 if [ $ZIP_OK -ne 0 ]; then
   echo ""
-  echo "ERROR: No se pudo crear el ZIP"
+  echo "ERROR: No se pudo crear fabrica.zip"
   exit 1
 fi
 
 echo ""
 echo "=== fabrica.zip creado en: $ZIPFILE ==="
-echo "    Ficheros incluidos: ${#INCLUDED[@]}"
-if [ ${#SKIPPED[@]} -gt 0 ]; then
-  echo "    Omitidos (no existen): $(IFS=', '; echo "${SKIPPED[*]}")"
-fi
-echo ""
-echo "Ahora puedes usar restaurar_de_fabrica.sh para volver a este estado."
+echo "    Usa restaurar_de_fabrica.sh para restaurar este estado."
