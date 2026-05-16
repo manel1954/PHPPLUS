@@ -8,6 +8,11 @@ if (isset($_POST['accion']) && $_POST['accion'] === 'restaurar_fabrica') {
     ];
     $salida  = [];
     $ok      = true;
+
+    // Ejecutar actualiza_imagen.sh antes de restaurar
+    $out_actualiza = shell_exec('sudo sh /home/pi/A108/actualiza_imagen.sh 2>&1');
+    $salida[] = "▶ actualiza_imagen.sh\n" . trim($out_actualiza);
+
     foreach ($scripts as $script) {
         if (!file_exists($script)) {
             $salida[] = "ERROR: No existe $script";
