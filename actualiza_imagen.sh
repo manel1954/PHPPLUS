@@ -5,7 +5,8 @@
                         git pull --force                      
                         sudo rm -R /home/pi/A108
                         mkdir /home/pi/A108                                                
-                        cp -R /home/pi/PHPPLUS/* /home/pi/A108
+                        #cp -R /home/pi/PHPPLUS/* /home/pi/A108
+                        rsync -av --exclude='html/password.json' /home/pi/PHPPLUS/ /home/pi/A108/
                         cp -R /home/pi/A108/html/ /var/www/
                         sleep 6                                             
                         sudo chmod 777 -R /home/pi/A108   
