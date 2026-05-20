@@ -61,12 +61,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Cambio de Contraseñas</title>
     <style>
         :root {
-            --bg: #0d0608;
-            --card: #180a0e;
-            --text: #c51a4a;
-            --text-light: #e05070;
-            --border: #3a1020;
-            --input-bg: #1e0c12;
+            --bg: #060810;
+            --card: #0a0e18;
+            --text: #1a7ac5;
+            --text-light: #50a0e0;
+            --border: #102038;
+            --input-bg: #0c121e;
             --success: #4caf50;
             --error: #ef5350;
         }
@@ -136,7 +136,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             padding: 1.5rem; 
             border-radius: 12px; 
             border: 1px solid var(--border); 
-            box-shadow: 0 4px 20px rgba(197, 26, 74, 0.15);
+            box-shadow: 0 4px 20px rgba(26, 122, 197, 0.15);
         }
         .card h2 { margin-bottom: 1.2rem; color: var(--text-light); text-align: center; font-weight: 500; }
 
@@ -155,7 +155,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         input:focus { 
             outline: none; 
             border-color: var(--text); 
-            box-shadow: 0 0 0 2px rgba(197, 26, 74, 0.25); 
+            box-shadow: 0 0 0 2px rgba(26, 122, 197, 0.25); 
         }
         
         .toggle-pass { 
@@ -187,7 +187,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         button[type="submit"]:hover { 
             background: var(--text-light); 
             transform: translateY(-1px); 
-            box-shadow: 0 4px 12px rgba(197, 26, 74, 0.4);
+            box-shadow: 0 4px 12px rgba(26, 122, 197, 0.4);
         }
         button[type="submit"]:active { transform: translateY(0); }
 
@@ -203,7 +203,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         .msg.show { display: block; animation: fadeIn 0.3s ease; }
         .success { background: rgba(76, 175, 80, 0.15); color: #81c784; border: 1px solid rgba(76, 175, 80, 0.3); }
-        .error { background: rgba(197, 26, 74, 0.15); color: #e05070; border: 1px solid rgba(197, 26, 74, 0.35); }
+        .error { background: rgba(26, 122, 197, 0.15); color: #e05070; border: 1px solid rgba(26, 122, 197, 0.35); }
 
         /* Línea decorativa frambuesa superior de cada card */
         .card::before {
