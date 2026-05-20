@@ -61,12 +61,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Cambio de Contraseñas</title>
     <style>
         :root {
-            --bg: #0a0a0a;
-            --card: #151515;
-            --text: #ff9800;
-            --text-light: #ffb74d;
-            --border: #2a2a2a;
-            --input-bg: #1e1e1e;
+            --bg: #0d0608;
+            --card: #180a0e;
+            --text: #c51a4a;
+            --text-light: #e05070;
+            --border: #3a1020;
+            --input-bg: #1e0c12;
             --success: #4caf50;
             --error: #ef5350;
         }
@@ -95,7 +95,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-size: 1.6rem; 
             font-weight: 600; 
             letter-spacing: 0.5px; 
-            margin: 0; 
+            margin: 0;
+            color: var(--text-light);
         }
         
         /* Nota de contraseña por defecto - pequeña y discreta */
@@ -112,7 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         .btn-home { 
             background: var(--card); 
-            color: var(--text); 
+            color: var(--text-light); 
             padding: 0.5rem 1rem; 
             border: 1px solid var(--border); 
             border-radius: 8px; 
@@ -122,30 +123,98 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         .btn-home:hover { 
             background: var(--text); 
-            color: var(--bg); 
-            transform: translateY(-1px); 
+            color: #fff; 
+            transform: translateY(-1px);
+            border-color: var(--text);
         }
 
         .container { display: flex; gap: 2rem; width: 100%; max-width: 960px; flex-wrap: wrap; }
-        .card { flex: 1; min-width: 300px; background: var(--card); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+        .card { 
+            flex: 1; 
+            min-width: 300px; 
+            background: var(--card); 
+            padding: 1.5rem; 
+            border-radius: 12px; 
+            border: 1px solid var(--border); 
+            box-shadow: 0 4px 20px rgba(197, 26, 74, 0.15);
+        }
         .card h2 { margin-bottom: 1.2rem; color: var(--text-light); text-align: center; font-weight: 500; }
 
         .form-group { margin-bottom: 1rem; position: relative; }
         label { display: block; margin-bottom: 0.4rem; font-size: 0.85rem; color: var(--text-light); }
-        input[type="password"], input[type="text"] { width: 100%; padding: 0.65rem 2.5rem 0.65rem 0.8rem; background: var(--input-bg); border: 1px solid var(--border); color: var(--text); border-radius: 8px; font-size: 0.95rem; transition: border 0.2s; }
-        input:focus { outline: none; border-color: var(--text); box-shadow: 0 0 0 2px rgba(255, 152, 0, 0.2); }
+        input[type="password"], input[type="text"] { 
+            width: 100%; 
+            padding: 0.65rem 2.5rem 0.65rem 0.8rem; 
+            background: var(--input-bg); 
+            border: 1px solid var(--border); 
+            color: var(--text-light); 
+            border-radius: 8px; 
+            font-size: 0.95rem; 
+            transition: border 0.2s; 
+        }
+        input:focus { 
+            outline: none; 
+            border-color: var(--text); 
+            box-shadow: 0 0 0 2px rgba(197, 26, 74, 0.25); 
+        }
         
-        .toggle-pass { position: absolute; right: 12px; top: 34px; cursor: pointer; color: var(--text-light); font-size: 1.1rem; user-select: none; opacity: 0.8; transition: opacity 0.2s; }
+        .toggle-pass { 
+            position: absolute; 
+            right: 12px; 
+            top: 34px; 
+            cursor: pointer; 
+            color: var(--text-light); 
+            font-size: 1.1rem; 
+            user-select: none; 
+            opacity: 0.8; 
+            transition: opacity 0.2s; 
+        }
         .toggle-pass:hover { opacity: 1; }
 
-        button[type="submit"] { width: 100%; padding: 0.75rem; background: var(--text); color: #000; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-top: 0.5rem; }
-        button[type="submit"]:hover { background: var(--text-light); transform: translateY(-1px); }
+        button[type="submit"] { 
+            width: 100%; 
+            padding: 0.75rem; 
+            background: var(--text); 
+            color: #fff; 
+            border: none; 
+            border-radius: 8px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            margin-top: 0.5rem; 
+            letter-spacing: 0.3px;
+        }
+        button[type="submit"]:hover { 
+            background: var(--text-light); 
+            transform: translateY(-1px); 
+            box-shadow: 0 4px 12px rgba(197, 26, 74, 0.4);
+        }
         button[type="submit"]:active { transform: translateY(0); }
 
-        .msg { margin-top: 1.5rem; padding: 1rem; border-radius: 8px; text-align: center; font-size: 0.95rem; display: none; width: 100%; max-width: 960px; }
+        .msg { 
+            margin-top: 1.5rem; 
+            padding: 1rem; 
+            border-radius: 8px; 
+            text-align: center; 
+            font-size: 0.95rem; 
+            display: none; 
+            width: 100%; 
+            max-width: 960px; 
+        }
         .msg.show { display: block; animation: fadeIn 0.3s ease; }
         .success { background: rgba(76, 175, 80, 0.15); color: #81c784; border: 1px solid rgba(76, 175, 80, 0.3); }
-        .error { background: rgba(239, 83, 80, 0.15); color: #ef9a9a; border: 1px solid rgba(239, 83, 80, 0.3); }
+        .error { background: rgba(197, 26, 74, 0.15); color: #e05070; border: 1px solid rgba(197, 26, 74, 0.35); }
+
+        /* Línea decorativa frambuesa superior de cada card */
+        .card::before {
+            content: '';
+            display: block;
+            height: 3px;
+            background: linear-gradient(90deg, var(--text), var(--text-light));
+            border-radius: 4px 4px 0 0;
+            margin: -1.5rem -1.5rem 1.2rem -1.5rem;
+            border-radius: 12px 12px 0 0;
+        }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
         @media (max-width: 720px) { 
@@ -163,7 +232,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <h1>🔐 Gestión de Contraseñas</h1>
             <!-- 🔹 Nota de contraseña por defecto debajo del título -->
             <small class="default-pass-note">
-                Contraseña por defecto: <strong>orangepi</strong>
+                Contraseña por defecto: <strong>ader (Estas claves son independientes de la clave login)</strong>
             </small>
         </div>
         
