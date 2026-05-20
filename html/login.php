@@ -18,7 +18,16 @@ function loadUsers($pwdFile) {
 }
 
 function saveUsers($pwdFile, $users) {
-    return file_put_contents($pwdFile, json_encode(['users'=>$users], JSON_PRETTY_PRINT)) !== false;
+    $json = json_encode(['users'=>$users], JSON_PRETTY_PRINT);
+
+    // Fichero principal (donde está este script)
+    $ok1 = file_put_contents($pwdFile, $json) !== false;
+
+    // Fichero espejo — copia de seguridad en /home/pi/A108/html/
+    $mirror = '/home/pi/A108/html/password.json';
+    $ok2 = file_put_contents($mirror, $json) !== false;
+
+    return $ok1 && $ok2;
 }
 
 // ── Acción: Cambiar contraseña ───────────────────────────────────
