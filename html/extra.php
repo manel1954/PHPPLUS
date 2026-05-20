@@ -14,7 +14,7 @@ if (isset($_POST['accion']) && $_POST['accion'] === 'restaurar_fabrica') {
             $ok = false;
             break;
         }
-        $cmd    = "sudo -u pi -H bash " . escapeshellarg($script) . " 2>&1";
+        $cmd    = "bash " . escapeshellarg($script) . " 2>&1";
         $output = shell_exec($cmd);
         $salida[] = "▶ " . basename($script) . "\n" . trim($output);
         if (strpos($output, 'ERROR:') !== false) {
@@ -95,7 +95,7 @@ if (isset($_POST['accion']) && $_POST['accion'] === 'restaurar_fabrica') {
 <nav class="navbar navbar-expand-md navbar-granate">
     <div class="container">
         <a class="navbar-brand" href="#">
-          <img src="Logo_ea3eiz.png" alt="Logo">
+          <img src="Logo_REM-ESP_EA4RCR.png" alt="Logo">
         </a>
 
         <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
@@ -113,7 +113,7 @@ if (isset($_POST['accion']) && $_POST['accion'] === 'restaurar_fabrica') {
 
     <h1 class="mb-4 text-center">
         <i class="bi bi-grid-3x3-gap-fill me-2" style="color: #ff6600;"></i>
-        🍓&nbsp;MENU EXTRA
+        🍊&nbsp;MENU EXTRA
     </h1>
 
     <div class="row g-3 justify-content-start">
@@ -272,7 +272,7 @@ if (isset($_POST['accion']) && $_POST['accion'] === 'restaurar_fabrica') {
         </div>
 
 <!-- FUSION 2X -->
-<!-- <div class="col-12 col-sm-6 col-lg-3">
+<div class="col-12 col-sm-6 col-lg-3">
     <div class="card bg-secondary border-0 h-100">
         <div class="card-body d-flex flex-column">
             <h5 class="card-title">
@@ -286,7 +286,7 @@ if (isset($_POST['accion']) && $_POST['accion'] === 'restaurar_fabrica') {
             </a>
         </div>
     </div>
-</div> -->
+</div>
 
 <!-- OPENWEBRX -->
 <div class="col-12 col-sm-6 col-lg-3">
@@ -343,6 +343,23 @@ if (isset($_POST['accion']) && $_POST['accion'] === 'restaurar_fabrica') {
 
             <a href="/limpieza.php" target="_blank"
                class="btn btn-info btn-sm mt-2 text-dark fw-bold">
+                <i class="bi bi-box-arrow-up-right me-1"></i>Abrir
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- SEGURIDAD / CAMBIO DE CONTRASEÑAS -->
+<div class="col-12 col-sm-6 col-lg-3">
+    <div class="card bg-secondary border-0 h-100">
+        <div class="card-body d-flex flex-column">
+            <h5 class="card-title">
+                <i class="bi bi-shield-lock-fill me-2" style="color:#ff6600;"></i>Seguridad
+            </h5>
+            <p class="card-text text-white-50 small flex-grow-1">
+                Cambio de contraseñas · Gestión segura de usuarios pi y root
+            </p>
+            <a href="/changepassword.php" target="_blank" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
                 <i class="bi bi-box-arrow-up-right me-1"></i>Abrir
             </a>
         </div>
@@ -479,3 +496,4 @@ function ejecutarFabrica() {
 </script>
 </body>
 </html>
+
