@@ -262,11 +262,13 @@ endfor;
 </div>
 
 <footer>
-    <a href="#" onclick="window.close();"style="text-decoration:none; margin-left:auto;">
+    <div style="display:flex; justify-content:center;">
+  <a href="#" onclick="window.close(); return false;" style="text-decoration:none;">
     <button type="button">
-        🏠 CERRAR
+      🏠 CERRAR
     </button>
-</a>
+  </a>
+</div>
 
 </footer>
 
