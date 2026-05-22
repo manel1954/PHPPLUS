@@ -102,8 +102,10 @@ if (isset($_POST['accion']) && $_POST['accion'] === 'restaurar_fabrica') {
             <span class="navbar-toggler-icon" style="filter: invert(1);"></span>
         </button>
 
-<a href="#" onclick="window.close(); return false;" class="btn btn-outline-light btn-sm">
-    <i class="bi bi-x-circle me-1"></i> CERRAR MENU EXTRA
+<a href="#" onclick="window.close();"style="text-decoration:none; margin-left:auto;">
+    <button type="button">
+        🏠 CERRAR MENU EXTRA
+    </button>
 </a>
     </div>
 </nav>
