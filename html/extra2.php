@@ -95,7 +95,7 @@ if (isset($_POST['accion']) && $_POST['accion'] === 'restaurar_fabrica') {
 <nav class="navbar navbar-expand-md navbar-granate">
     <div class="container">
         <a class="navbar-brand" target="_blank" href="http://rem-esp.es">
-          <img src="Logo_REM-ESP_EA4RCR.png" alt="Logo">
+          <img src="Logo_Ader.png" alt="Logo">
         </a>
 
         <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
