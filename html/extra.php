@@ -94,8 +94,8 @@ if (isset($_POST['accion']) && $_POST['accion'] === 'restaurar_fabrica') {
 <!-- HEADER -->
 <nav class="navbar navbar-expand-md navbar-granate">
     <div class="container">
-        <a class="navbar-brand" target="_blank" href="http://rem-esp.es">
-          <img src="Logo_REM-ESP_EA4RCR.png" alt="Logo">
+        <a class="navbar-brand" target="_blank" href="https://associacioader.com">
+          <img src="Logo_Ader.png" alt="Logo">
         </a>
 
         <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
@@ -113,7 +113,7 @@ if (isset($_POST['accion']) && $_POST['accion'] === 'restaurar_fabrica') {
 
     <h1 class="mb-4 text-center">
         <i class="bi bi-grid-3x3-gap-fill me-2" style="color: #ff6600;"></i>
-        🍊&nbsp;MENU EXTRA
+         🍓&nbsp;MENU EXTRA
     </h1>
 
     <div class="row g-3 justify-content-start">
