@@ -834,14 +834,12 @@ button.btn-header { font-family: var(--font-mono); }
 <div class="ctrl-header-top">
 <!-- <img src="Logo_Ader.png" alt="EA3EIZ" style="height:40px;width:auto;"> -->
 
-
-        <a class="navbar-brand" href="https://associacioader.com/" target="_blank">
-          <img src="Logo_Ader.png" alt="Logo"style="height:40px;width:auto;>"
-        </a>
-
-
-
-<h1>PANEL SISTEMAS DIGITALES PARA RADIOAFICIONADOS PHPPLUS</h1>
+<div style="display:flex; align-items:center; gap:.75rem;">
+  <a class="navbar-brand" href="https://associacioader.com/" target="_blank">
+    <img src="Logo_Ader.png" alt="Logo" style="height:40px; width:auto;">
+  </a>
+  <h1>PANEL SISTEMAS DIGITALES PARA RADIOAFICIONADOS PHPPLUS</h1>
+</div>
 
 </div>
 <div class="ctrl-header-btns">
