@@ -183,7 +183,7 @@ setInterval(() => {
 
 
 <a href="#" onclick="window.close(); return false;" class="btn btn-outline-light btn-sm">
-    <i class="bi bi-x-circle me-1"></i> CERRAR AUTO_RX
+    <i class="bi bi-x-circle me-1"></i> CERRAR RADIOSONDE
 </a>
 
 
