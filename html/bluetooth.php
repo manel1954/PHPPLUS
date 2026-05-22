@@ -242,17 +242,9 @@ if (isset($_GET['action'])) {
             </h1>
 
             <!-- BOTON A LA DERECHA -->
-            <a href="mmdvm.php"
-               style="margin-left:auto;
-                      background:#2ecc71;
-                      color:#000;
-                      padding:8px 14px;
-                      border-radius:8px;
-                      text-decoration:none;
-                      font-weight:600;
-                      white-space:nowrap;">
-                🏠 Panel PHPPLUS
-            </a>
+  <a href="#" onclick="window.close(); return false;" class="btn btn-outline-light btn-sm">
+    <i class="bi bi-x-circle me-1"></i> CERRAR BLUETOOTH
+</a>
 
         </div>
         
