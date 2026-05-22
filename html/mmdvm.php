@@ -832,7 +832,13 @@ button.btn-header { font-family: var(--font-mono); }
 <body>
 <header class="ctrl-header">
 <div class="ctrl-header-top">
-<img src="Logo_Ader.png" alt="EA3EIZ" style="height:40px;width:auto;">
+<!-- <img src="Logo_Ader.png" alt="EA3EIZ" style="height:40px;width:auto;"> -->
+
+
+        <a class="navbar-brand" href="https://associacioader.com/" target="_blank">
+          <img src="Logo_Ader.png" alt="Logo"style="height:40px;width:auto;>"
+        </a>
+
 
 
 <h1>PANEL SISTEMAS DIGITALES PARA RADIOAFICIONADOS PHPPLUS</h1>
