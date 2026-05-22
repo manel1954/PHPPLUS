@@ -318,7 +318,9 @@ button:hover{
 
 <div class="top">
 <h1>🧹 Limpieza del sistema</h1>
-<a class="home" href="mmdvm.php">🏠 Panel PHPPLUS</a>
+<a href="#" onclick="window.close(); return false;" class="btn btn-outline-light btn-sm">
+    <i class="bi bi-x-circle me-1"></i> CERRAR LIMPIEZA
+</a>
 </div>
 
 <form method="post">
