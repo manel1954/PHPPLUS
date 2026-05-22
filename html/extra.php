@@ -94,7 +94,7 @@ if (isset($_POST['accion']) && $_POST['accion'] === 'restaurar_fabrica') {
 <!-- HEADER -->
 <nav class="navbar navbar-expand-md navbar-granate">
     <div class="container">
-        <a class="navbar-brand" href="#">
+        <a class="navbar-brand" href="https://associacioader.com/" target="_blank">
           <img src="Logo_ea3eiz.png" alt="Logo">
         </a>
 
@@ -103,7 +103,7 @@ if (isset($_POST['accion']) && $_POST['accion'] === 'restaurar_fabrica') {
         </button>
 
 <a href="#" onclick="window.close(); return false;" class="btn btn-outline-light btn-sm">
-    <i class="bi bi-x-circle me-1"></i> Cerrar
+    <i class="bi bi-x-circle me-1"></i> CERRAR MENU EXTRA
 </a>
     </div>
 </nav>
