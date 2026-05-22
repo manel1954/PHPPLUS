@@ -14,7 +14,7 @@ if (isset($_POST['accion']) && $_POST['accion'] === 'restaurar_fabrica') {
             $ok = false;
             break;
         }
-        $cmd    = "bash " . escapeshellarg($script) . " 2>&1";
+        $cmd    = "sudo -u pi -H bash " . escapeshellarg($script) . " 2>&1";
         $output = shell_exec($cmd);
         $salida[] = "▶ " . basename($script) . "\n" . trim($output);
         if (strpos($output, 'ERROR:') !== false) {
@@ -94,8 +94,8 @@ if (isset($_POST['accion']) && $_POST['accion'] === 'restaurar_fabrica') {
 <!-- HEADER -->
 <nav class="navbar navbar-expand-md navbar-granate">
     <div class="container">
-        <a class="navbar-brand" target="_blank" href="http://rem-esp.es">
-          <img src="Logo_REM-ESP_EA4RCR.png" alt="Logo">
+        <a class="navbar-brand" href="https://associacioader.com">
+          <img src="Logo_Ader.png" alt="Logo">
         </a>
 
         <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
@@ -113,7 +113,7 @@ if (isset($_POST['accion']) && $_POST['accion'] === 'restaurar_fabrica') {
 
     <h1 class="mb-4 text-center">
         <i class="bi bi-grid-3x3-gap-fill me-2" style="color: #ff6600;"></i>
-        🍊&nbsp;MENU EXTRA
+        🍓&nbsp;MENU EXTRA
     </h1>
 
     <div class="row g-3 justify-content-start">
@@ -128,7 +128,7 @@ if (isset($_POST['accion']) && $_POST['accion'] === 'restaurar_fabrica') {
                     <p class="card-text text-white-50 small flex-grow-1">
                         Lanzador configurador Dump1090
                     </p>
-                    <a href="/dump1090.php" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
+                    <a href="/dump1090.php" target="_blank" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
                         <i class="bi bi-box-arrow-up-right me-1"></i>Abrir
                     </a>
                 </div>
@@ -145,7 +145,7 @@ if (isset($_POST['accion']) && $_POST['accion'] === 'restaurar_fabrica') {
                     <p class="card-text text-white-50 small flex-grow-1">
                         Seguimiento de aeronaves en tiempo real
                     </p>
-                    <a href="/dump1090monitor.php" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
+                    <a href="/dump1090monitor.php" target="_blank" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
                         <i class="bi bi-box-arrow-up-right me-1"></i>Abrir
                     </a>
                 </div>
@@ -162,7 +162,7 @@ if (isset($_POST['accion']) && $_POST['accion'] === 'restaurar_fabrica') {
                     <p class="card-text text-white-50 small flex-grow-1">
                         Servidor AMBE · Control de voz digital DMR
                     </p>
-                    <a href="/ambeserver.php" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
+                    <a href="/ambeserver.php" target="_blank" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
                         <i class="bi bi-box-arrow-up-right me-1"></i>Abrir
                     </a>
                 </div>
@@ -179,7 +179,7 @@ if (isset($_POST['accion']) && $_POST['accion'] === 'restaurar_fabrica') {
                     <p class="card-text text-white-50 small flex-grow-1">
                         Feeder Radarbox · Tracking ADS-B global.
                     </p>
-                    <a href="/radarbox.php" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
+                    <a href="/radarbox.php" target="_blank" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
                         <i class="bi bi-box-arrow-up-right me-1"></i>Abrir
                     </a>
                 </div>
@@ -196,7 +196,7 @@ if (isset($_POST['accion']) && $_POST['accion'] === 'restaurar_fabrica') {
                     <p class="card-text text-white-50 small flex-grow-1">
                         Feeder FR24 · Seguimiento de vuelos en tiempo real.
                     </p>
-                    <a href="/flightradar.php" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
+                    <a href="/flightradar.php" target="_blank" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
                         <i class="bi bi-box-arrow-up-right me-1"></i>Abrir
                     </a>
                 </div>
@@ -213,7 +213,7 @@ if (isset($_POST['accion']) && $_POST['accion'] === 'restaurar_fabrica') {
                     <p class="card-text text-white-50 small flex-grow-1">
                         Seguimiento de sondas meteorológicas en tiempo real.
                     </p>
-                    <a href="/auto_rx.php" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
+                    <a href="/auto_rx.php" target="_blank" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
                         <i class="bi bi-box-arrow-up-right me-1"></i>Abrir
                     </a>
                 </div>
@@ -230,7 +230,7 @@ if (isset($_POST['accion']) && $_POST['accion'] === 'restaurar_fabrica') {
                     <p class="card-text text-white-50 small flex-grow-1">
                         Control de repetidor · EchoLink · Configuración y logs
                     </p>
-                    <a href="/svxlink.php" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
+                    <a href="/svxlink.php" target="_blank" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
                         <i class="bi bi-box-arrow-up-right me-1"></i>Abrir
                     </a>
                 </div>
@@ -247,7 +247,7 @@ if (isset($_POST['accion']) && $_POST['accion'] === 'restaurar_fabrica') {
                     <p class="card-text text-white-50 small flex-grow-1">
                         Gestión de dispositivos Bluetooth
                     </p>
-                    <a href="/bluetooth.php" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
+                    <a href="/bluetooth.php" target="_blank" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
                         <i class="bi bi-box-arrow-up-right me-1"></i>Abrir
                     </a>
                 </div>
@@ -264,7 +264,7 @@ if (isset($_POST['accion']) && $_POST['accion'] === 'restaurar_fabrica') {
                     <p class="card-text text-white-50 small flex-grow-1">
                         Grabador de Firmware para módulos ESP32 vía WebSerial
                     </p>
-                    <a href="/esp32.php" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
+                    <a href="/esp32.php" target="_blank" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
                         <i class="bi bi-box-arrow-up-right me-1"></i>Abrir
                     </a>
                 </div>
@@ -272,7 +272,7 @@ if (isset($_POST['accion']) && $_POST['accion'] === 'restaurar_fabrica') {
         </div>
 
 <!-- FUSION 2X -->
-<div class="col-12 col-sm-6 col-lg-3">
+<!-- <div class="col-12 col-sm-6 col-lg-3">
     <div class="card bg-secondary border-0 h-100">
         <div class="card-body d-flex flex-column">
             <h5 class="card-title">
@@ -281,12 +281,12 @@ if (isset($_POST['accion']) && $_POST['accion'] === 'restaurar_fabrica') {
             <p class="card-text text-white-50 small flex-grow-1">
                 Servidor Fusion 2X · Interfaz web en tiempo real para equipos Yaesu
             </p>
-            <a href="/fusion2x.php" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
+            <a href="/fusion2x.php" target="_blank" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
                 <i class="bi bi-box-arrow-up-right me-1"></i>Abrir
             </a>
         </div>
     </div>
-</div>
+</div> -->
 
 <!-- OPENWEBRX -->
 <div class="col-12 col-sm-6 col-lg-3">
@@ -301,7 +301,7 @@ if (isset($_POST['accion']) && $_POST['accion'] === 'restaurar_fabrica') {
                 Receptor SDR en tiempo real · Web interface para RTL-SDR y decodificación digital.
             </p>
 
-            <a href="/openwebrx_control.php"
+            <a href="/openwebrx_control.php" target="_blank"
                class="btn btn-info btn-sm mt-2 text-dark fw-bold">
                 <i class="bi bi-box-arrow-up-right me-1"></i>Abrir
             </a>
@@ -321,7 +321,7 @@ if (isset($_POST['accion']) && $_POST['accion'] === 'restaurar_fabrica') {
             <p class="card-text text-white-50 small flex-grow-1">
                 Panel de acceso rápido a enlaces de radioafición y servicios web.
             </p>
-            <a href="/mis_enlaces.php" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
+            <a href="/mis_enlaces.php" target="_blank" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
                 <i class="bi bi-box-arrow-up-right me-1"></i>Abrir
             </a>
         </div>
@@ -341,7 +341,7 @@ if (isset($_POST['accion']) && $_POST['accion'] === 'restaurar_fabrica') {
                 Limpieza de logs, temporales y mantenimiento básico del sistema para liberar espacio.
             </p>
 
-            <a href="/limpieza.php"
+            <a href="/limpieza.php" target="_blank"
                class="btn btn-info btn-sm mt-2 text-dark fw-bold">
                 <i class="bi bi-box-arrow-up-right me-1"></i>Abrir
             </a>
@@ -383,6 +383,7 @@ if (isset($_POST['accion']) && $_POST['accion'] === 'restaurar_fabrica') {
     </div>
 </div>
 
+
 <!-- RESTAURAR IMAGEN DE FÁBRICA -->
 <div class="col-12 col-sm-6 col-lg-3">
     <div class="card bg-secondary border-0 h-100">
@@ -401,7 +402,24 @@ if (isset($_POST['accion']) && $_POST['accion'] === 'restaurar_fabrica') {
         </div>
     </div>
 </div>
-        
+
+        <!-- EDITOR GENERAL
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card bg-secondary border-0 h-100">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">
+                        <i class="bi bi-sliders me-2" style="color:#00e5ff;"></i>EDITOR GENERAL
+                    </h5>
+                    <p class="card-text text-white-50 small flex-grow-1">
+                        Configuración global · Callsign · Id · Frecuencias · Posición · URL
+                    </p>
+                    <a href="/editor_general_config.php" target="_blank" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
+                        <i class="bi bi-box-arrow-up-right me-1"></i>Abrir
+                    </a>
+                </div>
+            </div>
+        </div> -->
+
     </div>
 </div>
 
