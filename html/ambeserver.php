@@ -321,10 +321,10 @@ body { background: #0d0d0d; }
     <i class="bi bi-cpu-fill me-2 text-warning"></i>
     AMBE Server
 </h4>
-    <a href="mmdvm.php" class="btn btn-outline-light">
-        <i class="bi bi-house-door-fill me-1"></i>
-        Panel PHPPLUS
-    </a>
+   
+<a href="#" onclick="window.close(); return false;" class="btn btn-outline-light btn-sm">
+    <i class="bi bi-x-circle me-1"></i> CERRAR AMBE SERVER
+</a>
 </div>
 
 <div class="d-flex gap-4 mb-4">
