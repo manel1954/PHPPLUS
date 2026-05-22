@@ -608,9 +608,11 @@ $host = hostnameServer();
             <div class="title">Análisis del sistema</div>
             <div class="subtitle">Panel inteligente PHPHPLUS</div>
         </div>
-        <a href="mmdvm.php" class="home-btn">
-            🏠 Panel PHPPLUS
-        </a>
+        <a href="#" onclick="window.close();"style="text-decoration:none; margin-left:auto;">
+    <button type="button">
+        🏠 CERRAR ANALISIS
+    </button>
+</a>
     </div>
 
     <!-- ===== ESTADÍSTICAS ===== -->
