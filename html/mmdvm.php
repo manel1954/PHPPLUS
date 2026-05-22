@@ -569,7 +569,7 @@ if ($action === 'nxdn-transmission') {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Panel PHPPLUS ADER</title>
+<title>Panel PHPPLUS</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@500;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
 <style>
@@ -832,18 +832,11 @@ button.btn-header { font-family: var(--font-mono); }
 <body>
 <header class="ctrl-header">
 <div class="ctrl-header-top">
-<!-- <img src="Logo_Ader.png" alt="EA3EIZ" style="height:40px;width:auto;"> -->
-
-<div style="display:flex; align-items:center; gap:.75rem;">
-  <a class="navbar-brand" href="https://associacioader.com/" target="_blank">
-    <img src="Logo_Ader.png" alt="Logo" style="height:40px; width:auto;">
-  </a>
-  <h1>PANEL SISTEMAS DIGITALES PARA RADIOAFICIONADOS PHPPLUS</h1>
-</div>
-
+<img src="Logo_ea3eiz.png" alt="EA3EIZ" style="height:40px;width:auto;">
+<h1>PANEL SISTEMAS DIGITALES PARA RADIOAFICIONADOS PHPPLUS</h1>
 </div>
 <div class="ctrl-header-btns">
-<a href="editor_general_config.php" target="_blank" class="btn-header red"> 📄 editor general </a>
+<a href="editor_general_config.php" class="btn-header red"> 📄 editor general </a>
 <a href="?action=backup-configs" class="btn-header amber"> 💾 Hacer copia de seguridad </a>
 <button onclick="openRestore()" class="btn-header cyan"> 📂 Restaurar copia de seguridad </button>
 <div class="dropdown-wrap" id="dropActualizaciones">
@@ -856,7 +849,7 @@ button.btn-header { font-family: var(--font-mono); }
   </div>
 </div>
 <button class="btn-header cyan" onclick="xtTtydOpen()">⌨ Terminal</button>
-<a href="extra.php" target="_blank" class="btn-header amber">☰ Menu Extra</a>
+<a href="extra.php" class="btn-header amber">☰ Menu Extra</a>
 <button id="btnReboot" class="btn-header red" onclick="rebootPi()">⏻ Reiniciar Pi</button>
 </div>
 </header>

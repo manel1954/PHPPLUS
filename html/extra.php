@@ -94,19 +94,17 @@ if (isset($_POST['accion']) && $_POST['accion'] === 'restaurar_fabrica') {
 <!-- HEADER -->
 <nav class="navbar navbar-expand-md navbar-granate">
     <div class="container">
-        <a class="navbar-brand" href="https://associacioader.com/" target="_blank">
-          <img src="Logo_Ader.png" alt="Logo">
+        <a class="navbar-brand" href="#">
+          <img src="Logo_ea3eiz.png" alt="Logo">
         </a>
 
         <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
             <span class="navbar-toggler-icon" style="filter: invert(1);"></span>
         </button>
 
-<a href="#" onclick="window.close();"style="text-decoration:none; margin-left:auto;">
-    <button type="button">
-        🏠 CERRAR MENU EXTRA
-    </button>
-</a>
+        <a href="mmdvm.php" class="btn btn-outline-light btn-sm">
+            <i class="bi bi-house-fill me-1"></i> Panel PHPPLUS
+        </a>
     </div>
 </nav>
 
@@ -345,44 +343,6 @@ if (isset($_POST['accion']) && $_POST['accion'] === 'restaurar_fabrica') {
 
             <a href="/limpieza.php" target="_blank"
                class="btn btn-info btn-sm mt-2 text-dark fw-bold">
-                <i class="bi bi-box-arrow-up-right me-1"></i>Abrir
-            </a>
-        </div>
-    </div>
-</div>
-
-
-<!-- ANALISIS.PHP -->
-<div class="col-12 col-sm-6 col-lg-3">
-    <div class="card bg-secondary border-0 h-100">
-        <div class="card-body d-flex flex-column">
-            <h5 class="card-title">
-                <i class="bi bi-speedometer2 me-2" style="color:#00e5ff;"></i>Análisis Servicios
-            </h5>
-            <p class="card-text text-white-50 small flex-grow-1">
-                Panel de monitoreo · CPU/RAM/Disco · Control de servicios con interruptores
-            </p>
-            <a href="/analisis.php" target="_blank" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
-                <i class="bi bi-box-arrow-up-right me-1"></i>Abrir
-            </a>
-        </div>
-    </div>
-</div>
-
-
-
-
-<!-- SEGURIDAD / CAMBIO DE CONTRASEÑAS -->
-<div class="col-12 col-sm-6 col-lg-3">
-    <div class="card bg-secondary border-0 h-100">
-        <div class="card-body d-flex flex-column">
-            <h5 class="card-title">
-                <i class="bi bi-shield-lock-fill me-2" style="color:#ff6600;"></i>Seguridad
-            </h5>
-            <p class="card-text text-white-50 small flex-grow-1">
-                Cambio de contraseñas · Gestión segura de usuarios pi y root
-            </p>
-            <a href="/changepassword.php" target="_blank" class="btn btn-info btn-sm mt-2 text-dark fw-bold">
                 <i class="bi bi-box-arrow-up-right me-1"></i>Abrir
             </a>
         </div>

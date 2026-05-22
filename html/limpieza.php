@@ -318,11 +318,7 @@ button:hover{
 
 <div class="top">
 <h1>🧹 Limpieza del sistema</h1>
-<a href="#" onclick="window.close();"style="text-decoration:none; margin-left:auto;">
-    <button type="button">
-        🏠 CERRAR LIMPIEZA
-    </button>
-</a>
+<a class="home" href="mmdvm.php">🏠 Panel PHPPLUS</a>
 </div>
 
 <form method="post">

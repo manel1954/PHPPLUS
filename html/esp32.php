@@ -73,13 +73,12 @@ button{ background:var(--primary); color:white; } button:hover{ opacity:.9; } bu
     <button type="button" style="background-color: #673AB7;">📥 Descarga firmware</button>
 </a>
 
-<a href="#" onclick="window.close();"style="text-decoration:none; margin-left:auto;">
+<a href="mmdvm.php" style="text-decoration:none; margin-left:auto;">
     <button type="button">
-        🏠 CERRAR ESP32
+        🏠 Panel PHPPLUS
     </button>
 </a>
-    
-</div>
+    </div>
     <div id="progressContainer" class="progress-wrapper hidden">
         <div class="progress-bar"><div id="progressFill" class="progress-fill">0%</div></div>
         <div id="progressLabel" style="margin-top:8px; font-size:0.9rem; color:#bbb; text-align:center;">Esperando...</div>

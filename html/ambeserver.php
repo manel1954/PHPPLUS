@@ -15,7 +15,7 @@ $cronCmd = "@reboot sleep 10 && cd $baseDir && nohup $binary "
     . "-s \$(grep '^velocidad=' $iniFile | cut -d= -f2) "
     . "-i \$(grep '^puerto=' $iniFile | cut -d= -f2) "
     . "-p \$(grep '^puertonet=' $iniFile | cut -d= -f2) "
-    . ">> $logFile 2>&1 & ; echo \$(pgrep -f AMBEserver | head -n1) > $pidFile";
+    . ">> $logFile 2>&1 &";
 
 /* =========================================================
    FUNCIONES
@@ -50,13 +50,22 @@ function getAutoStatus()
 
 function isRunning($pidFile)
 {
-    $pid = trim(@file_get_contents($pidFile));
-
-    if ($pid && trim(shell_exec("ps -p $pid -o pid= 2>/dev/null"))) {
-        return true;
+    if (!file_exists($pidFile)) {
+        return false;
     }
 
-    return trim(shell_exec("pgrep -x AMBEserver 2>/dev/null")) !== '';
+    $pid = trim(@file_get_contents($pidFile));
+    if (!$pid) {
+        return false;
+    }
+
+    $running = trim(shell_exec("ps -p $pid -o pid= 2>/dev/null"));
+    if (!$running) {
+        @unlink($pidFile);
+        return false;
+    }
+
+    return true;
 }
 
 /* =========================================================
@@ -321,10 +330,10 @@ body { background: #0d0d0d; }
     <i class="bi bi-cpu-fill me-2 text-warning"></i>
     AMBE Server
 </h4>
-   
-<a href="#" onclick="window.close(); return false;" class="btn btn-outline-light btn-sm">
-    <i class="bi bi-x-circle me-1"></i> CERRAR AMBE SERVER
-</a>
+    <a href="mmdvm.php" class="btn btn-outline-light">
+        <i class="bi bi-house-door-fill me-1"></i>
+        Panel PHPPLUS
+    </a>
 </div>
 
 <div class="d-flex gap-4 mb-4">

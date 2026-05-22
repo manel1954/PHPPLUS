@@ -262,13 +262,7 @@ endfor;
 </div>
 
 <footer>
-    <div style="display:flex; justify-content:center;">
-  <a href="#" onclick="window.close(); return false;" style="text-decoration:none;">
-    <button type="button">
-      🏠 CERRAR
-    </button>
-  </a>
-</div>
+    <a href="mmdvm.php" class="btn-salir btn-header red">✕ &nbsp;CERRAR</a>
 
 </footer>
 

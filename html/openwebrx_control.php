@@ -166,11 +166,9 @@ body {
             <div class="spacer"></div>
 
             <!-- HOME PHPPLUS -->
-<a href="#" onclick="window.close();"style="text-decoration:none; margin-left:auto;">
-    <button type="button">
-        🏠 CERRAR OPENWEBRX
-    </button>
-</a>
+            <a href="mmdvm.php" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-house-fill me-1"></i> PANEL PHPPLUS
+            </a>
 
         </div>
     </div>
