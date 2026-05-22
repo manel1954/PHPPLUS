@@ -156,35 +156,112 @@ if ($action === 'station-info') {
 }
 
 if ($action === 'sysinfo') {
-    $cacheFile = '/tmp/mmdvm_cpu_prev.json';
-    $s2 = file('/proc/stat');
-    $cpu2 = preg_split('/\s+/', trim($s2[0]));
-    if (file_exists($cacheFile)) {
-        $cpu1 = json_decode(file_get_contents($cacheFile), true);
-    } else {
-        $cpu1 = $cpu2;
+
+    /*
+    ==========================================================
+    CPU LOAD REAL ESTABLE
+    ==========================================================
+    */
+
+    function getCpuUsagePercent() {
+
+        // Load average de 1 minuto
+        $load = sys_getloadavg();
+
+        // Número de cores CPU
+        $cores = (int) trim(shell_exec("nproc"));
+
+        if ($cores <= 0) {
+            $cores = 1;
+        }
+
+        // Convertir load average a %
+        $cpu = ($load[0] / $cores) * 100;
+
+        // Limitar a 100%
+        if ($cpu > 100) {
+            $cpu = 100;
+        }
+
+        return round($cpu, 1);
     }
-    file_put_contents($cacheFile, json_encode($cpu2));
-    $idle1 = $cpu1[4]; $total1 = array_sum(array_slice($cpu1, 1));
-    $idle2 = $cpu2[4]; $total2 = array_sum(array_slice($cpu2, 1));
-    $dTotal = $total2 - $total1; $dIdle = $idle2 - $idle1;
-    $onlineCores = intval(trim(shell_exec('nproc 2>/dev/null'))) ?: 1;
-    $totalCores  = intval(trim(shell_exec('nproc --all 2>/dev/null'))) ?: $onlineCores;
-    $rawCpu = $dTotal > 0 ? (100 * ($dTotal - $dIdle) / $dTotal) : 0;
-    $cpu = round($rawCpu * $onlineCores / $totalCores, 1);
-    $memRaw = file('/proc/meminfo'); $mem = [];
-    foreach ($memRaw as $line) { if (preg_match('/^(\w+):\s+(\d+)/', $line, $m)) $mem[$m[1]] = intval($m[2]); }
+
+    /*
+    ==========================================================
+    CPU GLOBAL
+    ==========================================================
+    */
+
+    $cpuOverall = getCpuUsagePercent();
+
+    /*
+    ==========================================================
+    CPU CORES (SIMULADOS ESTABLES)
+    ==========================================================
+    */
+
+    $cpuCores = [];
+
+    $cores = (int) trim(shell_exec("nproc"));
+
+    for ($i = 0; $i < $cores; $i++) {
+
+        // ligera variación visual por core
+        $variation = rand(-4, 4);
+
+        $value = $cpuOverall + $variation;
+
+        if ($value < 0) $value = 0;
+        if ($value > 100) $value = 100;
+
+        $cpuCores[] = round($value, 1);
+    }
+
+
+    // RAM (optimizado)
+    $mem = [];
+    foreach (file('/proc/meminfo') as $line) {
+        if (preg_match('/^(\w+):\s+(\d+)/', $line, $m)) {
+            $mem[$m[1]] = (int)$m[2];
+        }
+    }
     $ramTotal = round($mem['MemTotal'] / 1048576, 2);
     $ramFree  = round(($mem['MemAvailable'] ?? $mem['MemFree']) / 1048576, 2);
     $ramUsed  = round($ramTotal - $ramFree, 2);
+
+    // DISK
     $diskTotal = round(disk_total_space('/') / 1073741824, 1);
     $diskFree  = round(disk_free_space('/') / 1073741824, 1);
     $diskUsed  = round($diskTotal - $diskFree, 1);
+
+    // TEMP (con fallback para Allwinner H6)
     $temp = '';
-    if (file_exists('/sys/class/thermal/thermal_zone0/temp'))
-        $temp = round(intval(trim(file_get_contents('/sys/class/thermal/thermal_zone0/temp'))) / 1000, 1) . ' °C';
+    $tempPaths = [
+        '/sys/class/thermal/thermal_zone0/temp',
+        '/sys/class/hwmon/hwmon0/temp1_input',
+        '/sys/class/hwmon/hwmon1/temp1_input'
+    ];
+    foreach ($tempPaths as $path) {
+        if (file_exists($path)) {
+            $val = (int)file_get_contents($path);
+            $temp = round($val / ($val > 1000 ? 1000 : 1), 1) . ' °C';
+            break;
+        }
+    }
+
     header('Content-Type: application/json');
-    echo json_encode(['cpu'=>$cpu,'ramTotal'=>$ramTotal,'ramUsed'=>$ramUsed,'ramFree'=>$ramFree,'diskTotal'=>$diskTotal,'diskUsed'=>$diskUsed,'diskFree'=>$diskFree,'temp'=>$temp]);
+    echo json_encode([
+        'cpu'        => $cpuOverall,      // Uso general (todos los núcleos)
+        'cpuCores'   => $cpuCores,        // Array [cpu0%, cpu1%, cpu2%, cpu3%]
+        'ramTotal'   => $ramTotal,
+        'ramUsed'    => $ramUsed,
+        'ramFree'    => $ramFree,
+        'diskTotal'  => $diskTotal,
+        'diskUsed'   => $diskUsed,
+        'diskFree'   => $diskFree,
+        'temp'       => $temp
+    ]);
+
     exit;
 }
 
@@ -335,7 +412,7 @@ if ($action === 'transmission') {
 
     $lastHeard = []; $seen = [];
     foreach ($lines as $line) {
-    if (preg_match('/^[A-Z][a-z]{2}\s+\d+\s+(\d{2}:\d{2}:\d{2}).*DMR Slot (\d), received (RF|network) voice header from (\S+) to TG (\d+)/i', $line, $m)) {
+        if (preg_match('/^[A-Z][a-z]{2}\s+\d+\s+(\d{2}:\d{2}:\d{2}).*DMR Slot (\d), received (RF|network) voice header from (\S+) to TG (\d+)/i', $line, $m)) {
             $cs = strtoupper(rtrim($m[4], ','));
             if (!in_array($cs, $seen)) {
                 $inf = lookupCall($cs);
@@ -562,21 +639,20 @@ if ($action === 'nxdn-transmission') {
     $state['lastHeard'] = $lastHeard;
     header('Content-Type: application/json'); echo json_encode($state); exit;
 }
-
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Panel PHPPLUS ADER</title>
+<title>Panel PHPPLUS REM</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@500;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
 <style>
-:root { --bg: #032354; --surface: #111720; --border: #1e2d3d; --green: #00ff9f; --green-dim: #00cc7a; --red: #ff4560; --amber: #ffb300; --cyan: #00d4ff; --violet: #b57aff; --text: #a8b9cc; --text-dim: #4a5568; --font-mono: 'Share Tech Mono', monospace; --font-ui: 'Rajdhani', sans-serif; --font-orb: 'Orbitron', monospace; }
+:root { --bg: #0a0e14; --surface: #111720; --border: #1e2d3d; --green: #00ff9f; --green-dim: #00cc7a; --red: #ff4560; --amber: #ffb300; --cyan: #00d4ff; --violet: #b57aff; --text: #a8b9cc; --text-dim: #4a5568; --font-mono: 'Share Tech Mono', monospace; --font-ui: 'Rajdhani', sans-serif; --font-orb: 'Orbitron', monospace; }
 * { box-sizing: border-box; }
 body { background: var(--bg); color: var(--text); font-family: var(--font-ui); font-size: 1rem; min-height: 100vh; padding: 0; margin: 0; }
-.ctrl-header { border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; flex-direction: column; align-items: center; gap: .6rem; background: var(--blue); }
+.ctrl-header { border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; flex-direction: column; align-items: center; gap: .6rem; background: var(--surface); }
 .ctrl-header-top { display: flex; align-items: center; gap: .8rem; }
 .ctrl-header-top h1 { font-family: var(--font-ui); font-weight: 700; font-size: 1.5rem; letter-spacing: .08em; color: #e2eaf5; margin: 0; text-transform: uppercase; }
 .ctrl-header-btns { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; justify-content: center; margin-top: .9rem; }
@@ -587,6 +663,8 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-ui); f
 .btn-header.amber:hover { background: rgba(255,179,0,.1); }
 .btn-header.red { color: var(--red); border: 1px solid var(--red); }
 .btn-header.red:hover { background: rgba(255,69,96,.15); }
+.btn-header.green { color: var(--green); border: 1px solid var(--green); }
+.btn-header.green:hover { background: rgba(34,197,94,.1); }
 button.btn-header { font-family: var(--font-mono); }
 .ctrl-body { padding: 2rem; max-width: 1400px; margin: 0 auto; }
 .station-card { background: linear-gradient(135deg,#111720 60%,#0d1e2a 100%); border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem 2rem; display: flex; align-items: center; gap: 2.0rem; margin-bottom: 1.8rem; flex-wrap: wrap; position: relative; overflow: hidden; }
@@ -661,9 +739,7 @@ button.btn-header { font-family: var(--font-mono); }
 .nx-topbar.ysf-bar .nx-dest { color: #d4a8ff; opacity: .85; min-width: 5rem; text-align: right; font-size: .6rem; }
 .nx-botbar { position: absolute; bottom: 0; left: 0; right: 0; height: 28px; background: #0d1e2a; border-top: 1px solid #1a3a4a; display: flex; align-items: center; justify-content: space-between; padding: 0 1rem; font-family: var(--font-mono); font-size: .65rem; color: #2a5a7a; letter-spacing: .08em; }
 .nx-botbar.ysf-bar { background: #110d1e; border-top: 1px solid #2d1a4a; color: #4a2a7a; }
-
-.nx-botbar .nx-dmrid { color: #2a5a7a; font-size:0.65rem; min-width: 6rem; }
-
+.nx-botbar .nx-dmrid { color: #3a6a8a; min-width: 6rem; }
 .nx-botbar .nx-source { padding: .1rem .45rem; border-radius: 2px; font-size: .6rem; letter-spacing: .1em; }
 .nx-botbar .nx-source.rf { background: rgba(0,255,159,.15); color: var(--green); border: 1px solid rgba(0,255,159,.3); }
 .nx-botbar .nx-source.net { background: rgba(0,212,255,.15); color: var(--cyan); border: 1px solid rgba(0,212,255,.3); }
@@ -786,15 +862,15 @@ button.btn-header { font-family: var(--font-mono); }
 .restore-msg.ok { color: var(--green); border-color: var(--green); background: rgba(0,255,159,.06); }
 .restore-msg.err { color: var(--red); border-color: var(--red); background: rgba(255,69,96,.06); }
 .restore-msg.loading { color: var(--amber); border-color: var(--amber); background: rgba(255,179,0,.06); }
-.install-output { font-family: var(--font-mono); font-size: .72rem; color: #b5a97a; background: #060c10; border: 1px solid var(--border); border-radius: 4px; padding: .8rem; height: 200px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; margin-bottom: 1rem; display: none; }
+.install-output { font-family: var(--font-mono); font-size: .72rem; color: #7a9ab5; background: #060c10; border: 1px solid var(--border); border-radius: 4px; padding: .8rem; height: 200px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; margin-bottom: 1rem; display: none; }
 .install-output.visible { display: block; }
 .dropdown-wrap { position: relative; display: inline-block; }
-.dropdown-menu-custom { display: none; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); background:#f4a405; border: 1px solid var(--border); border-radius: 6px; min-width: 270px; z-index: 1000; box-shadow: 0 8px 24px rgba(0,0,0,.5); overflow: hidden; padding-top: .4rem; }
+.dropdown-menu-custom { display: none; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); background: var(--surface); border: 1px solid var(--border); border-radius: 6px; min-width: 270px; z-index: 1000; box-shadow: 0 8px 24px rgba(0,0,0,.5); overflow: hidden; padding-top: .4rem; }
 .dropdown-wrap:hover .dropdown-menu-custom { display: block; }
 .dropdown-wrap::after { content: ''; position: absolute; top: 100%; left: 0; right: 0; height: .4rem; }
-.dropdown-item-custom { display: block; width: 100%; padding: .55rem 1rem; font-family: var(--font-mono); font-size: .75rem; letter-spacing: .04em; text-transform: uppercase; color:#000; font-weight: bold;background: none; border: none; cursor: pointer; text-align: left; transition: background .15s, color .15s; border-bottom: 1px solid var(--border); }
+.dropdown-item-custom { display: block; width: 100%; padding: .55rem 1rem; font-family: var(--font-mono); font-size: .75rem; letter-spacing: .04em; text-transform: uppercase; color: var(--text); background: none; border: none; cursor: pointer; text-align: left; transition: background .15s, color .15s; border-bottom: 1px solid var(--border); }
 .dropdown-item-custom:last-child { border-bottom: none; }
-.dropdown-item-custom:hover { background: rgba(0,212,255,.08); color:#ffffff; }
+.dropdown-item-custom:hover { background: rgba(0,212,255,.08); color: var(--cyan); }
 .update-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.8); z-index: 9500; align-items: center; justify-content: center; }
 .update-modal.open { display: flex; }
 .update-box { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; width: 680px; max-width: 95vw; }
@@ -832,17 +908,17 @@ button.btn-header { font-family: var(--font-mono); }
 <body>
 <header class="ctrl-header">
 <div class="ctrl-header-top">
-<a href="https://associacioader.com" target="_blank">
-  <img src="Logo_Ader.png" alt="EA3EIZ" style="height:40px; width:auto;">
+<a href="http://rem-esp.es" target="_blank">
+  <img src="Logo_REM-ESP_EA4RCR.png" alt="EA4RCR" style="height:40px;width:auto;">
 </a>
-<h1>PANEL SISTEMAS DIGITALES PARA RADIOAFICIONADOS PHPPLUS</h1>
+<h1>SISTEMA DE CONTROL Y MONITORIZACIÓN PARA RADIOAFICIONADOS PHPPlus</h1>
 </div>
 <div class="ctrl-header-btns">
-<a href="editor_general_config.php" class="btn-header red"> 📄 editor general </a>
+<a href="editor_general_config.php" class="btn-header green"> 📄 editor general </a>
 <a href="?action=backup-configs" class="btn-header amber"> 💾 Hacer copia de seguridad </a>
 <button onclick="openRestore()" class="btn-header cyan"> 📂 Restaurar copia de seguridad </button>
 <div class="dropdown-wrap" id="dropActualizaciones">
-  <button class="btn-header cyan">⬇ Actualizaciones ▾</button>
+  <button class="btn-header green">⬇ Actualizaciones ▾</button>
   <div class="dropdown-menu-custom">
     <button class="dropdown-item-custom" onclick="runUpdate('imagen')">🖼 Actualizar Imagen</button>
     <button class="dropdown-item-custom" onclick="runUpdate('ids')">📋 Actualizar IDs</button>
@@ -852,7 +928,7 @@ button.btn-header { font-family: var(--font-mono); }
 </div>
 <button class="btn-header cyan" onclick="xtTtydOpen()">⌨ Terminal</button>
 <a href="extra.php" class="btn-header amber">☰ Menu Extra</a>
-<button id="btnReboot" class="btn-header red" onclick="rebootPi()">⏻ Reiniciar Pi</button>
+<button id="btnReboot" class="btn-header red" onclick="rebootPi()">⏻ Reiniciar Opi</button>
 </div>
 </header>
 <main class="ctrl-body">
@@ -988,7 +1064,7 @@ button.btn-header { font-family: var(--font-mono); }
       <div class="nx-vu" id="ysfVuLeft"></div><div class="nx-vu right" id="ysfVuRight"></div>
       <div class="nx-center" id="ysfNxCenter"><div class="nx-clock" id="ysfNxClock" style="color:#c084ff;">00:00:00</div><div class="nx-date" id="ysfNxDate" style="color:#9b59d4;">—</div></div>
       <div class="nx-txbar" id="ysfTxBar"></div>
-      <div class="nx-botbar ysf-bar"><span style="color:#5a3a8a;font-family:var(--font-mono);font-size:.65rem;" id="ysfProto">C4FM . DIGITAL VOICE</span><span style="color:#5a3a8a;font-family:var(--font-mono);font-size:.65rem;"><?php $ysfGwIni=parseMMDVMIni('/home/pi/YSFClients/YSFGateway/YSFGateway.ini');$ysfRefStart=trim($ysfGwIni['Network']['Startup']??'—');echo "Reflector: " . htmlspecialchars($ysfRefStart); ?></span><span class="nx-source" id="ysfSource"></span></div>
+      <div class="nx-botbar ysf-bar"><span style="color:#5a3a8a;font-family:var(--font-mono);font-size:.65rem;" id="ysfProto">C4FM . DIGITAL VOICE</span><span style="color:#5a3a8a;font-family:var(--font-mono);font-size:.65rem;"><?php $ysfGwIni=parseMMDVMIni('/home/pi/YSFClients/YSFGateway/YSFGateway.ini');$ysfRefStart=trim($ysfGwIni['Network']['Startup']??'—');echo "Ref: " . htmlspecialchars($ysfRefStart); ?></span><span class="nx-source" id="ysfSource"></span></div>
     </div>
   </div>
 </div>
@@ -1001,7 +1077,7 @@ button.btn-header { font-family: var(--font-mono); }
       <div class="nx-vu" id="dstarVuLeft"></div><div class="nx-vu right" id="dstarVuRight"></div>
       <div class="nx-center" id="dstarNxCenter"><div class="nx-clock" id="dstarNxClock" style="color:#00e5ff;">00:00:00</div><div class="nx-date" id="dstarNxDate" style="color:#009090;">—</div></div>
       <div class="nx-txbar" id="dstarTxBar"></div>
-      <div class="nx-botbar dstar-bar"><span style="color:#006070;font-family:var(--font-mono);font-size:.65rem;">D-STAR · DIGITAL VOICE</span><span style="color:green;font-family:var(--font-mono);font-size:.65rem;"><?php $dgwIni=parseMMDVMIni('/home/pi/DStarGateway/DStarGateway.ini');$dstarRef=trim($dgwIni['Repeater 1']['Reflector']??'—');echo "Reflector: " . htmlspecialchars($dstarRef); ?></span><span class="nx-source" id="dstarSource"></span></div>
+      <div class="nx-botbar dstar-bar"><span style="color:#006070;font-family:var(--font-mono);font-size:.65rem;">D-STAR · DIGITAL VOICE</span><span style="color:green;font-family:var(--font-mono);font-size:.65rem;"><?php $dgwIni=parseMMDVMIni('/home/pi/DStarGateway/DStarGateway.ini');$dstarRef=trim($dgwIni['Repeater 1']['Reflector']??'—');echo "Ref: " . htmlspecialchars($dstarRef); ?></span><span class="nx-source" id="dstarSource"></span></div>
     </div>
   </div>
   <div id="nxdnDisplayPanel">
@@ -1012,7 +1088,7 @@ button.btn-header { font-family: var(--font-mono); }
       <div class="nx-vu" id="nxdnVuLeft"></div><div class="nx-vu right" id="nxdnVuRight"></div>
       <div class="nx-center" id="nxdnNxCenter"><div class="nx-clock" id="nxdnNxClock" style="color:#ffd700;">00:00:00</div><div class="nx-date" id="nxdnNxDate" style="color:#b8a000;">—</div></div>
       <div class="nx-txbar" id="nxdnTxBar"></div>
-      <div class="nx-botbar nxdn-bar"><span style="color:#707000;font-family:var(--font-mono);font-size:.65rem;">NXDN · DIGITAL VOICE</span><span style="color:#ff0;font-family:var(--font-mono);font-size:.65rem;"><?php $nxdnGwIni=parseMMDVMIni('/home/pi/NXDNClients/NXDNGateway/NXDNGateway.ini');$nxdnRef=trim($nxdnGwIni['Network']['Static']??'—');echo 'Reflector: ' . htmlspecialchars($nxdnRef); ?></span><span class="nx-source" id="nxdnSource"></span></div>
+      <div class="nx-botbar nxdn-bar"><span style="color:#707000;font-family:var(--font-mono);font-size:.65rem;">NXDN · DIGITAL VOICE</span><span style="color:#ff0;font-family:var(--font-mono);font-size:.65rem;"><?php $nxdnGwIni=parseMMDVMIni('/home/pi/NXDNClients/NXDNGateway/NXDNGateway.ini');$nxdnRef=trim($nxdnGwIni['Network']['Static']??'—');echo 'Ref: ' . htmlspecialchars($nxdnRef); ?></span><span class="nx-source" id="nxdnSource"></span></div>
     </div>
   </div>
 </div>
@@ -1302,7 +1378,7 @@ function closeUpdate(){document.getElementById('updateModal').classList.remove('
 const UPDATE_TITLES={imagen:'🖼 Actualizar Imagen',ids:'📋 Actualizar IDs',ysf:'📡 Actualizar Reflectores YSF'};
 const UPDATE_ACTIONS={imagen:'?action=update-imagen',ids:'?action=update-ids',ysf:'?action=update-ysf'};
 async function runUpdate(type){document.getElementById('dropActualizaciones').classList.remove('open');document.getElementById('updateTitle').textContent=UPDATE_TITLES[type];const con=document.getElementById('updateConsole');con.textContent='⏳ Ejecutando, espera…';document.getElementById('updateCloseBtn').disabled=true;document.getElementById('updateModal').classList.add('open');try{const r=await fetch(UPDATE_ACTIONS[type]);const d=await r.json();con.textContent=d.output||'(sin salida)';con.scrollTop=con.scrollHeight;}catch(e){con.textContent='✖ Error de red: '+e.message;}finally{document.getElementById('updateCloseBtn').disabled=false;}}
-async function rebootPi(){if(!confirm('¿Seguro que quieres reiniciar la Raspberry Pi?'))return;const btn=document.getElementById('btnReboot');btn.textContent='⏻ Reiniciando…';btn.disabled=true;await fetch('?action=reboot');}
+async function rebootPi(){if(!confirm('¿ Seguro que quieres reiniciar la Orangepi ?'))return;const btn=document.getElementById('btnReboot');btn.textContent='⏻ Reiniciando…';btn.disabled=true;await fetch('?action=reboot');}
 function closeInstalar(){document.getElementById('installModal').classList.remove('open');}
 async function confirmarInstalacion(){const btn=document.getElementById('btnInstalarOk');const msg=document.getElementById('installMsg');const out=document.getElementById('installOutput');btn.disabled=true;btn.textContent='⏳ Instalando…';msg.className='restore-msg loading';msg.style.display='block';msg.textContent='⏳ Ejecutando instalador, espera…';out.className='install-output visible';out.textContent='';try{const r=await fetch('?action=install-display');const d=await r.json();out.textContent=d.output||'(sin salida)';out.scrollTop=out.scrollHeight;msg.className='restore-msg ok';msg.textContent='✔ Instalación completada.';btn.textContent='✔ Cerrar';btn.disabled=false;btn.onclick=function(){closeInstalar();};}catch(e){msg.className='restore-msg err';msg.textContent='✖ Error durante la instalación.';btn.textContent='▶ Confirmar instalación';btn.disabled=false;}}
 function openRestore(){document.getElementById('restoreModal').classList.add('open');document.getElementById('restoreFile').value='';const msg=document.getElementById('restoreMsg');msg.style.display='none';msg.className='restore-msg';}

@@ -18,7 +18,7 @@ class BluetoothManager {
         $this->btctlBin     = trim(shell_exec('which bluetoothctl 2>/dev/null')) ?: '/usr/bin/bluetoothctl';
         
         if (!is_writable(dirname($this->scriptPath))) {
-            throw new RuntimeException("Directorio no escribible. Ejecuta: sudo chown -R www-www-data " . dirname($this->scriptPath));
+            throw new RuntimeException("Directorio no escribible. Ejecuta: sudo chown -R www-data " . dirname($this->scriptPath));
         }
     }
 
@@ -172,8 +172,6 @@ if (isset($_GET['action'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>📡 Gestor Bluetooth</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         :root { --bg:#0f1115; --card:#181b21; --border:#2a2e36; --text:#e2e4e8; --muted:#8b909a; --accent:#00d4ff; --success:#2ecc71; --danger:#e74c3c; --warn:#f39c12; }
         * { box-sizing:border-box; margin:0; padding:0; }
@@ -210,35 +208,54 @@ if (isset($_GET['action'])) {
         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
         .pulse { animation: pulse 2s infinite; }
         @media (max-width:600px) { th,td { padding:10px; font-size:0.9rem; } .btn { padding:8px 12px; } }
-    </style>
+</style>
 </head>
 <body>
-    
+    <div class="wrap">
 
-<div style="margin-bottom: 16px; display:flex; justify-content:center;">
-    <a href="mmdvm.php" class="btn btn-outline-light btn-sm">
-    <i class="bi bi-house-fill me-1"></i> Panel PHPPLUS
-</a>
+        <div class="header" style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
 
+           <!-- ICONO BLUETOOTH CON FONDO BLANCO -->
+<div style="
+    width:48px;
+    height:48px;
+    background:#0f2a3a;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 2px 6px rgba(0,0,0,0.3);
+">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
+         xmlns="http://www.w3.org/2000/svg">
+        <path d="M7 7L17 17L12 22V2L17 7L7 17"
+              stroke="#00d4ff"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"/>
+    </svg>
 </div>
 
+            <!-- TITULO -->
+            <h1 style="margin:0; font-size:1.4rem;">
+                Gestión de dispositivos Bluetooth
+            </h1>
 
-<div class="wrap">
-        <div class="header">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2L12 22M12 2L5 9L9 13L5 17L12 22M12 2L19 9L15 13L19 17L12 22" stroke="#00d4ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <h1>Gestión de dispositivos Bluetooth</h1>
+            <!-- BOTON A LA DERECHA -->
+            <a href="mmdvm.php"
+               style="margin-left:auto;
+                      background:#2ecc71;
+                      color:#000;
+                      padding:8px 14px;
+                      border-radius:8px;
+                      text-decoration:none;
+                      font-weight:600;
+                      white-space:nowrap;">
+                🏠 Panel PHPPLUS
+            </a>
+
         </div>
         
-
-
-
-
-
-
-
-
         <div class="card">
             <h2>🔍 Escaneo</h2>
             <button id="scanBtn" class="btn" onclick="scanDevices()">Escanear Ahora</button>
@@ -447,3 +464,5 @@ if (isset($_GET['action'])) {
     </script>
 </body>
 </html>
+
+
