@@ -102,9 +102,9 @@ if (isset($_POST['accion']) && $_POST['accion'] === 'restaurar_fabrica') {
             <span class="navbar-toggler-icon" style="filter: invert(1);"></span>
         </button>
 
-        <a href="mmdvm.php" class="btn btn-outline-light btn-sm">
-            <i class="bi bi-house-fill me-1"></i> Panel PHPPLUS
-        </a>
+<a href="#" onclick="window.close(); return false;" class="btn btn-outline-light btn-sm">
+    <i class="bi bi-x-circle me-1"></i> Cerrar
+</a>
     </div>
 </nav>
 
