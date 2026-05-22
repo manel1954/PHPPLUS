@@ -95,7 +95,7 @@ if (isset($_POST['accion']) && $_POST['accion'] === 'restaurar_fabrica') {
 <nav class="navbar navbar-expand-md navbar-granate">
     <div class="container">
         <a class="navbar-brand" href="https://associacioader.com/" target="_blank">
-          <img src="Logo_ea3eiz.png" alt="Logo">
+          <img src="Logo_Ader.png" alt="Logo">
         </a>
 
         <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
