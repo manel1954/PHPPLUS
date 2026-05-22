@@ -237,7 +237,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
         
         <!-- Lado derecho: Botón Panel PHPPLUS -->
-        <a href="mmdvm.php" class="btn-home">🏠 Panel PHPPLUS</a>
+        <a href="#" onclick="window.close();"style="text-decoration:none; margin-left:auto;">
+    <button type="button">
+        🏠 CERRAR GESTION CONTRASEÑAS
+    </button>
+</a>
     </div>
 
     <div class="container">
