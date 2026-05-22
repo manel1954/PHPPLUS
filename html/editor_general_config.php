@@ -356,9 +356,9 @@ body { background: var(--bg-base); color: var(--text-main); font-family: var(--f
         
     <div style="display:flex; align-items:center; gap:16px;">
             <h1><i class="bi bi-sliders"></i> 🍓&nbsp;EDITOR GENERAL</h1>
-            <a href="mmdvm.php" class="btn btn-outline-light btn-sm">
-                <i class="bi bi-house-fill me-1"></i> Panel PHPPLUS
-            </a>
+            <a href="#" onclick="window.close(); return false;" class="btn btn-outline-light btn-sm">
+    <i class="bi bi-x-circle me-1"></i> CERRAR EDITOR
+</a>
         </div>
         <span class="badge-subtitle">MMDVMHost · YSF · D-STAR · NXDN</span>
     </div>
