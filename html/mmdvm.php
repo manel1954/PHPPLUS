@@ -843,7 +843,7 @@ button.btn-header { font-family: var(--font-mono); }
 
 </div>
 <div class="ctrl-header-btns">
-<a href="editor_general_config.php" class="btn-header red"> 📄 editor general </a>
+<a href="editor_general_config.php" target="_blank" class="btn-header red"> 📄 editor general </a>
 <a href="?action=backup-configs" class="btn-header amber"> 💾 Hacer copia de seguridad </a>
 <button onclick="openRestore()" class="btn-header cyan"> 📂 Restaurar copia de seguridad </button>
 <div class="dropdown-wrap" id="dropActualizaciones">
