@@ -135,8 +135,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ui);height:10
             <span class="sw-busy-dot"></span>
         </label>
         <span id="svcLabel" style="font-family:var(--font-mono);font-size:.72rem;color:var(--text-dim);letter-spacing:.08em;text-transform:uppercase;min-width:2rem;">OFF</span>
-        <!-- <button class="btn-ex btn-red" onclick="cerrarVentana()">✖ Cerrar</button> -->
-        <button class="btn-ex btn-red" onclick="window.location.href='mmdvm.php'">✖ Cerrar</button>
+
+        <button class="btn btn-alert" onclick="window.close(); ">✖ Cerrar</button>
     </div>
 </header>
 
