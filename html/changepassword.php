@@ -195,7 +195,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 Contraseña por defecto: <strong>aderphp (Estas claves son independientes de la clave login)
             </h3>
         </div>
-        <a href="mmdvm.php" onclick="window.close(); return false;" class="btn-home">✕ Cerrar</a>
+   <a href="mmdvm.php" class="btn btn-outline-light btn-sm">
+            <i class="bi bi-house-fill me-1"></i> Panel PHPPLUS
+        </a
     </div>
 
     <div class="container">
