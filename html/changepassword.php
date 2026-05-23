@@ -191,9 +191,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="header">
         <div class="header-left">
             <h1>🔐 Gestión de Contraseñas</h1>
-            <small class="default-pass-note">
+            <h1 class="default-pass-note">
                 Contraseña por defecto: <strong>aderphp (Estas claves son independientes de la clave login)</strong>
-            </small>
+            </h1>
         </div>
         <a href="#" onclick="window.close(); return false;" class="btn-home">✕ Cerrar</a>
     </div>
