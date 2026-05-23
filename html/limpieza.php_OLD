@@ -1,7 +1,6 @@
 <?php
 // =========================================
 //           LIMPIEZA DEL SISTEMA
-//              LIGHT EDITION
 // =========================================
 
 error_reporting(E_ALL);
@@ -9,8 +8,9 @@ ini_set('display_errors', 1);
 
 $paths = [
     'mmdvm' => '/home/pi/MMDVMHost/*.log',
-    'logs'  => '/var/log/*.gz',
-    'logs2' => '/var/log/*.1'
+    'tmp'   => '/tmp/*',
+    'oldlogs' => '/var/log/*.gz',
+    'oldlogs2' => '/var/log/*.1'
 ];
 
 function consola($msg) {
@@ -18,7 +18,6 @@ function consola($msg) {
 }
 
 function borrar($pattern) {
-
     $files = glob($pattern);
     $deleted = 0;
     $out = "";
@@ -31,9 +30,7 @@ function borrar($pattern) {
     }
 
     foreach ($files as $f) {
-
         if (is_file($f)) {
-
             if (@unlink($f)) {
                 $out .= consola("✔ Eliminado: $f");
                 $deleted++;
@@ -46,31 +43,22 @@ function borrar($pattern) {
     return [$deleted, $out];
 }
 
-function ejecutar_comando($cmd) {
-
-    $output = [];
-    $return = 0;
-
-    exec($cmd . " 2>&1", $output, $return);
-
-    return [
-        'ok' => ($return === 0),
-        'out' => implode("\n", $output)
-    ];
-}
-
 function limpiar_historial() {
 
     $out = "";
 
-    $file = '/home/pi/.bash_history';
+    $files = [
+        '/home/pi/.bash_history',
+        '/root/.bash_history'
+    ];
 
-    if (file_exists($file)) {
-
-        if (@file_put_contents($file, "")) {
-            $out .= consola("✔ Historial limpiado");
-        } else {
-            $out .= consola("✖ Sin permisos historial");
+    foreach ($files as $f) {
+        if (file_exists($f)) {
+            if (@unlink($f)) {
+                $out .= consola("✔ Historial eliminado");
+            } else {
+                $out .= consola("✖ Error historial");
+            }
         }
     }
 
@@ -80,22 +68,15 @@ function limpiar_historial() {
 function info_sistema() {
 
     $df = shell_exec("df -h / | awk 'NR==2'");
-    $inode = shell_exec("df -i / | awk 'NR==2'");
     $uptime = shell_exec("uptime -p");
-
     $mem = shell_exec("free -m | awk 'NR==2{printf \"Usado: %sMB / Total: %sMB\", $3,$2}'");
 
     return [
-        'disco'  => trim($df),
-        'inode'  => trim($inode),
+        'disco' => trim($df),
         'uptime' => trim($uptime),
-        'ram'    => trim($mem)
+        'ram' => trim($mem)
     ];
 }
-
-// ==================
-// ENGINE
-// ==================
 
 function ejecutar($opt) {
 
@@ -104,75 +85,47 @@ function ejecutar($opt) {
     $report = [];
     $console = "";
 
-    // =========================
-    // MMDVM LOGS
-    // =========================
     if (!empty($opt['mmdvm'])) {
-
         list($c, $log) = borrar($paths['mmdvm']);
-
-        $report['MMDVM'] = $c;
+        $report['MMDVMHost'] = $c;
         $console .= $log;
     }
 
-    // =========================
-    // LOGS SISTEMA
-    // =========================
-    if (!empty($opt['logs'])) {
+    if (!empty($opt['tmp'])) {
+        list($c, $log) = borrar($paths['tmp']);
+        $report['/tmp'] = $c;
+        $console .= $log;
+    }
 
-        list($c1, $l1) = borrar($paths['logs']);
-        list($c2, $l2) = borrar($paths['logs2']);
-
-        $report['Logs'] = $c1 + $c2;
+    if (!empty($opt['oldlogs'])) {
+        list($c1, $l1) = borrar($paths['oldlogs']);
+        list($c2, $l2) = borrar($paths['oldlogs2']);
+        $report['logs antiguos'] = $c1 + $c2;
         $console .= $l1 . $l2;
     }
 
-    // =========================
-    // APT CLEAN (SEGURO)
-    // =========================
-    if (!empty($opt['apt'])) {
-
-        ejecutar_comando("apt clean");
-        ejecutar_comando("apt autoclean");
-        ejecutar_comando("apt autoremove -y");
-
-        $report['APT'] = "OK";
-        $console .= consola("✔ APT limpiado");
-    }
-
-    // =========================
-    // JOURNALCTL
-    // =========================
     if (!empty($opt['journal'])) {
-
-        ejecutar_comando("journalctl --vacuum-time=3d");
-        ejecutar_comando("journalctl --vacuum-size=100M");
-
-        $report['Journal'] = "OK";
-        $console .= consola("✔ Journal limpiado");
+        exec("journalctl --vacuum-time=3d --vacuum-size=100M 2>&1");
+        $report['journalctl'] = "OK";
+        $console .= consola("✔ Journal optimizado");
     }
 
-    // =========================
-    // CACHE USUARIO
-    // =========================
-    if (!empty($opt['cache'])) {
-
-        ejecutar_comando("rm -rf /home/pi/.cache/*");
-
-        $report['Cache'] = "OK";
-        $console .= consola("✔ Cache usuario limpiada");
+    if (!empty($opt['apt'])) {
+        exec("apt clean 2>&1");
+        $report['APT'] = "OK";
+        $console .= consola("✔ Cache APT limpia");
     }
 
-    // =========================
-    // THUMBNAILS
-    // =========================
-    if (!empty($opt['thumb'])) {
+    if (!empty($opt['history'])) {
+        $console .= limpiar_historial();
+        $report['historial'] = "OK";
+    }
 
-        ejecutar_comando("rm -rf /home/pi/.thumbnails/*");
-        ejecutar_comando("rm -rf /home/pi/.cache/thumbnails/*");
-
-        $report['Thumbnails'] = "OK";
-        $console .= consola("✔ Thumbnails limpiados");
+    if (!empty($opt['extra'])) {
+        exec("rm -rf /home/pi/.cache/* 2>&1");
+        exec("rm -rf /var/tmp/* 2>&1");
+        $report['cache'] = "OK";
+        $console .= consola("✔ Cache sistema limpiada");
     }
 
     return [$report, $console];
@@ -185,17 +138,16 @@ $sys = info_sistema();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $opt = [
-        'mmdvm'   => isset($_POST['mmdvm']),
-        'logs'    => isset($_POST['logs']),
-        'apt'     => isset($_POST['apt']),
+        'mmdvm' => isset($_POST['mmdvm']),
+        'tmp' => isset($_POST['tmp']),
+        'oldlogs' => isset($_POST['oldlogs']),
         'journal' => isset($_POST['journal']),
-        'cache'   => isset($_POST['cache']),
-        'thumb'   => isset($_POST['thumb'])
+        'apt' => isset($_POST['apt']),
+        'history' => isset($_POST['history']),
+        'extra' => isset($_POST['extra'])
     ];
 
     list($report, $console) = ejecutar($opt);
-
-    $sys = info_sistema();
 }
 ?>
 
@@ -215,7 +167,7 @@ body{
 }
 
 .contenedor{
-    max-width:1150px;
+    max-width:900px;
     margin:30px auto;
     background:#161b22;
     padding:20px;
@@ -242,10 +194,13 @@ h1{
 }
 .home:hover{background:#2a313c;}
 
-/* GRID */
+/* =========================
+   CHECKBOX HORIZONTAL PRO
+========================= */
+
 .grid-opciones{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    display:flex;
+    flex-wrap:wrap;
     gap:10px;
     margin-top:15px;
 }
@@ -259,6 +214,11 @@ h1{
     align-items:center;
     gap:8px;
     cursor:pointer;
+    transition:0.2s;
+}
+
+.opcion:hover{
+    background:#222a36;
 }
 
 .opcion input{
@@ -345,7 +305,7 @@ button:hover{
 }
 
 .sysvalue{
-    font-size:11px;
+    font-size:13px;
     white-space:pre-wrap;
 }
 
@@ -371,13 +331,13 @@ button:hover{
 </label>
 
 <label class="opcion">
-<input type="checkbox" name="logs">
-<span>Logs sistema</span>
+<input type="checkbox" name="tmp">
+<span>/tmp</span>
 </label>
 
 <label class="opcion">
-<input type="checkbox" name="apt">
-<span>APT cache</span>
+<input type="checkbox" name="oldlogs">
+<span>Logs antiguos</span>
 </label>
 
 <label class="opcion">
@@ -386,13 +346,18 @@ button:hover{
 </label>
 
 <label class="opcion">
-<input type="checkbox" name="cache">
-<span>Cache usuario</span>
+<input type="checkbox" name="apt">
+<span>APT cache</span>
 </label>
 
 <label class="opcion">
-<input type="checkbox" name="thumb">
-<span>Thumbnails</span>
+<input type="checkbox" name="history">
+<span>Historial</span>
+</label>
+
+<label class="opcion">
+<input type="checkbox" name="extra">
+<span>Cache sistema</span>
 </label>
 
 </div>
@@ -421,11 +386,6 @@ button:hover{
 <div class="syscard">
 <h3>💾 Disco</h3>
 <div class="sysvalue"><?= htmlspecialchars($sys['disco']) ?></div>
-</div>
-
-<div class="syscard">
-<h3>🧩 Inodos</h3>
-<div class="sysvalue"><?= htmlspecialchars($sys['inode']) ?></div>
 </div>
 
 <div class="syscard">
