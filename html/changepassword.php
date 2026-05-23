@@ -162,9 +162,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="header-left">
             <h1>🔐 Gestión de Contraseñas</h1>
             <!-- 🔹 Nota de contraseña por defecto debajo del título -->
-            <small class="default-pass-note">
-                Contraseña por defecto: <strong>aderphp (Estas claves son independientes de la clave login)</strong>
-            </small>
+<small class="default-pass-note">
+    Contraseña por defecto: <strong style="color:#fff;font-weight:bold;">aderphp</strong><strong> (Estas claves son independientes de la clave login)</strong>
+</small>
         </div>
         
         <!-- Lado derecho: Botón Panel PHPPLUS -->
