@@ -9,6 +9,10 @@ GRIS="\033[0m"
 MARRON="\33[38;5;138m"
 
 			cd /home/pi/
-            wget --user-agent="MMDVM-Host/1.0 (Amateur Radio; EA4GAX; Spain)" https://hostfiles.refcheck.radio/YSFHosts.txt
+            wget --user-agent="EA3EIZ" https://hostfiles.refcheck.radio/YSFHosts.txt
+            
+            #wget --user-agent="MMDVM-Host/1.0 (Amateur Radio; EA4GAX; Spain)" https://hostfiles.refcheck.radio/YSFHosts.txt
+            
+            
             sudo mv /home/pi/YSFHosts.txt /home/pi/YSFClients/YSFGateway/
 			sleep 3	
