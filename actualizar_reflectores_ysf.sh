@@ -15,4 +15,6 @@ MARRON="\33[38;5;138m"
             
             
             sudo mv /home/pi/YSFHosts.txt /home/pi/YSFClients/YSFGateway/
+            
+            cp /home/pi/YSFClients/YSFGateway/YSFHosts.txt /opt/config/fusion2x/data/
 			sleep 3	
