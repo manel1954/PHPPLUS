@@ -546,7 +546,6 @@ body{
     <a 
         class="fusion-btn"
         target="_blank"
-        href="##"
         href="http://<?php echo $aqui_poner_ip; ?>:8080">
           
         <div class="fusion-icon">
@@ -555,7 +554,7 @@ body{
             </span>
         </div>
 
-        <!-- <div class="fusion-text">
+        <div class="fusion-text">
 
             <div class="fusion-title">
                 FUSION 2X WEB
@@ -565,22 +564,6 @@ body{
                 Emisión / radio en tiempo real
             </div>
 
-        </div> -->
-
-
-            <div class="fusion-text">
-
-            <div class="fusion-title">
-                FUSION 2X WEB
-            </div>
-
-            <div class="fusion-sub">
-                Emisión / radio en tiempo real
-            </div>
-
-            <div class="fusion-sub" style="color:var(--green); margin-top:4px;font-size:1.5rem;">
-                No disponible (Temporalmente en construcción)
-            </div>
         </div>
 
         <div class="fusion-signal">
