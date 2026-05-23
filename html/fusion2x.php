@@ -530,7 +530,7 @@ body{
         color:var(--cyan);
         margin-bottom:10px;
     ">
-        Fusion 2X WEB SERVICE     Usuario: admin Pass: admin
+        Fusion 2X WEB SERVICE
     </h3>
 
     <div class="status">
@@ -557,7 +557,7 @@ body{
         <div class="fusion-text">
 
             <div class="fusion-title">
-                FUSION 2X WEB
+                FUSION 2X WEB                                Usuario: admin · Contraseña: admin
             </div>
 
             <div class="fusion-sub">
