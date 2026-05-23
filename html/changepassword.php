@@ -191,7 +191,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="header">
         <div class="header-left">
             <h1>🔐 Gestión de Contraseñas</h1>
-            <h1 class="default-pass-note">
+            <h1>
                 Contraseña por defecto: <strong>aderphp (Estas claves son independientes de la clave login)</strong>
             </h1>
         </div>
