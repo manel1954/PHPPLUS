@@ -557,7 +557,7 @@ body{
         <div class="fusion-text">
 
             <div class="fusion-title">
-                FUSION 2X WEB                                Usuario: admin · Contraseña: admin
+                FUSION 2X WEB Claves de entrada por defecto: Usuario admin · Contraseña admin
             </div>
 
             <div class="fusion-sub">
