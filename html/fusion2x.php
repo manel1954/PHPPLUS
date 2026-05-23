@@ -577,7 +577,7 @@ body{
                 Emisión / radio en tiempo real
             </div>
 
-            <div class="fusion-sub" style="color:var(--green); margin-top:4px;font-size:2rem;">
+            <div class="fusion-sub" style="color:var(--green); margin-top:4px;font-size:1rem;">
                 No disponible (Temporalmente en construcción)
             </div>
 
