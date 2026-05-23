@@ -547,7 +547,7 @@ body{
         class="fusion-btn"
         target="_blank"
         href="##"
-        <!-- href="http://<?php echo $p; ?>:8080"> -->
+        href="http://<?php echo $aqui_poner_ip; ?>:8080">
           
         <div class="fusion-icon">
             <span class="material-symbols-outlined">
