@@ -195,9 +195,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 Contraseña por defecto: <strong>aderphp (Estas claves son independientes de la clave login)
             </h3>
         </div>
-   <a href="mmdvm.php" class="btn btn-outline-light btn-sm">
+   <!-- HEADER -->
+<nav class="navbar navbar-expand-md navbar-granate">
+    <div class="container">
+        <a class="navbar-brand" target="_blank" href="https://associacioader.com">
+          <img src="Logo_Ader.png" alt="Logo">
+        </a>
+
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+            <span class="navbar-toggler-icon" style="filter: invert(1);"></span>
+        </button>
+
+        <a href="mmdvm.php" class="btn btn-outline-light btn-sm">
             <i class="bi bi-house-fill me-1"></i> Panel PHPPLUS
-        </a
+        </a>
+    </div>
+</nav>
     </div>
 
     <div class="container">
