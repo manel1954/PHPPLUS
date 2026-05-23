@@ -61,12 +61,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Cambio de Contraseñas</title>
     <style>
         :root {
-            --bg: #0a0a0a;
-            --card: #151515;
-            --text: #ff9800;
-            --text-light: #ffb74d;
-            --border: #2a2a2a;
-            --input-bg: #1e1e1e;
+            --bg: #060810;
+            --card: #0a0e18;
+            --text: #1a7ac5;
+            --text-light: #50a0e0;
+            --border: #102038;
+            --input-bg: #0c121e;
             --success: #4caf50;
             --error: #ef5350;
         }
@@ -122,24 +122,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         .btn-home:hover { 
             background: var(--text); 
-            color: var(--bg); 
+            color: #fff; 
             transform: translateY(-1px); 
         }
 
         .container { display: flex; gap: 2rem; width: 100%; max-width: 960px; flex-wrap: wrap; }
-        .card { flex: 1; min-width: 300px; background: var(--card); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+        .card { flex: 1; min-width: 300px; background: var(--card); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(26,122,197,0.15); }
         .card h2 { margin-bottom: 1.2rem; color: var(--text-light); text-align: center; font-weight: 500; }
 
         .form-group { margin-bottom: 1rem; position: relative; }
         label { display: block; margin-bottom: 0.4rem; font-size: 0.85rem; color: var(--text-light); }
-        input[type="password"], input[type="text"] { width: 100%; padding: 0.65rem 2.5rem 0.65rem 0.8rem; background: var(--input-bg); border: 1px solid var(--border); color: var(--text); border-radius: 8px; font-size: 0.95rem; transition: border 0.2s; }
-        input:focus { outline: none; border-color: var(--text); box-shadow: 0 0 0 2px rgba(255, 152, 0, 0.2); }
+        input[type="password"], input[type="text"] { width: 100%; padding: 0.65rem 2.5rem 0.65rem 0.8rem; background: var(--input-bg); border: 1px solid var(--border); color: var(--text-light); border-radius: 8px; font-size: 0.95rem; transition: border 0.2s; }
+        input:focus { outline: none; border-color: var(--text); box-shadow: 0 0 0 2px rgba(26, 122, 197, 0.2); }
         
         .toggle-pass { position: absolute; right: 12px; top: 34px; cursor: pointer; color: var(--text-light); font-size: 1.1rem; user-select: none; opacity: 0.8; transition: opacity 0.2s; }
         .toggle-pass:hover { opacity: 1; }
 
-        button[type="submit"] { width: 100%; padding: 0.75rem; background: var(--text); color: #000; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-top: 0.5rem; }
-        button[type="submit"]:hover { background: var(--text-light); transform: translateY(-1px); }
+        button[type="submit"] { width: 100%; padding: 0.75rem; background: var(--text); color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-top: 0.5rem; }
+        button[type="submit"]:hover { background: var(--text-light); color: #000; transform: translateY(-1px); }
         button[type="submit"]:active { transform: translateY(0); }
 
         .msg { margin-top: 1.5rem; padding: 1rem; border-radius: 8px; text-align: center; font-size: 0.95rem; display: none; width: 100%; max-width: 960px; }
