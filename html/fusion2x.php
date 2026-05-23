@@ -554,6 +554,19 @@ body{
             </span>
         </div>
 
+        <!-- <div class="fusion-text">
+
+            <div class="fusion-title">
+                FUSION 2X WEB
+            </div>
+
+            <div class="fusion-sub">
+                Emisión / radio en tiempo real
+            </div>
+
+        </div> -->
+
+
 <div class="fusion-text">
 
             <div class="fusion-title">
@@ -564,11 +577,14 @@ body{
                 Emisión / radio en tiempo real
             </div>
 
-            <div class="fusion-sub" style="color:var(--green); margin-top:4px;">
+            <div class="fusion-sub" style="color:var(--green); margin-top:4px;font-size:.63rem;">
                 No disponible (en construcción)
             </div>
 
         </div>
+
+
+
 
         <div class="fusion-signal">
             <span class="material-symbols-outlined">
