@@ -543,16 +543,17 @@ body{
     </div>
 
     <!-- WEB -->
-    <!-- <a
+    <a 
         class="fusion-btn"
         target="_blank"
-        href="http://<?php echo $ip; ?>:8080">
-
+        href="##"
+        <!-- href="http://<?php echo $p; ?>:8080"> -->
+          
         <div class="fusion-icon">
             <span class="material-symbols-outlined">
                 radio
             </span>
-        </div> -->
+        </div>
 
         <!-- <div class="fusion-text">
 
@@ -567,7 +568,7 @@ body{
         </div> -->
 
 
-<div class="fusion-text">
+            <div class="fusion-text">
 
             <div class="fusion-title">
                 FUSION 2X WEB
@@ -580,19 +581,14 @@ body{
             <div class="fusion-sub" style="color:var(--green); margin-top:4px;font-size:1.5rem;">
                 No disponible (Temporalmente en construcción)
             </div>
-
         </div>
-
-
-
 
         <div class="fusion-signal">
             <span class="material-symbols-outlined">
                 signal_cellular_alt
             </span>
         </div>
-
-    <!-- </a> -->
+    </a>
 
     <!-- TERMINAL -->
     <div class="term-wrap">
