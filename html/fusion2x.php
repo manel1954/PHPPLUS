@@ -543,7 +543,7 @@ body{
     </div>
 
     <!-- WEB -->
-    <a
+    <!-- <a
         class="fusion-btn"
         target="_blank"
         href="http://<?php echo $ip; ?>:8080">
@@ -552,7 +552,7 @@ body{
             <span class="material-symbols-outlined">
                 radio
             </span>
-        </div>
+        </div> -->
 
         <!-- <div class="fusion-text">
 
@@ -592,7 +592,7 @@ body{
             </span>
         </div>
 
-    </a>
+    <!-- </a> -->
 
     <!-- TERMINAL -->
     <div class="term-wrap">
