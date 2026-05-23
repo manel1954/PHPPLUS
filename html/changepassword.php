@@ -191,11 +191,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="header">
         <div class="header-left">
             <h1>🔐 Gestión de Contraseñas</h1>
-            <h1>
+            <h3>
                 Contraseña por defecto: <strong>aderphp (Estas claves son independientes de la clave login)</strong>
-            </h1>
+            </h3>
         </div>
-        <a href="#" onclick="window.close(); return false;" class="btn-home">✕ Cerrar</a>
+        <a href="mmdvm.php" onclick="window.close(); return false;" class="btn-home">✕ Cerrar</a>
     </div>
 
     <div class="container">
