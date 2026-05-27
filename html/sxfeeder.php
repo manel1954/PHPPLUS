@@ -338,7 +338,7 @@ location.href='?service='+document.getElementById('svc').value;
 /* WEB AIS ONLY */
 function openWeb(){
 if(svc!=='ais') return alert('SXFeeder no tiene web');
-window.open('http://'+location.hostname+':8080','_blank');
+window.open('http://'+location.hostname+':8090','_blank');
 }
 
 /* CONFIG TOGGLE */
