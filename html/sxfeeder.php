@@ -7,7 +7,7 @@ $SERVICES = [
         'name'    => 'AIS-catcher',
         'systemd' => 'ais-catcher.service',
         'config'  => '/etc/AIS-catcher/config.cmd',
-        'webport' => 8080
+        'webport' => 8090
     ],
     'sxfeeder' => [
         'name'    => 'SXFeeder',
