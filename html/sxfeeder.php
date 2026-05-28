@@ -2,12 +2,35 @@
 require_once __DIR__ . '/auth.php';
 header('X-Content-Type-Options: nosniff');
 
+/* ========== FUNCIÓN PARA EXTRAER PUERTO WEB DINÁMICO ========== */
+function getWebPortFromConfig($configFile) {
+    // Si no existe el archivo o está vacío, devolver 8080 por defecto
+    if (!file_exists($configFile) || filesize($configFile) === 0) {
+        return 8080;
+    }
+    
+    $content = file_get_contents($configFile);
+    
+    // Si el contenido está vacío o solo tiene espacios, devolver 8080
+    if (empty(trim($content))) {
+        return 8080;
+    }
+    
+    // Busca -N seguido opcionalmente de espacio y luego el puerto (número)
+    if (preg_match('/-N\s*(\d+)/', $content, $matches)) {
+        return (int)$matches[1];
+    }
+    
+    // Fallback al puerto por defecto si no encuentra el parámetro
+    return 8080;
+}
+
 $SERVICES = [
     'ais' => [
         'name'    => 'AIS-catcher',
         'systemd' => 'ais-catcher.service',
         'config'  => '/etc/AIS-catcher/config.cmd',
-        'webport' => 8090
+        'webport' => 8080
     ],
     'sxfeeder' => [
         'name'    => 'SXFeeder',
@@ -26,9 +49,11 @@ $SVC = $SERVICES[$serviceKey];
 $SYSTEMD = $SVC['systemd'];
 $CONFIG_FILE = $SVC['config'];
 
+// ← Calcula el puerto web dinámico SOLO para ais-catcher
+$WEB_PORT = ($serviceKey === 'ais') ? getWebPortFromConfig($CONFIG_FILE) : null;
+
 /* ================= STATUS ================= */
 if ($action === 'status') {
-
     $st  = trim(shell_exec("systemctl is-active $SYSTEMD 2>/dev/null"));
     $en  = trim(shell_exec("systemctl is-enabled $SYSTEMD 2>/dev/null"));
 
@@ -43,7 +68,6 @@ if ($action === 'status') {
 
 /* ================= ON ================= */
 if ($action === 'on') {
-
     shell_exec("sudo systemctl enable $SYSTEMD 2>/dev/null");
     shell_exec("sudo systemctl start $SYSTEMD 2>/dev/null");
 
@@ -59,7 +83,6 @@ if ($action === 'on') {
 
 /* ================= OFF ================= */
 if ($action === 'off') {
-
     shell_exec("sudo systemctl stop $SYSTEMD 2>/dev/null");
     shell_exec("sudo systemctl disable $SYSTEMD 2>/dev/null");
 
@@ -118,6 +141,7 @@ if ($action === 'config-save') {
 --green:#00ff9f;
 --red:#ff4560;
 --text:#a8b9cc;
+--purple:#bd00ff;
 }
 
 body{
@@ -173,6 +197,15 @@ font-size:11px;
 .btn:hover{background:#12202b;}
 .btn-red{border-color:var(--red);color:var(--red);}
 .btn-green{border-color:var(--green);color:var(--green);}
+
+/* Botón Admin (Naranja) */
+.btn-admin {
+    border-color: #ff9100;
+    color: #ff9100;
+}
+.btn-admin:hover {
+    background: #3d2300;
+}
 
 /* SWITCH tipo dump1090 */
 .switch{
@@ -246,7 +279,7 @@ border:1px solid var(--border);
 
 <div class="header">
 
-<div class="title">AIS / SX CONTROL</div>
+<div class="title">AIS-CATCHER / SXFEEDER CONTROL</div>
 
 <div class="row">
 
@@ -258,7 +291,9 @@ border:1px solid var(--border);
 <button class="btn btn-green" onclick="toggleCfg()">CONFIG</button>
 <button class="btn btn-green" onclick="toggleLog()">LOG</button>
 
+<!-- Botones Web -->
 <button class="btn btn-green" onclick="openWeb()">WEB</button>
+<button class="btn btn-admin" onclick="openAdmin()">WEB ADMIN</button>
 
 </div>
 
@@ -297,6 +332,8 @@ border:1px solid var(--border);
 <script>
 
 const svc='<?= $serviceKey ?>';
+// Inyectamos el puerto desde PHP (si es null, JS usará 8080)
+const webPort = <?= ($WEB_PORT !== null) ? intval($WEB_PORT) : 'null' ?>;
 
 /* API */
 function api(a,p=null){
@@ -335,10 +372,18 @@ function chg(){
 location.href='?service='+document.getElementById('svc').value;
 }
 
-/* WEB AIS ONLY */
+/* WEB AIS ONLY - Puerto Dinámico (Default 8080 si no hay config) */
 function openWeb(){
-if(svc!=='ais') return alert('SXFeeder no tiene web');
-window.open('http://'+location.hostname+':8090','_blank');
+    if(svc!=='ais') return alert('SXFeeder no tiene web');
+    // Usar el puerto inyectado desde PHP o fallback a 8080
+    const port = (webPort !== null && webPort > 0) ? webPort : 8080;
+    window.open('http://'+location.hostname+':'+port,'_blank');
+}
+
+/* WEB ADMIN - Puerto Fijo 8110 */
+function openAdmin(){
+    if(svc!=='ais') return alert('SXFeeder no tiene panel Admin');
+    window.open('http://'+location.hostname+':8110','_blank');
 }
 
 /* CONFIG TOGGLE */
@@ -355,8 +400,16 @@ const d=await r.json();
 document.getElementById('cfgTxt').value=d.content;
 }
 
+/* GUARDAR CONFIG Y RECARGAR */
 async function saveCfg(){
-await api('config-save','content='+encodeURIComponent(document.getElementById('cfgTxt').value));
+    await api('config-save','content='+encodeURIComponent(document.getElementById('cfgTxt').value));
+    
+    // Pequeño delay para asegurar escritura en disco
+    setTimeout(() => {
+        // Al recargar, PHP vuelve a leer la config y actualiza webPort
+        // El botón WEB apuntará automáticamente al nuevo puerto
+        location.reload();
+    }, 500);
 }
 
 /* LOG TOGGLE */
