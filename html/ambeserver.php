@@ -11,7 +11,11 @@ $pidFile = $baseDir . "/ambe.pid";
    CRON AUTOARRANQUE
    ========================================================= */
 
-$cronCmd = "@reboot /home/pi/AMBE_SERVER/start_ambe.sh";
+$cronCmd = "@reboot sleep 10 && cd $baseDir && nohup $binary "
+    . "-s \$(grep '^velocidad=' $iniFile | cut -d= -f2) "
+    . "-i \$(grep '^puerto=' $iniFile | cut -d= -f2) "
+    . "-p \$(grep '^puertonet=' $iniFile | cut -d= -f2) "
+    . ">> $logFile 2>&1 & ; echo \$(pgrep -f AMBEserver | head -n1) > $pidFile";
 
 /* =========================================================
    FUNCIONES
@@ -232,7 +236,7 @@ if (isset($_GET['action'])) {
 
     if ($action === 'disable_auto') {
         header('Content-Type: application/json');
-        shell_exec("crontab -l 2>/dev/null | grep -v 'AMBEserver' | grep -v 'start_ambe' | crontab -");
+        shell_exec("crontab -l 2>/dev/null | grep -v 'AMBEserver' | crontab -");
         logMsg($logFile, ">>> Autoarranque DESACTIVADO");
         echo json_encode(['ok' => true]);
         exit;
