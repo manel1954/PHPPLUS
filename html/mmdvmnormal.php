@@ -609,10 +609,7 @@ if ($action === 'nxdn-transmission') {
 <style>
 :root { --bg: #032354; --surface: #111720; --border: #1e2d3d; --green: #00ff9f; --green-dim: #00cc7a; --red: #ff4560; --amber: #ffb300; --cyan: #00d4ff; --violet: #b57aff; --text: #a8b9cc; --text-dim: #4a5568; --font-mono: 'Share Tech Mono', monospace; --font-ui: 'Rajdhani', sans-serif; --font-orb: 'Orbitron', monospace; }
 * { box-sizing: border-box; }
-body {   background-image: url("fondo_02.png");
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: cover; color: var(--text); font-family: var(--font-ui); font-size: 1rem; min-height: 100vh; padding: 0; margin: 0; }
+body { background:#00004d; color: var(--text); font-family: var(--font-ui); font-size: 1rem; min-height: 100vh; padding: 0; margin: 0; }
 
 .ctrl-header-inner { width: 100%; max-width: 1400px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: .6rem; }
 
