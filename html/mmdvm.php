@@ -859,7 +859,7 @@ button.btn-header { font-family: var(--font-mono); }
 </div>
 <button class="btn-header cyan" onclick="xtTtydOpen()">⌨ Terminal</button>
 <a href="extra.php" class="btn-header amber">☰ Menu Extra</a>
-<a href="dmr2ysf.php" class="btn-header" style="color:#c06080;border-color:#c06080;" onmouseover="this.style.background='rgba(192,96,128,.15)'" onmouseout="this.style.background='transparent'">🔗 Bridge</a>
+<a href="dmr2ysf.php" class="btn-header bridge">🔗 Bridge</a>
 <button id="btnReboot" class="btn-header red" onclick="rebootPi()">⏻ Reiniciar Pi</button>
 </div>
 </header>
