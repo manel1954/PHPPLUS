@@ -579,6 +579,13 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-ui); f
 .ctrl-header { border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; flex-direction: column; align-items: center; gap: .6rem; background: var(--blue); }
 .ctrl-header-top { display: flex; align-items: center; gap: .8rem; }
 .ctrl-header-top h1 { font-family: var(--font-ui); font-weight: 700; font-size: 1.5rem; letter-spacing: .08em; color: #e2eaf5; margin: 0; text-transform: uppercase; }
+
+
+.btn-header.bridge { color: #b06090; border: 1px solid #b06090; }
+.btn-header.bridge:hover { background: rgba(176,96,144,.1); }
+
+
+
 .ctrl-header-btns { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; justify-content: center; margin-top: .9rem; }
 .btn-header { font-family: var(--font-mono); font-size: .65rem; letter-spacing: .08em; text-transform: uppercase; background: transparent; border-radius: 4px; padding: .28rem .75rem; cursor: pointer; transition: background .2s; text-decoration: none; display: inline-block; }
 .btn-header.cyan { color: var(--cyan); border: 1px solid var(--cyan); }
