@@ -112,6 +112,7 @@ $WRITE_MAP = [
         // ['YSF2DMR', 'Info', 'Longitude'],
         // ['DMR2NXDN', 'Info', 'Longitude'],
          ['NXDNGateway', 'Info', 'Longitude'],
+    ],   
     'Location'    => [
         ['MMDVMHost',  'Info', 'Location'],
         ['MMDVMYSF',   'Info', 'Location'],
