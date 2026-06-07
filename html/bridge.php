@@ -176,8 +176,8 @@ if (isset($_GET['action']) && $_GET['action'] === 'check_status') {
 <!-- ── Navbar ── -->
 <nav class="navbar navbar-expand-md navbar-granate position-relative">
     <div class="container">
-        <a class="navbar-brand" target="_blank" href="http://rem-esp.es">
-            <img src="Logo_REM-ESP_EA4RCR.png" alt="Logo">
+        <a class="navbar-brand" target="_blank" href="https://associacioader.com">
+            <img src="Logo_Ader.png" alt="Logo">
         </a>
         <a href="mmdvm.php" class="btn btn-panel btn-sm ms-auto">
             <i class="bi bi-house-fill me-1"></i> Panel PHPPLUS
@@ -312,7 +312,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'check_status') {
 <!-- ── Footer ── -->
 <footer class="footer text-center py-3 mt-5">
     <i class="bi bi-radio me-2"></i>
-    Bridge Cards REM 2026 | <a href="http://rem-esp.es" target="_blank">rem-esp.es</a>
+    Bridge Cards ADER 2026 | <a href="https://associacioader.com" target="_blank">Associacioader</a>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
