@@ -1,58 +1,40 @@
 <?php
 // =============================================================
-// dmr2ysf_panel.php - Control de puente DMR ⇄ YSF by EA4AOJ
+// dmr2nxdn.php - Control de puente DMR ⇄ NXDN by EA4AOJ
 // =============================================================
 
-// 🔧 Permitir acceso sin sesión SOLO desde localhost (systemd/terminal)
 if ($_SERVER['REMOTE_ADDR'] === '127.0.0.1' || $_SERVER['REMOTE_ADDR'] === '::1') {
-    // Bypass auth para control local
 } else {
-   // 🔧 Permitir polling automático de estado desde localhost
-if (!isset($_GET['action']) || ($_GET['action'] !== 'status' && $_SERVER['REMOTE_ADDR'] !== '127.0.0.1' && $_SERVER['REMOTE_ADDR'] !== '::1')) {
-    require_once __DIR__ . '/auth.php';
-}
+    if (!isset($_GET['action']) || ($_GET['action'] !== 'status' && $_SERVER['REMOTE_ADDR'] !== '127.0.0.1' && $_SERVER['REMOTE_ADDR'] !== '::1')) {
+        require_once __DIR__ . '/auth.php';
+    }
 }
 header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: SAMEORIGIN');
 
-// ── Rutas de Scripts ──
-define('START_SCRIPT', '/usr/local/bin/dmr2ysf-start.sh');
-define('STOP_SCRIPT',  '/usr/local/bin/dmr2ysf-stop.sh');
+define('START_SCRIPT', '/usr/local/bin/dmr2nxdn-start.sh');
+define('STOP_SCRIPT',  '/usr/local/bin/dmr2nxdn-stop.sh');
+define('INI_MMDVM',    '/home/pi/MMDVMHost/MMDVMDMR2NXDN.ini');
+define('INI_DMR2NXDN', '/home/pi/MMDVM_CM/DMR2NXDN/DMR2NXDN.ini');
+define('INI_NXDNGW',   '/home/pi/NXDNClients/NXDNGateway/NXDNGateway.ini');
+define('XDN_HOSTS',    '/home/pi/NXDNClients/NXDNGateway/XDNHosts.json');
+define('PID_MMDVM',  '/tmp/MMDVMDMR2NXDN.pid');
+define('PID_D2N',    '/tmp/DMR2NXDN.pid');
+define('PID_NXDNGW', '/tmp/NXDNGateway.pid');
+define('LOG_MMDVM',  '/tmp/MMDVMDMR2NXDN.log');
+define('LOG_D2N',    '/tmp/DMR2NXDN.log');
+define('LOG_NXDNGW', '/tmp/NXDNGateway.log');
 
-// ── Archivos de Configuración ──
-define('INI_MMDVM',   '/home/pi/MMDVMHost/MMDVMDMR2YSF.ini');
-define('INI_DMR2YSF', '/home/pi/MMDVM_CM/DMR2YSF/DMR2YSF.ini');
-define('INI_YSFGW',   '/home/pi/YSFClients/YSFGateway/YSFGateway.ini');
-define('INI_TGLIST',  '/home/pi/MMDVM_CM/DMR2YSF/TG-YSFList.txt');
-define('TGYSF_NAMES', '/home/pi/MMDVM_CM/DMR2YSF/TG-YSFNames.json');
-define('YSF_HOSTS',   '/home/pi/YSFClients/YSFGateway/YSFHosts.json');
+$CONFIG_FILES = ['mmdvm'=>INI_MMDVM,'dmr2nxdn'=>INI_DMR2NXDN,'nxdn'=>INI_NXDNGW];
 
-// ─ Archivos PID ──
-define('PID_MMDVM',   '/tmp/MMDVMDMR2YSF.pid');
-define('PID_D2Y',     '/tmp/DMR2YSF.pid');
-define('PID_YSFGW',   '/tmp/YSFGateway.pid');
-
-// ── Logs en vivo ──
-define('LOG_MMDVM',   '/tmp/MMDVMDMR2YSF.log');
-define('LOG_D2Y',     '/tmp/DMR2YSF.log');
-define('LOG_YSFGW',   '/tmp/YSFGateway.log');
-
-$CONFIG_FILES = [
-    'mmdvm'   => INI_MMDVM,
-    'dmr2ysf' => INI_DMR2YSF,
-    'ysf'     => INI_YSFGW,
-    'tglist'  => INI_TGLIST
-];
-
-// ── Funciones auxiliares ──
 function saveState($key, $value) {
     $file = '/var/lib/mmdvm-state';
     $lines = file_exists($file) ? file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) : [];
     $found = false;
-    foreach ($lines as &$line) { if (strpos($line, $key . '=') === 0) { $line = $key . '=' . $value; $found = true; } }
+    foreach ($lines as &$line) { if (strpos($line, $key.'=') === 0) { $line = $key.'='.$value; $found = true; } }
     unset($line);
-    if (!$found) $lines[] = $key . '=' . $value;
-    @file_put_contents($file, implode("\n", $lines) . "\n");
+    if (!$found) $lines[] = $key.'='.$value;
+    @file_put_contents($file, implode("\n", $lines)."\n");
 }
 
 function checkPid($pidFile, $binName) {
@@ -68,79 +50,44 @@ function checkPid($pidFile, $binName) {
 
 function tailLive($path, $lines = 80) {
     if (!file_exists($path)) return '';
-    return shell_exec("tail -n {$lines} " . escapeshellarg($path) . " 2>/dev/null");
+    return shell_exec("tail -n {$lines} ".escapeshellarg($path)." 2>/dev/null");
 }
 
 function lookupCall($callsign) {
     $cs = strtoupper(trim($callsign));
-    $datFiles = ['/home/pi/MMDVMHost/DMRIds.dat', '/etc/DMRIds.dat', '/usr/local/etc/DMRIds.dat'];
+    $datFiles = ['/home/pi/MMDVMHost/DMRIds.dat','/etc/DMRIds.dat','/usr/local/etc/DMRIds.dat'];
     foreach ($datFiles as $f) {
         if (!file_exists($f)) continue;
         $row = trim(shell_exec("awk -F'\t' '{if (toupper(\$2)==\"".$cs."\") {print \$1\"\t\"\$2\"\t\"\$3; exit}}' ".escapeshellarg($f)." 2>/dev/null"));
         if ($row !== '') {
             $parts = explode("\t", $row);
-            return ['dmrid'=>trim($parts[0]??''), 'name'=>trim($parts[2]??'')];
+            return ['dmrid'=>trim($parts[0]??''),'name'=>trim($parts[2]??'')];
         }
     }
-    return ['dmrid'=>'', 'name'=>''];
+    return ['dmrid'=>'','name'=>''];
 }
 
-// 🌍 Bandera por prefijo de callsign
 function getFlagInfo($callsign) {
     $prefixes = [
-        'EA'=>['ESP','🇪🇸'],'EB'=>['ESP','🇪'],'EC'=>['ESP','🇸'],'ED'=>['ESP','🇪🇸'],'EE'=>['ESP','🇪🇸'],'EF'=>['ESP','🇪🇸'],
+        'EA'=>['ESP','🇪🇸'],'EB'=>['ESP','🇪🇸'],'EC'=>['ESP','🇪🇸'],'ED'=>['ESP','🇪🇸'],'EE'=>['ESP','🇪🇸'],'EF'=>['ESP','🇪🇸'],
         'F'=>['FRA','🇫🇷'],'FB'=>['FRA','🇫🇷'],'FC'=>['FRA','🇫🇷'],'FD'=>['FRA','🇫🇷'],'FE'=>['FRA','🇫🇷'],'FF'=>['FRA','🇫🇷'],
         'I'=>['ITA','🇮🇹'],'IZ'=>['ITA','🇮🇹'],'IW'=>['ITA','🇮🇹'],'IV'=>['ITA','🇮🇹'],'IX'=>['ITA','🇮🇹'],
-        'G'=>['GBR','🇬🇧'],'M'=>['GBR','🇬🇧'],'2E'=>['GBR','🇬🇧'],'M6'=>['GBR','🇬🇧'],'M7'=>['GBR','🇬🇧'],
+        'G'=>['GBR','🇬🇧'],'M'=>['GBR','🇬🇧'],'2E'=>['GBR','🇬🇧'],
         'DL'=>['DEU','🇩🇪'],'DA'=>['DEU','🇩🇪'],'DB'=>['DEU','🇩🇪'],'DC'=>['DEU','🇩🇪'],'DD'=>['DEU','🇩🇪'],'DF'=>['DEU','🇩🇪'],
-        'ON'=>['BEL','🇧🇪'],'OR'=>['BEL','🇧🇪'],'OT'=>['BEL','🇧🇪'],
-        'PA'=>['NLD','🇳🇱'],'PB'=>['NLD','🇳🇱'],'PC'=>['NLD','🇳🇱'],'PD'=>['NLD','🇳🇱'],'PE'=>['NLD','🇳🇱'],'PF'=>['NLD','🇳🇱'],
-        'OE'=>['AUT','🇦🇹'],
-        'HB'=>['CHE','🇨🇭'],'HE'=>['CHE','🇨🇭'],
-        'LY'=>['LTU','🇱🇹'],'ES'=>['EST','🇪🇪'],'YL'=>['LVA','🇱🇻'],
-        'SP'=>['POL','🇵'],'SQ'=>['POL','🇱'],'SN'=>['POL','🇵'],'SO'=>['POL','🇱'],
-        'OK'=>['CZE','🇨'],'OM'=>['SVK','🇸🇰'],'HA'=>['HUN','🇭🇺'],
-        'YO'=>['ROU','🇷🇴'],'YR'=>['ROU','🇷'],
-        'SV'=>['GRC','🇬🇷'],'SW'=>['GRC','🇬🇷'],'SX'=>['GRC','🇬🇷'],'SY'=>['GRC','🇬🇷'],'SZ'=>['GRC','🇬🇷'],
-        'UA'=>['RUS','🇷'],'UB'=>['RUS','🇷'],'UC'=>['RUS','🇷🇺'],'UD'=>['RUS','🇷'],'UE'=>['RUS','🇷🇺'],
-        'UW'=>['UKR','🇺🇦'],'UX'=>['UKR','🇺'],'UY'=>['UKR','🇺'],'UZ'=>['UKR','🇺🇦'],
-        'K'=>['USA','🇺'],'N'=>['USA','🇸'],'W'=>['USA','🇺'],'AA'=>['USA','🇸'],'AB'=>['USA','🇺'],
-        'VE'=>['VEN','🇻'],'YV'=>['VEN','🇻🇪'],
-        'PY'=>['BRA','🇧🇷'],'PU'=>['BRA','🇧'],'PP'=>['BRA','🇷'],'PQ'=>['BRA','🇧🇷'],'PR'=>['BRA','🇧'],'PS'=>['BRA','🇷'],'PT'=>['BRA','🇧🇷'],
-        'CE'=>['CHL','🇨'],'CA'=>['CHL','🇨🇱'],'CD'=>['CHL','🇨🇱'],
-        'CX'=>['URY','🇺'],'CW'=>['URY','🇺'],
-        'LV'=>['ARG','🇦'],'LU'=>['ARG','🇷'],'LW'=>['ARG','🇦🇷'],'LX'=>['ARG','🇦🇷'],
-        'HC'=>['ECU','🇪'],'HD'=>['ECU','🇪🇨'],
-        'HK'=>['COL','🇨🇴'],'HJ'=>['COL','🇨🇴'],'5J'=>['COL','🇨🇴'],'5K'=>['COL','🇨🇴'],
-        'TI'=>['CRI','🇨🇷'],'TE'=>['CRI','🇨🇷'],
-        'CP'=>['BOL','🇧🇴'],
-        'JA'=>['JPN','🇯🇵'],'JB'=>['JPN','🇯🇵'],'JC'=>['JPN','🇯🇵'],'JD'=>['JPN','🇯🇵'],'JE'=>['JPN','🇯'],
-        'BV'=>['TWN','🇹🇼'],'BU'=>['TWN','🇹🇼'],
-        'VR'=>['HKG','🇭'],'VS'=>['HKG','🇭🇰'],
-        'XX'=>['MAC','🇲🇴'],
-        'HL'=>['KOR','🇰'],'DS'=>['KOR','🇰🇷'],'DT'=>['KOR','🇰🇷'],'DU'=>['KOR','🇰'],
-        'BY'=>['CHN','🇨'],'BA'=>['CHN','🇨🇳'],'BD'=>['CHN','🇨🇳'],
-        'VU'=>['IND','🇮🇳'],'AT'=>['IND','🇮🇳'],'AU'=>['IND','🇮🇳'],
-        'AP'=>['PAK','🇵🇰'],'A2'=>['BWA','🇧'],'A3'=>['TON','🇹🇴'],'A4'=>['OMN','🇴🇲'],'A5'=>['BTN','🇧🇹'],'A6'=>['ARE','🇦🇪'],'A7'=>['QAT','🇶🇦'],'A9'=>['BHR','🇧'],
-        '4X'=>['ISR','🇮'],'4Z'=>['ISR','🇮🇱'],
-        'ZS'=>['ZAF','🇿'],'ZT'=>['ZAF','🇿🇦'],'ZU'=>['ZAF','🇿'],
-        'VK'=>['AUS','🇦🇺'],'VH'=>['AUS','🇦🇺'],'VI'=>['AUS','🇦🇺'],
-        'ZL'=>['NZL','🇳🇿'],'ZM'=>['NZL','🇳'],
-        '9A'=>['HRV','🇭🇷'],'S5'=>['SVN','🇸🇮'],'T7'=>['BIH','🇧'],'E7'=>['BIH','🇧'],
-        'YT'=>['SRB','🇷🇸'],'YU'=>['SRB','🇷'],'Z3'=>['MKD','🇲'],'ZA'=>['ALB','🇦'],
-        'PZ'=>['SUR','🇸🇷'],'8P'=>['BRB','🇧'],'9Y'=>['TTO','🇹'],'9Z'=>['TTO','🇹🇹'],
-        'J6'=>['LCA','🇱'],'J7'=>['DMA','🇩'],'J8'=>['GRD','🇬'],
-        'VP2'=>['AIA','🇦'],'VP5'=>['TCA','🇹'],'VP8'=>['FLK','🇫'],
-        'ZD8'=>['SHN','🇸🇭'],'C6'=>['BHS','🇧🇸'],'C9'=>['MOZ','🇲'],'D4'=>['CPV','🇨'],
-        'EA8'=>['ESH','🇪'],'EA9'=>['ESH','🇪🇭'],'ZB2'=>['GIB','🇬'],
-        'CT'=>['PRT','🇵'],'CU'=>['PRT','🇵🇹'],'CV'=>['PRT','🇵🇹'],'CW'=>['PRT','🇵🇹'],'CS'=>['PRT','🇵🇹'],'CR'=>['PRT','🇵🇹']
+        'ON'=>['BEL','🇧🇪'],'PA'=>['NLD','🇳🇱'],'OE'=>['AUT','🇦🇹'],'HB'=>['CHE','🇨🇭'],
+        'SP'=>['POL','🇵🇱'],'SQ'=>['POL','🇵🇱'],'OK'=>['CZE','🇨🇿'],'OM'=>['SVK','🇸🇰'],'HA'=>['HUN','🇭🇺'],
+        'YO'=>['ROU','🇷🇴'],'SV'=>['GRC','🇬🇷'],'UA'=>['RUS','🇷🇺'],'UW'=>['UKR','🇺🇦'],
+        'K'=>['USA','🇺🇸'],'N'=>['USA','🇺🇸'],'W'=>['USA','🇺🇸'],'VE'=>['CAN','🇨🇦'],
+        'PY'=>['BRA','🇧🇷'],'LU'=>['ARG','🇦🇷'],'JA'=>['JPN','🇯🇵'],'VK'=>['AUS','🇦🇺'],
+        'ZS'=>['ZAF','🇿🇦'],'ZL'=>['NZL','🇳🇿'],'9A'=>['HRV','🇭🇷'],'S5'=>['SVN','🇸🇮'],
+        'CT'=>['PRT','🇵🇹'],'CU'=>['PRT','🇵🇹'],
     ];
     $cs = strtoupper(trim($callsign));
     for ($len = 4; $len >= 1; $len--) {
         $prefix = substr($cs, 0, $len);
         if (isset($prefixes[$prefix])) return $prefixes[$prefix];
     }
-    return ['XXX', '🌐'];
+    return ['XXX','🌐'];
 }
 
 function colorizeLog($text) {
@@ -148,7 +95,7 @@ function colorizeLog($text) {
         $ll = strtolower($l);
         if (preg_match('/error|fail|abort|exception|denied|segfault/i', $ll)) return '<span class="log-err">'.htmlspecialchars($l).'</span>';
         if (preg_match('/warn|warning|timeout/i', $ll)) return '<span class="log-warn">'.htmlspecialchars($l).'</span>';
-        if (preg_match('/connect|start|open|loaded|success|tx|rx|linked|tg|ysf|slot|mode|sigterm|stopped/i', $ll)) return '<span class="log-ok">'.htmlspecialchars($l).'</span>';
+        if (preg_match('/connect|start|open|loaded|success|tx|rx|linked|tg|nxdn|slot|mode|sigterm|stopped/i', $ll)) return '<span class="log-ok">'.htmlspecialchars($l).'</span>';
         return '<span class="log-info">'.htmlspecialchars($l).'</span>';
     }, explode("\n", $text)));
 }
@@ -158,121 +105,89 @@ function colorizeLog($text) {
 // ============================================================================
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
 
-// ── TG-YSFList: listar reflectores disponibles ──
-if ($action === 'tgysf-hosts') {
+if ($action === 'nxdn-hosts') {
     $list = [];
-    if (file_exists(YSF_HOSTS)) {
-        $json = json_decode(file_get_contents(YSF_HOSTS), true);
+    if (file_exists(XDN_HOSTS)) {
+        $json = json_decode(file_get_contents(XDN_HOSTS), true);
         if (isset($json['reflectors']) && is_array($json['reflectors'])) {
             foreach ($json['reflectors'] as $ref) {
                 $id = intval($ref['designator'] ?? 0);
-                $name = trim($ref['name'] ?? '');
-                $desc = trim($ref['sponsor'] ?? '');
+                $name = trim($ref['name'] ?? $ref['sponsor'] ?? '');
                 $country = strtoupper(trim($ref['country'] ?? ''));
                 if ($id <= 0) continue;
-                $list[] = ['id'=>$id,'name'=>$name,'desc'=>$desc,'country'=>$country];
+                $list[] = ['id'=>$id,'name'=>$name,'country'=>$country];
             }
         }
     }
     usort($list, function($a,$b){
-        $aES = $a['country']==='ES'?0:1; $bES = $b['country']==='ES'?0:1;
-        if ($aES !== $bES) return $aES - $bES;
-        return strcmp($a['name'], $b['name']);
+        $aES=$a['country']==='ES'?0:1; $bES=$b['country']==='ES'?0:1;
+        if ($aES !== $bES) return $aES-$bES;
+        return strcmp($a['name'],$b['name']);
     });
     header('Content-Type: application/json');
     echo json_encode(['ok'=>true,'hosts'=>$list]);
     exit;
 }
 
-// ── TG-YSFList: leer entradas actuales ──
-if ($action === 'tgysf-read') {
-    $entries = [];
-    $names = file_exists(TGYSF_NAMES) ? (json_decode(file_get_contents(TGYSF_NAMES), true) ?: []) : [];
-    $hostNames = [];
-    if (file_exists(YSF_HOSTS)) {
-        $hjson = json_decode(file_get_contents(YSF_HOSTS), true);
-        if (isset($hjson['reflectors'])) {
-            foreach ($hjson['reflectors'] as $ref) {
-                $hid = intval($ref['designator'] ?? 0);
-                $hnm = trim($ref['name'] ?? '');
-                if ($hid > 0 && $hnm !== '') $hostNames[(string)$hid] = $hnm;
-            }
+if ($action === 'nxdn-set-room') {
+    $roomId = intval($_POST['room_id'] ?? 0);
+    if ($roomId > 0) {
+        $iniPath = INI_NXDNGW;
+        if (file_exists($iniPath) && is_writable($iniPath)) {
+            $content = file_get_contents($iniPath);
+            if (preg_match('/^\s*#?\s*Static\s*=.*/im', $content))
+                $content = preg_replace('/^\s*#?\s*Static\s*=.*/im', 'Static='.$roomId, $content);
+            else
+                $content = preg_replace('/(\[Network\])/i', "$1\nStatic=$roomId", $content);
+            if (preg_match('/^\s*#?\s*DefaultRoom\s*=.*/im', $content))
+                $content = preg_replace('/^\s*#?\s*DefaultRoom\s*=.*/im', 'DefaultRoom='.$roomId, $content);
+            else
+                $content = preg_replace('/(\[Network\])/i', "$1\nDefaultRoom=$roomId", $content);
+            file_put_contents($iniPath, $content);
+            shell_exec('sudo '.STOP_SCRIPT.' >/dev/null 2>&1'); sleep(1);
+            shell_exec('sudo '.START_SCRIPT.' >/dev/null 2>&1');
+            header('Content-Type: application/json');
+            echo json_encode(['ok'=>true,'msg'=>"Sala $roomId aplicada en 'Static' y 'DefaultRoom', servicios reiniciados."]);
+        } else {
+            header('Content-Type: application/json');
+            echo json_encode(['ok'=>false,'msg'=>'No se pudo escribir en el fichero .ini']);
         }
+    } else {
+        header('Content-Type: application/json');
+        echo json_encode(['ok'=>false,'msg'=>'ID de sala no válido']);
     }
-    if (file_exists(INI_TGLIST)) {
-        foreach (file(INI_TGLIST, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
-            $line = trim($line);
-            if ($line === '' || $line[0] === '#') continue;
-            $parts = explode(';', $line, 2);
-            if (count($parts) === 2 && is_numeric(trim($parts[0]))) {
-                $tg = trim($parts[0]); $ysf = trim($parts[1]);
-                $nm = $names[$tg] ?? $hostNames[$ysf] ?? '';
-                $entries[] = ['tg'=>$tg, 'ysf'=>$ysf, 'name'=>$nm];
-            }
-        }
-    }
-    header('Content-Type: application/json');
-    echo json_encode(['ok'=>true, 'entries'=>$entries]);
-    exit;
-}
-
-// ── TG-YSFList: guardar entradas ──
-if ($action === 'tgysf-save') {
-    $raw = json_decode(file_get_contents('php://input'), true);
-    $entries = $raw['entries'] ?? [];
-    $lines = ["# DMR TG - YSF ID mapping", "# DMR TG ID;YSF reflector ID", "#"];
-    $names = [];
-    foreach ($entries as $e) {
-        $tg = intval($e['tg'] ?? 0); $ysf = intval($e['ysf'] ?? 0); $nm = trim($e['name'] ?? '');
-        if ($tg > 0 && $ysf > 0) {
-            $lines[] = $tg . ';' . $ysf;
-            if ($nm !== '') $names[(string)$tg] = $nm;
-        }
-    }
-    $b1 = file_put_contents(INI_TGLIST, implode("\n", $lines) . "\n");
-    $b2 = file_put_contents(TGYSF_NAMES, json_encode($names, JSON_PRETTY_PRINT));
-    $ok = ($b1 !== false && $b2 !== false);
-    header('Content-Type: application/json');
-    echo json_encode(['ok'=>$ok, 'msg'=>$ok?'Guardado correctamente':'Error al escribir']);
     exit;
 }
 
 if ($action === 'status') {
-    $mmd = checkPid(PID_MMDVM, 'MMDVMDMR2YSF');
-    $d2y = checkPid(PID_D2Y, 'DMR2YSF');
-    $ysf = checkPid(PID_YSFGW, 'YSFGateway');
+    $mmd  = checkPid(PID_MMDVM, 'MMDVMDMR2NXDN');
+    $d2n  = checkPid(PID_D2N,   'DMR2NXDN');
+    $nxdn = checkPid(PID_NXDNGW,'NXDNGateway');
     $perms = [];
-    foreach ($CONFIG_FILES as $k => $p) {
-        $perms[$k] = ['exists' => file_exists($p), 'writable' => is_writable($p)];
-    }
+    foreach ($CONFIG_FILES as $k => $p) $perms[$k] = ['exists'=>file_exists($p),'writable'=>is_writable($p)];
     header('Content-Type: application/json');
-    echo json_encode([
-        'mmdvm' => $mmd, 'dmr2ysf' => $d2y, 'ysfgateway' => $ysf,
-        'bridge_active' => ($mmd==='active' && $d2y==='active' && $ysf==='active'),
-        'perms' => $perms, 'ts' => time()
-    ]);
+    echo json_encode(['mmdvm'=>$mmd,'dmr2nxdn'=>$d2n,'nxdngateway'=>$nxdn,
+        'bridge_active'=>($mmd==='active'&&$d2n==='active'&&$nxdn==='active'),
+        'perms'=>$perms,'ts'=>time()]);
     exit;
 }
 
 if ($action === 'start') {
-    saveState('dmr2ysf', 'on');
-    $out = shell_exec('sudo ' . START_SCRIPT . ' 2>&1');
-    sleep(4);
+    saveState('dmr2nxdn','on');
+    $out = shell_exec('sudo '.START_SCRIPT.' 2>&1'); sleep(4);
     header('Content-Type: application/json');
-    echo json_encode(['ok'=>true, 'msg'=>'Puente iniciado', 'log'=>trim($out)?:'Sin salida']);
+    echo json_encode(['ok'=>true,'msg'=>'Puente iniciado','log'=>trim($out)?:'Sin salida']);
     exit;
 }
 
 if ($action === 'stop') {
-    saveState('dmr2ysf', 'off');
-    $out = shell_exec('sudo ' . STOP_SCRIPT . ' 2>&1');
-    sleep(2);
-    shell_exec('sudo pkill -9 -f DMR2YSF 2>/dev/null');
-    shell_exec('sudo rm -f /tmp/DMR2YSF.pid');
-    sleep(1);
-    @unlink('/tmp/dmr2ysf_lastheard.json');
+    saveState('dmr2nxdn','off');
+    $out = shell_exec('sudo '.STOP_SCRIPT.' 2>&1'); sleep(2);
+    shell_exec('sudo pkill -9 -f DMR2NXDN 2>/dev/null');
+    shell_exec('sudo rm -f /tmp/DMR2NXDN.pid'); sleep(1);
+    @unlink('/tmp/dmr2nxdn_lastheard.json');
     header('Content-Type: application/json');
-    echo json_encode(['ok'=>true, 'msg'=>'Puente detenido', 'log'=>trim($out)?:'Sin salida']);
+    echo json_encode(['ok'=>true,'msg'=>'Puente detenido','log'=>trim($out)?:'Sin salida']);
     exit;
 }
 
@@ -280,9 +195,9 @@ if ($action === 'logs') {
     $n = intval($_GET['lines'] ?? 80);
     header('Content-Type: application/json');
     echo json_encode([
-        'mmdvm' => htmlspecialchars(tailLive(LOG_MMDVM, $n) ?: ''),
-        'dmr2ysf' => htmlspecialchars(tailLive(LOG_D2Y, $n) ?: ''),
-        'ysf' => htmlspecialchars(tailLive(LOG_YSFGW, $n) ?: '')
+        'mmdvm'   => htmlspecialchars(tailLive(LOG_MMDVM,  $n) ?: ''),
+        'dmr2nxdn'=> htmlspecialchars(tailLive(LOG_D2N,    $n) ?: ''),
+        'nxdn'    => htmlspecialchars(tailLive(LOG_NXDNGW, $n) ?: '')
     ]);
     exit;
 }
@@ -290,255 +205,177 @@ if ($action === 'logs') {
 if ($action === 'cfg-read') {
     $id = $_POST['id'] ?? '';
     $path = $CONFIG_FILES[$id] ?? null;
-    if (!$path || !file_exists($path)) {
-        header('Content-Type: application/json'); echo json_encode(['ok'=>false,'msg'=>'No encontrado']); exit;
-    }
+    if (!$path || !file_exists($path)) { header('Content-Type: application/json'); echo json_encode(['ok'=>false,'msg'=>'No encontrado']); exit; }
     header('Content-Type: application/json');
-    echo json_encode(['ok'=>true, 'path'=>$path, 'content'=>file_get_contents($path), 'id'=>$id]);
+    echo json_encode(['ok'=>true,'path'=>$path,'content'=>file_get_contents($path),'id'=>$id]);
     exit;
 }
 
 if ($action === 'cfg-save') {
     $id = $_POST['id'] ?? '';
     $path = $CONFIG_FILES[$id] ?? null;
-    if (!$path) { 
-        header('Content-Type: application/json'); 
-        echo json_encode(['ok'=>false, 'msg'=>'Ruta no válida']); 
-        exit; 
-    }
+    if (!$path) { header('Content-Type: application/json'); echo json_encode(['ok'=>false,'msg'=>'Ruta no válida']); exit; }
     $res = file_put_contents($path, $_POST['content'] ?? '');
     header('Content-Type: application/json');
-    echo json_encode([
-        'ok' => ($res !== false), 
-        'msg' => ($res !== false ? 'Guardado correctamente' : 'Error al escribir el fichero')
-    ]);
+    echo json_encode(['ok'=>($res!==false),'msg'=>($res!==false?'Guardado correctamente':'Error al escribir el fichero')]);
     exit;
 }
 
 if ($action === 'restart-svc') {
     shell_exec('sudo '.STOP_SCRIPT.' >/dev/null 2>&1'); sleep(1);
-    shell_exec('sudo '.START_SCRIPT.' >/dev/null 2>&1');
-    usleep(1000000);
+    shell_exec('sudo '.START_SCRIPT.' >/dev/null 2>&1'); usleep(1000000);
     header('Content-Type: application/json'); echo json_encode(['ok'=>true]); exit;
 }
 
-// ── Transmisión y Last Heard ──
+// ============================================================
+// TRANSMISSION — lógica idéntica al original
+// ============================================================
 if ($action === 'transmission') {
     $log = tailLive(LOG_MMDVM, 5000);
     if (empty(trim($log))) {
         header('Content-Type: application/json');
-        $cached = _loadLastHeardCache(5, 300, '/tmp/dmr2ysf_lastheard.json', true);
-        echo json_encode(['state'=>['active'=>false], 'lastHeard'=>$cached, 'vu'=>['slot1'=>0,'slot2'=>0]]);
+        $cached = _loadLastHeardCache(5, 300, '/tmp/dmr2nxdn_lastheard.json', true);
+        echo json_encode(['state'=>['active'=>false],'lastHeard'=>$cached,'vu'=>['slot1'=>0,'slot2'=>0]]);
         exit;
     }
-    
+
     $lines = explode("\n", $log);
-    
     $state = ['active'=>false,'callsign'=>'','name'=>'','tg'=>'','slot'=>'','time'=>'','source'=>'','duration'=>'','loss'=>''];
     $namesMap = [];
-    
+
     foreach ($lines as $line) {
         if (preg_match('/(\d{2}:\d{2}:\d{2}).*FindWithName\s*=\s*([A-Z0-9]+)\s+(.+)/i', $line, $m)) {
             $namesMap[strtoupper(trim($m[2]))] = trim($m[3]);
         }
     }
-    
+
     $getName = function($cs) use ($namesMap) {
         $name = $namesMap[$cs] ?? '';
-        if (!$name) {
-            $lookup = lookupCall($cs);
-            $name = $lookup['name'] ?? '';
-        }
+        if (!$name) { $lookup = lookupCall($cs); $name = $lookup['name'] ?? ''; }
         return $name;
     };
-    
+
     $maxEntries = 5;
-    $cacheFile  = '/tmp/dmr2ysf_lastheard.json';
+    $cacheFile  = '/tmp/dmr2nxdn_lastheard.json';
     $cacheTTL   = 300;
-    
+
     $cachedEntries = _loadLastHeardCache($maxEntries, $cacheTTL, $cacheFile, false);
     $newEntries = [];
-    
+
+    // Paso 1: recopilar starts y ends del log actual
     foreach ($lines as $line) {
-        if (preg_match('/(\d{2}:\d{2}:\d{2}\.\d+).*DMR Slot ([12]),\s*received\s+(RF|network)\s+voice header from\s+([A-Z0-9]+)\s+to\s+TG\s+(\d+)/i', $line, $m)) {
+        // Voice header (inicio de transmisión)
+        if (preg_match('/(\d{2}:\d{2}:\d{2}\.\d+).*(?:DMR Slot ([12])|NXDN),\s*received\s+(RF|network)\s+voice header from\s+([A-Z0-9]+).*to\s+(?:TG\s+)?(\d+)/i', $line, $m)) {
             $callsign = strtoupper(trim($m[4]));
-            $source = strtoupper($m[3]) === 'RF' ? 'RF' : 'NET';
-            $key = $callsign.'-'.$m[2].'-'.$m[5].'-'.$source;
-            
+            $source   = strtoupper($m[3]) === 'RF' ? 'RF' : 'NET';
+            $slot     = (isset($m[2]) && $m[2] !== '') ? $m[2] : 'NX';
+            $tg       = $m[5];
+            $key      = $callsign.'-'.$slot.'-'.$tg.'-'.$source;
             $foundIndex = null;
             foreach ($newEntries as $i => $entry) {
-                if (($entry['callsign'].'-'.$entry['slot'].'-'.$entry['tg'].'-'.$entry['source']) === $key) {
-                    $foundIndex = $i;
-                    break;
-                }
+                if (($entry['callsign'].'-'.$entry['slot'].'-'.$entry['tg'].'-'.$entry['source']) === $key) { $foundIndex=$i; break; }
             }
-            
-            $newEntry = [
-                'callsign' => $callsign,
-                'name' => $getName($callsign),
-                'tg' => $m[5],
-                'slot' => $m[2],
-                'time' => explode('.', $m[1])[0],
-                'source' => $source,
-                'status' => 'TX',
-                'duration' => '',
-                'loss' => ''
-            ];
-            
-            if ($foundIndex !== null) {
-                unset($newEntries[$foundIndex]);
-                $newEntries[] = $newEntry;
-            } else {
-                $newEntries[] = $newEntry;
-            }
+            $newEntry = ['callsign'=>$callsign,'name'=>$getName($callsign),'tg'=>$tg,'slot'=>$slot,
+                'time'=>explode('.',$m[1])[0],'source'=>$source,'status'=>'TX','duration'=>'','loss'=>''];
+            if ($foundIndex !== null) { unset($newEntries[$foundIndex]); }
+            $newEntries[] = $newEntry;
         }
-        
-        if (preg_match('/(\d{2}:\d{2}:\d{2}\.\d+).*DMR Slot ([12]),\s*received\s+(RF|network)\s+end of voice transmission from\s+([A-Z0-9]+)\s+to\s+TG\s+(\d+),\s*([\d.]+)\s*seconds,\s*(?:BER:\s*([\d.]+)%|([\d.]+)%\s*packet loss)/i', $line, $m)) {
+        // End of voice (fin de transmisión)
+        if (preg_match('/(\d{2}:\d{2}:\d{2}\.\d+).*(?:DMR Slot ([12])|NXDN),\s*received\s+(RF|network)\s+end of voice transmission from\s+([A-Z0-9]+).*to\s+(?:TG\s+)?(\d+),\s*([\d.]+)\s*seconds,\s*(?:BER:\s*([\d.]+)%|([\d.]+)%\s*packet loss)/i', $line, $m)) {
             $callsign = strtoupper(trim($m[4]));
-            $source = strtoupper($m[3]) === 'RF' ? 'RF' : 'NET';
-            $key = $callsign.'-'.$m[2].'-'.$m[5].'-'.$source;
-            
+            $source   = strtoupper($m[3]) === 'RF' ? 'RF' : 'NET';
+            $slot     = (isset($m[2]) && $m[2] !== '') ? $m[2] : 'NX';
+            $tg       = $m[5];
+            $key      = $callsign.'-'.$slot.'-'.$tg.'-'.$source;
             $foundIndex = null;
             foreach ($newEntries as $i => $entry) {
-                $entryKey = $entry['callsign'].'-'.$entry['slot'].'-'.$entry['tg'].'-'.$entry['source'];
-                if ($entryKey === $key) {
-                    $foundIndex = $i;
-                    break;
-                }
+                if (($entry['callsign'].'-'.$entry['slot'].'-'.$entry['tg'].'-'.$entry['source']) === $key) { $foundIndex=$i; break; }
             }
-            
             if ($foundIndex !== null) {
                 $newEntries[$foundIndex]['duration'] = $m[6].'s';
-                $newEntries[$foundIndex]['loss'] = ($m[7] ?? $m[8] ?? '').'%';
-                $updatedEntry = $newEntries[$foundIndex];
-                unset($newEntries[$foundIndex]);
-                $newEntries[] = $updatedEntry;
+                $newEntries[$foundIndex]['loss']     = ($m[7] ?? $m[8] ?? '').'%';
+                $updated = $newEntries[$foundIndex]; unset($newEntries[$foundIndex]); $newEntries[] = $updated;
             }
         }
     }
-    
+
+    // Paso 2: merge con caché
     $merged = $cachedEntries;
-    
     foreach ($newEntries as $new) {
         $key = $new['callsign'].'-'.$new['slot'].'-'.$new['tg'].'-'.$new['source'];
         $foundIndex = null;
         foreach ($merged as $i => $entry) {
-            if (($entry['callsign'].'-'.$entry['slot'].'-'.$entry['tg'].'-'.$entry['source']) === $key) {
-                $foundIndex = $i;
-                break;
-            }
+            if (($entry['callsign'].'-'.$entry['slot'].'-'.$entry['tg'].'-'.$entry['source']) === $key) { $foundIndex=$i; break; }
         }
-        
         if ($foundIndex !== null) {
             if ($new['duration'] && !$merged[$foundIndex]['duration']) {
                 $merged[$foundIndex]['duration'] = $new['duration'];
-                $merged[$foundIndex]['loss'] = $new['loss'];
+                $merged[$foundIndex]['loss']     = $new['loss'];
             }
-            $temp = $merged[$foundIndex];
-            unset($merged[$foundIndex]);
-            $merged[] = $temp;
+            $temp = $merged[$foundIndex]; unset($merged[$foundIndex]); $merged[] = $temp;
         } else {
             $merged[] = $new;
         }
     }
-    
-    if (count($merged) > $maxEntries) {
-        $merged = array_slice($merged, -$maxEntries);
-    }
+    if (count($merged) > $maxEntries) $merged = array_slice($merged, -$maxEntries);
     $lastHeard = array_values($merged);
-    
     _saveLastHeardCache($lastHeard, $cacheFile);
-    
-    $activeBySlot = [1 => null, 2 => null];
-    
+
+    // Paso 3: estado activo actual (igual que original)
+    $activeBySlot = [1=>null, 2=>null, 'NX'=>null];
     foreach ($lines as $line) {
-        if (preg_match('/(\d{2}:\d{2}:\d{2}\.\d+).*DMR Slot ([12]),\s*received\s+(RF|network)\s+voice header from\s+([A-Z0-9]+)\s+to\s+TG\s+(\d+)/i', $line, $m)) {
-            $slot = (int)$m[2];
+        if (preg_match('/(\d{2}:\d{2}:\d{2}\.\d+).*(?:DMR Slot ([12])|NXDN),\s*received\s+(RF|network)\s+voice header from\s+([A-Z0-9]+).*to\s+(?:TG\s+)?(\d+)/i', $line, $m)) {
+            $slot = (isset($m[2]) && $m[2] !== '') ? $m[2] : 'NX';
             $callsign = strtoupper(trim($m[4]));
-            $activeBySlot[$slot] = [
-                'callsign' => $callsign,
-                'tg' => $m[5],
-                'time' => explode('.', $m[1])[0],
-                'source' => strtoupper($m[3]) === 'RF' ? 'RF' : 'NET'
-            ];
+            $activeBySlot[$slot] = ['callsign'=>$callsign,'tg'=>$m[5],'time'=>explode('.',$m[1])[0],'source'=>strtoupper($m[3])==='RF'?'RF':'NET'];
         }
-        if (preg_match('/(\d{2}:\d{2}:\d{2}\.\d+).*DMR Slot ([12]),\s*received\s+(RF|network)\s+end of voice transmission from\s+([A-Z0-9]+)\s+to\s+TG\s+(\d+),\s*([\d.]+)\s*seconds/i', $line, $m)) {
-            $slot = (int)$m[2];
+        if (preg_match('/(\d{2}:\d{2}:\d{2}\.\d+).*(?:DMR Slot ([12])|NXDN),\s*received\s+(RF|network)\s+end of voice transmission from\s+([A-Z0-9]+).*to\s+(?:TG\s+)?(\d+),\s*([\d.]+)\s*seconds/i', $line, $m)) {
+            $slot     = (isset($m[2]) && $m[2] !== '') ? $m[2] : 'NX';
             $callsign = strtoupper(trim($m[4]));
-            $tg = $m[5];
+            $tg       = $m[5];
             if ($activeBySlot[$slot] && $activeBySlot[$slot]['callsign'] === $callsign && $activeBySlot[$slot]['tg'] === $tg) {
                 $activeBySlot[$slot] = null;
             }
         }
     }
-    
-    foreach ([1, 2] as $slot) {
+
+    foreach ([1, 2, 'NX'] as $slot) {
         if ($activeBySlot[$slot]) {
             if (!$state['active'] || $activeBySlot[$slot]['time'] > $state['time']) {
-                $state = [
-                    'active' => true,
-                    'callsign' => $activeBySlot[$slot]['callsign'],
-                    'name' => $getName($activeBySlot[$slot]['callsign']),
-                    'tg' => $activeBySlot[$slot]['tg'],
-                    'slot' => $slot,
-                    'time' => $activeBySlot[$slot]['time'],
-                    'source' => $activeBySlot[$slot]['source'],
-                    'duration' => '',
-                    'loss' => ''
-                ];
+                $state = ['active'=>true,'callsign'=>$activeBySlot[$slot]['callsign'],
+                    'name'=>$getName($activeBySlot[$slot]['callsign']),
+                    'tg'=>$activeBySlot[$slot]['tg'],'slot'=>$slot,
+                    'time'=>$activeBySlot[$slot]['time'],'source'=>$activeBySlot[$slot]['source'],
+                    'duration'=>'','loss'=>''];
             }
         }
     }
-    
-    $vu = ['slot1'=>0, 'slot2'=>0];
-    if ($state['active']) {
-        $vu['slot'.$state['slot']] = 30 + rand(0, 70);
-    }
-    
+
+    $vu = ['slot1'=>0,'slot2'=>0];
+    if ($state['active'] && $state['slot'] !== 'NX')  { $vu['slot'.$state['slot']] = 30+rand(0,70); }
+    elseif ($state['active'] && $state['slot'] === 'NX') { $vu['slot1'] = 30+rand(0,70); }
+
     header('Content-Type: application/json');
-    echo json_encode(['state'=>$state, 'lastHeard'=>$lastHeard, 'vu'=>$vu]);
+    echo json_encode(['state'=>$state,'lastHeard'=>$lastHeard,'vu'=>$vu]);
     exit;
 }
 
-// ============================================================================
-// FUNCIONES DE PERSISTENCIA
-// ============================================================================
-
-function _loadLastHeardCache($maxEntries = 5, $ttlSeconds = 300, $cacheFile = '/tmp/dmr2ysf_lastheard.json', $stableOrder = true) {
+function _loadLastHeardCache($maxEntries=5,$ttlSeconds=300,$cacheFile='/tmp/dmr2nxdn_lastheard.json',$stableOrder=true) {
     if (!file_exists($cacheFile)) return [];
-    
-    $data = @json_decode(file_get_contents($cacheFile), true);
-    if (!$data || !is_array($data['entries'] ?? null)) return [];
-    
+    $data = @json_decode(file_get_contents($cacheFile),true);
+    if (!$data||!is_array($data['entries']??null)) return [];
     $now = time();
-    $valid = array_filter($data['entries'], function($e) use ($now, $ttlSeconds) {
-        return ($now - ($e['_ts'] ?? 0)) < $ttlSeconds;
-    });
-    
-    if ($stableOrder) {
-        $valid = array_values($valid);
-    } else {
-        usort($valid, function($a, $b) {
-            return ($b['_ts'] ?? 0) - ($a['_ts'] ?? 0);
-        });
-        $valid = array_values($valid);
-    }
-    
-    return array_slice($valid, 0, $maxEntries);
+    $valid = array_filter($data['entries'],function($e)use($now,$ttlSeconds){return($now-($e['_ts']??0))<$ttlSeconds;});
+    if ($stableOrder) { $valid=array_values($valid); }
+    else { usort($valid,function($a,$b){return($b['_ts']??0)-($a['_ts']??0);}); $valid=array_values($valid); }
+    return array_slice($valid,0,$maxEntries);
 }
 
-function _saveLastHeardCache($entries, $cacheFile = '/tmp/dmr2ysf_lastheard.json') {
+function _saveLastHeardCache($entries,$cacheFile='/tmp/dmr2nxdn_lastheard.json'){
     $now = time();
-    $data = [
-        'entries' => array_map(function($e) use ($now) {
-            $e['_ts'] = $e['_ts'] ?? $now;
-            return $e;
-        }, $entries),
-        'saved_at' => $now
-    ];
-    
-    @file_put_contents($cacheFile, json_encode($data, JSON_PRETTY_PRINT));
-    @chmod($cacheFile, 0644);
+    $data = ['entries'=>array_map(function($e)use($now){$e['_ts']=$e['_ts']??$now;return $e;},$entries),'saved_at'=>$now];
+    @file_put_contents($cacheFile,json_encode($data,JSON_PRETTY_PRINT));
+    @chmod($cacheFile,0644);
 }
 ?>
 <!DOCTYPE html>
@@ -546,7 +383,7 @@ function _saveLastHeardCache($entries, $cacheFile = '/tmp/dmr2ysf_lastheard.json
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>🔗 DMR ⇄ YSF</title>
+<title>🔗 DMR ⇄ NXDN</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@500;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
 <style>
@@ -604,7 +441,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ui);font-size
     margin:0 auto;
     padding:1.5rem .8rem .5rem;
     display:flex;flex-direction:column;
-    gap:1rem;
+    gap:1.0rem;
 }
 
 /* ══ CARD CONFIG (1 fila compacta) ══ */
@@ -778,44 +615,25 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ui);font-size
 .btn-act.start{background:transparent;color:var(--green);border-color:var(--green);}
 .btn-act.start:hover{background:rgba(0,255,159,.15);}
 .btn-act:disabled{opacity:.5;cursor:not-allowed;pointer-events:none;}
-
-/* TG-YSFList modal */
-#tgYsfModal .m-box{width:720px;}
-#tgYsfModal .tg-header{font-family:var(--font-mono);font-size:.75rem;color:var(--cyan);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.2rem;}
-#tgYsfModal .tg-sub{font-family:var(--font-mono);font-size:.6rem;color:var(--text-dim);margin-bottom:.55rem;}
-#tgYsfModal .tg-table-wrap{background:#060c10;border:1px solid rgba(0,212,255,.2);border-radius:4px;overflow:hidden;margin-bottom:.55rem;}
-#tgYsfModal .tg-table-head{display:grid;grid-template-columns:90px 110px 1fr 36px;padding:.32rem .65rem;background:rgba(0,0,0,.3);font-family:var(--font-mono);font-size:.6rem;color:var(--text-dim);letter-spacing:.08em;text-transform:uppercase;gap:.4rem;}
-#tgYsfModal .tg-rows{max-height:220px;overflow-y:auto;}
-#tgYsfModal .tg-row{display:grid;grid-template-columns:90px 110px 1fr 36px;padding:.3rem .65rem;border-bottom:1px solid rgba(0,212,255,.1);align-items:center;gap:.5rem;}
-#tgYsfModal .tg-val{font-family:var(--font-mono);font-size:.82rem;color:var(--cyan);}
-#tgYsfModal .tg-ysf{color:#80ffe8;}
-#tgYsfModal .tg-name-input{background:transparent;border:none;border-bottom:1px solid rgba(0,212,255,.2);color:var(--text);font-family:var(--font-mono);font-size:.78rem;padding:.15rem .2rem;outline:none;width:100%;}
-#tgYsfModal .tg-name-input:focus{border-bottom-color:var(--cyan);}
-#tgYsfModal .tg-del{background:transparent;border:1px solid rgba(255,69,96,.3);border-radius:3px;color:var(--red);font-size:.7rem;cursor:pointer;padding:.15rem .3rem;}
-#tgYsfModal .tg-del:hover{background:rgba(255,69,96,.1);}
-#tgYsfModal .tg-add-row{display:grid;grid-template-columns:90px 110px 1fr auto;gap:.5rem;align-items:end;margin-bottom:.5rem;}
-#tgYsfModal .tg-add-row input{width:100%;background:var(--surface);border:1px solid rgba(0,212,255,.3);border-radius:4px;color:var(--cyan);font-family:var(--font-mono);font-size:.82rem;padding:.42rem .5rem;outline:none;}
-#tgYsfModal .tg-add-row input:focus{border-color:var(--cyan);}
-#tgYsfModal .tg-add-btn{background:rgba(0,204,153,.2);color:var(--green);border:none;border-radius:4px;font-family:var(--font-mono);font-size:.78rem;padding:.42rem .8rem;cursor:pointer;}
-#tgYsfModal .tg-add-btn:hover{background:rgba(0,204,153,.3);}
-#tgYsfModal .tg-search-btn{background:rgba(13,37,53,.5);color:var(--cyan);border:1px solid rgba(0,212,255,.3);border-radius:4px;font-family:var(--font-mono);font-size:.78rem;padding:.42rem .8rem;cursor:pointer;margin-top:.25rem;}
-#tgYsfModal .tg-search-btn:hover{background:rgba(0,212,255,.1);}
-#tgYsfModal .tg-host-panel{display:none;background:#060c10;border:1px solid rgba(0,212,255,.2);border-radius:4px;padding:.8rem;margin-bottom:.5rem;}
-#tgYsfModal .tg-host-search{display:flex;gap:.5rem;margin-bottom:.6rem;}
-#tgYsfModal .tg-host-search input{flex:1;background:var(--surface);border:1px solid rgba(0,212,255,.3);border-radius:4px;color:var(--cyan);font-family:var(--font-mono);font-size:.78rem;padding:.38rem .6rem;outline:none;}
-#tgYsfModal .tg-host-close{background:transparent;border:1px solid rgba(255,69,96,.3);color:var(--red);border-radius:4px;font-family:var(--font-mono);font-size:.7rem;padding:.35rem .6rem;cursor:pointer;}
-#tgYsfModal .tg-host-list{max-height:200px;overflow-y:auto;font-family:var(--font-mono);font-size:.72rem;}
-#tgYsfModal .tg-host-item{padding:.35rem .6rem;cursor:pointer;border-bottom:1px solid rgba(0,212,255,.1);display:flex;gap:.8rem;align-items:center;}
-#tgYsfModal .tg-host-item:hover{background:rgba(0,212,255,.08);}
-#tgYsfModal .tg-host-id{color:var(--cyan);min-width:52px;}
-#tgYsfModal .tg-host-name{color:#80ffe8;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:.4rem;}
-#tgYsfModal .tg-host-ctry{color:var(--text-dim);font-size:.6rem;}
-#tgYsfModal .tg-hint{font-family:var(--font-mono);font-size:.6rem;color:var(--text-dim);margin-top:.4rem;}
-#tgYsfModal .tg-msg{font-family:var(--font-mono);font-size:.7rem;padding:.32rem .65rem;border-radius:4px;display:none;border:1px solid;margin-bottom:.35rem;}
-#tgYsfModal .tg-msg.ok{color:var(--green);border-color:var(--green);background:rgba(0,255,159,.1);}
-#tgYsfModal .tg-msg.err{color:var(--red);border-color:var(--red);background:rgba(255,69,96,.1);}
-#tgYsfModal .flag-emoji-img{height:1.2em;width:auto;vertical-align:middle;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4));}
-#tgYsfModal .flag-emoji{font-size:1.1em;line-height:1;vertical-align:middle;}
+/* Room modal */
+#roomModal .m-box{width:680px;}
+#roomModal .room-header{font-family:var(--font-mono);font-size:.75rem;color:var(--cyan);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.2rem;}
+#roomModal .room-sub{font-family:var(--font-mono);font-size:.6rem;color:var(--text-dim);margin-bottom:.55rem;}
+#roomModal .room-table-wrap{background:#060c10;border:1px solid rgba(0,212,255,.2);border-radius:4px;overflow:hidden;margin-bottom:.55rem;}
+#roomModal .room-table-head{display:grid;grid-template-columns:80px 1fr 60px;padding:.32rem .65rem;background:rgba(0,0,0,.3);font-family:var(--font-mono);font-size:.6rem;color:var(--text-dim);letter-spacing:.08em;text-transform:uppercase;gap:.4rem;}
+#roomModal .room-rows{max-height:260px;overflow-y:auto;}
+#roomModal .room-row{display:grid;grid-template-columns:80px 1fr 60px;padding:.3rem .65rem;border-bottom:1px solid rgba(0,212,255,.1);align-items:center;gap:.4rem;cursor:pointer;transition:background .2s;}
+#roomModal .room-row:hover{background:rgba(0,212,255,.08);}
+#roomModal .room-row.selected{background:rgba(0,255,159,.12);border-left:3px solid var(--green);}
+#roomModal .room-id{font-family:var(--font-mono);font-size:.78rem;color:var(--cyan);font-weight:bold;}
+#roomModal .room-name{color:#80ffe8;font-size:.72rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:.3rem;}
+#roomModal .room-ctry{color:var(--text-dim);font-size:.66rem;text-align:right;}
+#roomModal .room-search{display:flex;gap:.4rem;margin-bottom:.45rem;}
+#roomModal .room-search input{flex:1;background:var(--surface);border:1px solid rgba(0,212,255,.3);border-radius:4px;color:var(--cyan);font-family:var(--font-mono);font-size:.72rem;padding:.3rem .52rem;outline:none;}
+#roomModal .room-search input:focus{border-color:var(--cyan);}
+#roomModal .room-msg{font-family:var(--font-mono);font-size:.7rem;padding:.32rem .65rem;border-radius:4px;display:none;border:1px solid;margin-bottom:.35rem;}
+#roomModal .room-msg.ok{color:var(--green);border-color:var(--green);background:rgba(0,255,159,.1);}
+#roomModal .room-msg.err{color:var(--red);border-color:var(--red);background:rgba(255,69,96,.1);}
 </style>
 </head>
 <body>
@@ -826,13 +644,13 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ui);font-size
 <!-- HEADER -->
 <header class="header">
     <div style="display:flex;align-items:center;gap:.55rem;flex-shrink:0;">
-        <h1>🔗 DMR ⇄ YSF</h1>
+        <h1>🔗 DMR ⇄ NXDN</h1>
         <span class="badge-direct">BRIDGE</span>
     </div>
     <div class="h-status">
-        <div class="s-item"><span class="s-dot" id="dot-mmd"></span><span class="s-label">MMDVMDMR2YSF:</span><span class="s-val" id="val-mmd">—</span></div>
-        <div class="s-item"><span class="s-dot" id="dot-d2y"></span><span class="s-label">DMR2YSF:</span><span class="s-val" id="val-d2y">—</span></div>
-        <div class="s-item"><span class="s-dot" id="dot-ysf"></span><span class="s-label">YSFGateway:</span><span class="s-val" id="val-ysf">—</span></div>
+        <div class="s-item"><span class="s-dot" id="dot-mmd"></span><span class="s-label">MMDVMDMR2NXDN:</span><span class="s-val" id="val-mmd">—</span></div>
+        <div class="s-item"><span class="s-dot" id="dot-d2n"></span><span class="s-label">DMR2NXDN:</span><span class="s-val" id="val-d2n">—</span></div>
+        <div class="s-item"><span class="s-dot" id="dot-nxdn"></span><span class="s-label">NXDNGateway:</span><span class="s-val" id="val-nxdn">—</span></div>
         <div class="h-ts">ACT: <span id="ts">—</span></div>
     </div>
     <div class="h-toggle" style="flex-shrink:0;">
@@ -850,13 +668,13 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ui);font-size
         <div style="display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;">
             <span class="c-title" style="margin-bottom:0;">⚙️ Control del Puente</span>
             <div class="arch-info" style="flex:1;min-width:180px;margin-bottom:0;">
-                <span style="color:var(--cyan);">ℹ️</span> <strong>Arquitectura:</strong> MMDVMHost ⇄ DMR2YSF ⇄ YSFGateway
+                <span style="color:var(--cyan);">ℹ️</span> <strong>Arquitectura:</strong> MMDVMHost ⇄ DMR2NXDN ⇄ NXDNGateway (TG DMR &harr; SALA NXDN)
             </div>
             <div class="cfg-row" style="flex-shrink:0;">
-                <button class="btn-cfg" onclick="openCfg('mmdvm')">📄 MMDVMDMR2YSF.ini</button>
-                <button class="btn-cfg" onclick="openCfg('dmr2ysf')">📄 DMR2YSF.ini</button>
-                <button class="btn-cfg" onclick="openCfg('ysf')">📄 YSFGateway.ini</button>
-                <button class="btn-cfg" onclick="openTgYsfModal()" style="border-color:var(--green);color:var(--green);">📋 TG-YSFList.txt</button>
+                <button class="btn-cfg" onclick="openCfg('mmdvm')">📄 MMDVMDMR2NXDN.ini</button>
+                <button class="btn-cfg" onclick="openCfg('dmr2nxdn')">📄 DMR2NXDN.ini</button>
+                <button class="btn-cfg" onclick="openCfg('nxdn')">📄 NXDNGateway.ini</button>
+                <button class="btn-cfg" onclick="openRoomModal()" style="border-color:var(--green);color:var(--green);">📡 Selector de Sala NXDN</button>
             </div>
         </div>
     </div>
@@ -889,7 +707,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ui);font-size
             <div class="c-title" style="margin-bottom:.3rem;flex-shrink:0;">📋 Últimas Estaciones Escuchadas</div>
             <div class="lh-scroll">
                 <table class="lh-table">
-                    <thead><tr><th>Indicativo</th><th>Nombre</th><th>TG</th><th>Slot</th><th>Hora</th><th>Origen</th></tr></thead>
+                    <thead><tr><th>Indicativo</th><th>Nombre</th><th>TG/ID</th><th>Slot</th><th>Hora</th><th>Origen</th></tr></thead>
                     <tbody id="lhBody"><tr><td colspan="6" class="lh-empty">Sin actividad reciente</td></tr></tbody>
                 </table>
             </div>
@@ -901,7 +719,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ui);font-size
     <div class="logs-wrap">
         <div class="l-panel">
             <div class="l-head">
-                <span class="l-title">📋 MMDVMDMR2YSF</span>
+                <span class="l-title">📋 MMDVMDMR2NXDN</span>
                 <div class="l-actions">
                     <button class="btn-log" onclick="refreshLogs()" title="Actualizar">🔄</button>
                     <button class="btn-log" onclick="clearLog('lMmd')" title="Limpiar">🗑</button>
@@ -911,30 +729,30 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ui);font-size
         </div>
         <div class="l-panel">
             <div class="l-head">
-                <span class="l-title" style="color:#c9a0ff;">📋 DMR2YSF</span>
+                <span class="l-title" style="color:#c9a0ff;">📋 DMR2NXDN</span>
                 <div class="l-actions">
                     <button class="btn-log" onclick="refreshLogs()" title="Actualizar">🔄</button>
-                    <button class="btn-log" onclick="clearLog('lD2Y')" title="Limpiar">🗑</button>
+                    <button class="btn-log" onclick="clearLog('lD2N')" title="Limpiar">🗑</button>
                 </div>
             </div>
-            <div class="l-out" id="lD2Y">Esperando…</div>
+            <div class="l-out" id="lD2N">Esperando…</div>
         </div>
         <div class="l-panel">
             <div class="l-head">
-                <span class="l-title" style="color:var(--green);">📋 YSFGateway</span>
+                <span class="l-title" style="color:var(--green);">📋 NXDNGateway</span>
                 <div class="l-actions">
                     <button class="btn-log" onclick="refreshLogs()" title="Actualizar">🔄</button>
-                    <button class="btn-log" onclick="clearLog('lYsf')" title="Limpiar">🗑</button>
+                    <button class="btn-log" onclick="clearLog('lNxdn')" title="Limpiar">🗑</button>
                 </div>
             </div>
-            <div class="l-out" id="lYsf">Esperando…</div>
+            <div class="l-out" id="lNxdn">Esperando…</div>
         </div>
     </div><!-- /logs-wrap -->
 
 <!-- FOOTER -->
 <footer class="footer">
     <div class="footer-inner">
-        Panel Bridge DMR⇄YSF | <a href="mmdvm.php">Volver al panel PHPPLUS</a>
+        Panel Bridge DMR⇄NXDN | <a href="mmdvm.php">Volver al panel PHPPLUS</a>
     </div>
 </footer>
 
@@ -954,43 +772,22 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ui);font-size
     </div>
 </div>
 
-<!-- ══ MODAL TG-YSFLIST ══ -->
-<div id="tgYsfModal" class="modal" onclick="if(event.target===this)closeTgYsfModal()">
+<!-- ══ MODAL SALA NXDN ══ -->
+<div id="roomModal" class="modal" onclick="if(event.target===this)closeRoomModal()">
     <div class="m-box">
-        <div class="tg-header">📋 TG-YSF List · Mapeo TalkGroup → Reflector YSF</div>
-        <div class="tg-sub">/home/pi/MMDVM_CM/DMR2YSF/TG-YSFList.txt</div>
-        
-        <div class="tg-table-wrap">
-            <div class="tg-table-head">
-                <span>TG DMR</span><span>YSF ID</span><span>Nombre</span><span></span>
-            </div>
-            <div id="tgYsfRows" class="tg-rows"></div>
+        <div class="room-header">📡 Selector de Sala NXDN</div>
+        <div class="room-sub">Selecciona una sala para conectar el gateway. Se actualizará NXDNGateway.ini y se reiniciarán los servicios.</div>
+        <div class="room-search">
+            <input type="text" id="roomSearch" placeholder="🔍 Buscar por ID, nombre o país…" oninput="filterRooms(this.value)">
         </div>
-        
-        <div class="tg-add-row">
-            <div><input type="text" id="tgYsfNewTG" placeholder="9"></div>
-            <div><input type="text" id="tgYsfNewYSF" placeholder="62980"></div>
-            <div><input type="text" id="tgYsfNewName" placeholder="ej: ES-EA-DISTRITO-4"></div>
-            <div style="display:flex;flex-direction:column;gap:0.25rem;">
-                <button onclick="tgYsfAdd()" class="tg-add-btn">➕ Añadir</button>
-                <button onclick="tgYsfToggleHosts()" class="tg-search-btn">📡 Buscar Sala</button>
-            </div>
+        <div class="room-table-wrap">
+            <div class="room-table-head"><span>ID</span><span>Nombre / Sponsor</span><span>País</span></div>
+            <div id="roomRows" class="room-rows"></div>
         </div>
-        
-        <div id="tgYsfHostPanel" class="tg-host-panel">
-            <div class="tg-host-search">
-                <input type="text" id="tgYsfSearch" placeholder="🔍 Buscar reflector…" oninput="tgYsfFilterHosts(this.value)">
-                <button onclick="tgYsfToggleHosts()" class="tg-host-close">✖</button>
-            </div>
-            <div id="tgYsfHostList" class="tg-host-list"></div>
-            <div class="tg-hint">↑ Haz clic para rellenar YSF ID y Nombre</div>
-        </div>
-        
-        <div id="tgYsfMsg" class="tg-msg"></div>
-        
+        <div id="roomMsg" class="room-msg"></div>
         <div class="m-acts">
-            <button class="btn-act stop" onclick="closeTgYsfModal()">✖ Cerrar</button>
-            <button class="btn-act start" onclick="tgYsfSave()">💾 Guardar</button>
+            <button class="btn-act stop" onclick="closeRoomModal()">✖ Cerrar</button>
+            <button class="btn-act start" id="btnApplyRoom" onclick="applyRoom()" disabled>✅ Aplicar Sala y Reiniciar</button>
         </div>
     </div>
 </div>
@@ -1055,7 +852,7 @@ function getCountryFlag(country){
     return '<span class="flag-emoji">🌐</span>';
 }
 
-let S={active:false,poll:null,logT:null,txT:null,last:null,busy:false,cfgId:null};
+let S={active:false,poll:null,logT:null,txT:null,last:null,busy:false,cfgId:null,selectedRoom:null,allRooms:[]};
 
 function setDot(id,v){
     const e=$(id),vEl=$(id.replace('dot-','val-'));
@@ -1080,7 +877,7 @@ function updateVU(slot,level){
 async function status(){
     try{
         const d=await api('status');
-        setDot('dot-mmd',d.mmdvm);setDot('dot-d2y',d.dmr2ysf);setDot('dot-ysf',d.ysfgateway);
+        setDot('dot-mmd',d.mmdvm);setDot('dot-d2n',d.dmr2nxdn);setDot('dot-nxdn',d.nxdngateway);
         const newActive=d.bridge_active;
         if(!S.busy&&newActive!==S.active)setToggle(newActive,false);
         S.active=newActive;$('ts').textContent=fmtT(d.ts);
@@ -1094,7 +891,7 @@ async function status(){
 async function refreshLogs(){
     try{
         const d=await api('logs',{lines:80});
-        const panels={lMmd:d.mmdvm,lD2Y:d.dmr2ysf,lYsf:d.ysf};
+        const panels={lMmd:d.mmdvm,lD2N:d.dmr2nxdn,lNxdn:d.nxdn};
         for(let[id,txt]of Object.entries(panels)){
             const el=$(id);
             const atBot=el.scrollHeight-el.clientHeight<=el.scrollTop+20;
@@ -1106,7 +903,7 @@ async function refreshLogs(){
 async function fetchLogs(){
     try{
         const d=await api('logs',{lines:80});
-        const panels={lMmd:d.mmdvm,lD2Y:d.dmr2ysf,lYsf:d.ysf};
+        const panels={lMmd:d.mmdvm,lD2N:d.dmr2nxdn,lNxdn:d.nxdn};
         for(let[id,txt]of Object.entries(panels)){
             const el=$(id);
             const atBot=el.scrollHeight-el.clientHeight<=el.scrollTop+20;
@@ -1125,7 +922,7 @@ async function fetchTransmission(){
             const flag=getFlag(d.callsign);
             const nameHtml=d.name?`<span class="tx-name">(${esc(d.name)})</span>`:'';
             const sourceBadge=`<span class="tx-src ${d.source==='RF'?'rf':'net'}">${d.source||'—'}</span>`;
-            const metaHtml=`<div class="tx-meta">${sourceBadge}<span class="tx-dest">→ TG ${d.tg||'—'}</span><span class="tx-slot">📡 Slot ${d.slot||'-'}</span>${d.duration?`<span class="tx-time">⏱ ${esc(d.duration)}</span>`:''}</div>`;
+            const metaHtml=`<div class="tx-meta">${sourceBadge}<span class="tx-dest">→ TG ${d.tg||'—'}</span><span class="tx-slot">📡 ${d.slot==='NX'?'NXDN':'Slot '+d.slot}</span>${d.duration?`<span class="tx-time">⏱ ${esc(d.duration)}</span>`:''}</div>`;
             txCenter.innerHTML=`<div class="tx-info"><div class="tx-callsign"><span class="tx-flag">${flag}</span>${esc(d.callsign)}</div>${nameHtml}${metaHtml}</div>`;
         }else{
             txCenter.innerHTML='<div class="tx-idle">⏸ Pausa > Esperando actividad</div>';
@@ -1141,8 +938,8 @@ async function fetchTransmission(){
                 const durLoss=(r.duration||r.loss)?`<small style="color:var(--text-dim)">(${r.duration||''} ${r.loss||''})</small>`:'';
                 return `<tr class="${isTx?'tx-row':''}">
                     <td><span class="lh-cs"><span class="lh-flag">${flag}</span>${esc(r.callsign)}</span></td>
-                    <td>${esc(r.name||'—')}</td><td>TG ${esc(r.tg||'—')}</td>
-                    <td style="text-align:center">${esc(r.slot||'—')}</td>
+                    <td>${esc(r.name||'—')}</td><td>ID ${esc(r.tg||'—')}</td>
+                    <td style="text-align:center">${esc(r.slot==='NX'?'NX':r.slot||'—')}</td>
                     <td>${esc(r.time||'—')}</td>
                     <td><span class="tx-src ${r.source==='RF'?'rf':'net'}">${r.source||'—'}</span> ${durLoss}</td>
                 </tr>`;
@@ -1158,7 +955,12 @@ async function toggle(chk){
         if(!res.ok){alert('❌ '+res.msg);setToggle(!target,false);return;}
         await new Promise(r=>setTimeout(r,2500));
         await status();setToggle(target,false);fetchLogs();
-        if(target===false){['lMmd','lD2Y','lYsf'].forEach(id=>$(id).innerHTML='<span class="log-info">Logs limpiados.</span>');$('lhBody').innerHTML='<tr><td colspan="6" class="lh-empty">Sin actividad reciente</td></tr>';$('txCenter').innerHTML='<div class="tx-idle">⏸ Pausa > Esperando actividad</div>';updateVU(1,0);updateVU(2,0);}
+        if(target===false){
+        ['lMmd','lD2N','lNxdn'].forEach(id=>$(id).innerHTML='<span class="log-info">Logs limpiados.</span>');
+         $('lhBody').innerHTML='<tr><td colspan="6" class="lh-empty">Sin actividad reciente</td></tr>';
+          $('txCenter').innerHTML='<div class="tx-idle">⏸ Pausa > Esperando actividad</div>';
+        updateVU(1,0);updateVU(2,0);
+}
     }catch(e){console.error(e);setToggle(!target,false);alert('⚠️ Error: '+e.message);}
 }
 
@@ -1187,7 +989,7 @@ function colorizeLog(text){
         const ll=l.toLowerCase();
         if(/error|fail|abort|exception|denied|segfault/i.test(ll))return`<span class="log-err">${esc(l)}</span>`;
         if(/warn|warning|timeout/i.test(ll))return`<span class="log-warn">${esc(l)}</span>`;
-        if(/connect|start|open|loaded|success|tx|rx|linked|tg|ysf|slot|mode|sigterm|stopped/i.test(ll))return`<span class="log-ok">${esc(l)}</span>`;
+        if(/connect|start|open|loaded|success|tx|rx|linked|tg|nxdn|slot|mode|sigterm|stopped/i.test(ll))return`<span class="log-ok">${esc(l)}</span>`;
         return`<span class="log-info">${esc(l)}</span>`;
     }).join('\n');
 }
@@ -1199,132 +1001,55 @@ function startPoll(){
 }
 document.addEventListener('keydown',e=>{
     if(e.key==='Escape'&&$('cfgModal').classList.contains('open'))closeCfg();
-    if(e.key==='Escape'&&$('tgYsfModal').style.display==='flex')closeTgYsfModal();
+    if(e.key==='Escape'&&$('roomModal').classList.contains('open'))closeRoomModal();
 });
-
-// ── Funciones TG-YSFList ──
-let _tgYsfEntries=[], _tgYsfHosts=[], _tgYsfHostsLoaded=false;
-
-function openTgYsfModal(){
-    $('tgYsfModal').style.display='flex';
-    $('tgYsfMsg').style.display='none';
-    $('tgYsfHostPanel').style.display='none';
-    tgYsfLoad();
+function openRoomModal(){
+    $('roomModal').classList.add('open');$('roomMsg').style.display='none';
+    $('roomSearch').value='';S.selectedRoom=null;$('btnApplyRoom').disabled=true;loadRooms();
 }
-
-function closeTgYsfModal(){
-    $('tgYsfModal').style.display='none';
+function closeRoomModal(){$('roomModal').classList.remove('open');}
+async function loadRooms(){
+    const c=$('roomRows');
+    c.innerHTML='<div style="padding:.7rem;font-family:var(--font-mono);font-size:.68rem;color:var(--text-dim);text-align:center;">Cargando salas…</div>';
+    try{const r=await api('nxdn-hosts');S.allRooms=r.hosts||[];renderRooms(S.allRooms);}
+    catch(e){c.innerHTML='<div style="padding:.7rem;font-family:var(--font-mono);font-size:.68rem;color:var(--red);text-align:center;">Error al cargar</div>';}
 }
-
-async function tgYsfLoad(){
-    try{
-        const r=await api('tgysf-read');
-        _tgYsfEntries=r.entries||[];
-        tgYsfRender();
-    }catch(e){ console.warn('tgysf-read err',e); }
-}
-
-function tgYsfRender(){
-    const c=$('tgYsfRows');
-    if(!_tgYsfEntries.length){
-        c.innerHTML='<div style="padding:.7rem;font-family:var(--font-mono);font-size:.68rem;color:var(--text-dim);text-align:center;">Sin entradas</div>';
-        return;
-    }
-    c.innerHTML=_tgYsfEntries.map((e,i)=>`<div class="tg-row">
-        <span class="tg-val">${esc(e.tg)}</span>
-        <span class="tg-val tg-ysf">${esc(e.ysf)}</span>
-        <input type="text" class="tg-name-input" value="${esc(e.name||'')}" placeholder="—" onchange="_tgYsfEntries[${i}].name=this.value">
-        <button class="tg-del" onclick="tgYsfRemove(${i})">✖</button>
-    </div>`).join('');
-}
-
-function tgYsfAdd(){
-    const tg=$('tgYsfNewTG').value.trim();
-    const ysf=$('tgYsfNewYSF').value.trim();
-    const name=$('tgYsfNewName').value.trim();
-    if(!tg||!ysf||isNaN(tg)||isNaN(ysf)){ tgYsfShowMsg('Introduce valores numéricos válidos',false); return; }
-    if(_tgYsfEntries.some(e=>e.tg===tg)){ tgYsfShowMsg('El TG '+tg+' ya existe',false); return; }
-    _tgYsfEntries.push({tg,ysf,name});
-    $('tgYsfNewTG').value=''; $('tgYsfNewYSF').value=''; $('tgYsfNewName').value='';
-    tgYsfRender();
-}
-
-function tgYsfRemove(i){
-    _tgYsfEntries.splice(i,1);
-    tgYsfRender();
-}
-
-async function tgYsfSave(){
-    try{
-        const r=await fetch(location.href+'?action=tgysf-save',{
-            method:'POST',
-            headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({entries:_tgYsfEntries})
-        });
-        const d=await r.json();
-        tgYsfShowMsg(d.msg,d.ok);
-        if(d.ok) setTimeout(closeTgYsfModal,1500);
-    }catch(e){ tgYsfShowMsg('Error de red',false); }
-}
-
-async function tgYsfToggleHosts(){
-    const p=$('tgYsfHostPanel');
-    const v=p.style.display!=='none';
-    p.style.display=v?'none':'block';
-    if(!v&&!_tgYsfHostsLoaded) await tgYsfLoadHosts();
-}
-
-async function tgYsfLoadHosts(){
-    $('tgYsfHostList').innerHTML='<div style="color:var(--text-dim);text-align:center;padding:.5rem;">Cargando…</div>';
-    try{
-        const r=await api('tgysf-hosts');
-        _tgYsfHosts=r.hosts||[];
-        _tgYsfHostsLoaded=true;
-        tgYsfRenderHosts(_tgYsfHosts);
-    }catch(e){
-        $('tgYsfHostList').innerHTML='<div style="color:var(--red);text-align:center;padding:.5rem;">Error</div>';
-    }
-}
-
-function tgYsfFilterHosts(q){
-    const term=q.trim().toLowerCase();
-    tgYsfRenderHosts(term===''?_tgYsfHosts:_tgYsfHosts.filter(h=>
-        String(h.id).includes(term)||h.name.toLowerCase().includes(term)||h.desc.toLowerCase().includes(term)||h.country.toLowerCase().includes(term)
-    ));
-}
-
-function tgYsfRenderHosts(list){
-    const el=$('tgYsfHostList');
-    if(!list.length){ el.innerHTML='<div style="color:var(--text-dim);text-align:center;padding:.5rem;">Sin resultados</div>'; return; }
-    el.innerHTML=list.map(h=>{
-        const flag = getCountryFlag(h.country);
-        const nm=h.name||'—';
-        const desc=h.desc?' · '+h.desc:'';
-        const nmEsc=nm.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-        return `<div class="tg-host-item" onclick="tgYsfSelectHost(${h.id},'${nmEsc}')">
-            <span class="tg-host-id">${h.id}</span>
-            <span class="tg-host-name">${flag} ${esc(nm)}${esc(desc)}</span>
-            <span class="tg-host-ctry">${h.country||''}</span>
+function renderRooms(list){
+    const c=$('roomRows');
+    if(!list.length){c.innerHTML='<div style="padding:.7rem;font-family:var(--font-mono);font-size:.68rem;color:var(--text-dim);text-align:center;">Sin resultados</div>';return;}
+    c.innerHTML=list.map(r=>{
+        const flag=getCountryFlag(r.country);
+        const isSelected=S.selectedRoom===r.id?'selected':'';
+        return`<div class="room-row ${isSelected}" onclick="selectRoom(${r.id}, this)">
+            <span class="room-id">${r.id}</span>
+            <span class="room-name">${flag} ${esc(r.name||'Sin nombre')}</span>
+            <span class="room-ctry">${r.country||'--'}</span>
         </div>`;
     }).join('');
 }
-
-function tgYsfSelectHost(id,name){
-    $('tgYsfNewYSF').value=id;
-    $('tgYsfNewName').value=name;
-    $('tgYsfHostPanel').style.display='none';
-    $('tgYsfSearch').value='';
-    $('tgYsfNewTG').focus();
+function filterRooms(q){
+    const term=q.trim().toLowerCase();
+    renderRooms(term===''?S.allRooms:S.allRooms.filter(r=>
+        String(r.id).includes(term)||(r.name||'').toLowerCase().includes(term)||(r.country||'').toLowerCase().includes(term)
+    ));
 }
-
-function tgYsfShowMsg(msg,ok){
-    const el=$('tgYsfMsg');
-    el.textContent=(ok?'✔ ':'✖ ')+msg;
-    el.style.display='block';
-    el.className='tg-msg '+(ok?'ok':'err');
-    if(ok) setTimeout(()=>el.style.display='none',3000);
+function selectRoom(id,el){
+    S.selectedRoom=id;
+    document.querySelectorAll('.room-row').forEach(row=>row.classList.remove('selected'));
+    el.classList.add('selected');$('btnApplyRoom').disabled=false;
 }
-
+async function applyRoom(){
+    if(!S.selectedRoom)return;
+    const msg=$('roomMsg');
+    msg.style.display='block';msg.className='room-msg';msg.textContent='⏳ Aplicando sala y reiniciando servicios…';
+    $('btnApplyRoom').disabled=true;
+    try{
+        const r=await api('nxdn-set-room',{room_id:S.selectedRoom},'POST');
+        msg.className='room-msg '+(r.ok?'ok':'err');msg.textContent=(r.ok?'✅ ':'❌ ')+r.msg;
+        if(r.ok)setTimeout(()=>{closeRoomModal();status();refreshLogs();},3000);
+        else $('btnApplyRoom').disabled=false;
+    }catch(e){msg.className='room-msg err';msg.textContent='✖ Error de red: '+e.message;$('btnApplyRoom').disabled=false;}
+}
 window.addEventListener('load',startPoll);
 </script>
 </body>

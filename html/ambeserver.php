@@ -8,14 +8,14 @@ $logFile = $baseDir . "/ambe.log";
 $pidFile = $baseDir . "/ambe.pid";
 
 /* =========================================================
-   CRON AUTOARRANQUE (se instala en crontab de root)
+   CRON AUTOARRANQUE
    ========================================================= */
 
-$cronCmd = "@reboot sleep 10 && cd $baseDir && nohup $binary"
-    . " -s \$(grep '^velocidad=' $iniFile | cut -d= -f2)"
-    . " -i \$(grep '^puerto=' $iniFile | cut -d= -f2)"
-    . " -p \$(grep '^puertonet=' $iniFile | cut -d= -f2)"
-    . " >> $logFile 2>&1 & sleep 2 && pgrep -x AMBEserver > $pidFile";
+$cronCmd = "@reboot sleep 10 && cd $baseDir && nohup $binary "
+    . "-s \$(grep '^velocidad=' $iniFile | cut -d= -f2) "
+    . "-i \$(grep '^puerto=' $iniFile | cut -d= -f2) "
+    . "-p \$(grep '^puertonet=' $iniFile | cut -d= -f2) "
+    . ">> $logFile 2>&1 & sleep 2 && echo \$(pgrep -x AMBEserver | head -n1) > $pidFile";
 
 /* =========================================================
    FUNCIONES
@@ -44,7 +44,7 @@ function logMsg($logFile, $msg)
 
 function getAutoStatus()
 {
-    $cron = shell_exec("sudo crontab -l 2>/dev/null");
+    $cron = shell_exec("crontab -l 2>/dev/null");
     return strpos($cron, "AMBEserver") !== false;
 }
 
@@ -195,6 +195,12 @@ if (isset($_GET['action'])) {
         $config = loadConfig($iniFile);
         logMsg($logFile, ">>> START solicitado");
         $ok = startAMBE($binary, $config, $logFile, $pidFile);
+        
+        if ($ok) {
+            shell_exec("(crontab -l 2>/dev/null; echo " . escapeshellarg($cronCmd) . ") | crontab -");
+            logMsg($logFile, ">>> Autoarranque ACTIVADO");
+        }
+        
         echo json_encode(['ok' => $ok]);
         exit;
     }
@@ -204,6 +210,12 @@ if (isset($_GET['action'])) {
         $config = loadConfig($iniFile);
         logMsg($logFile, ">>> STOP solicitado");
         $ok = stopAMBE($pidFile, $logFile, $config['puerto']);
+        
+        if ($ok) {
+            shell_exec("crontab -l 2>/dev/null | grep -v 'AMBEserver' | crontab -");
+            logMsg($logFile, ">>> Autoarranque DESACTIVADO");
+        }
+        
         echo json_encode(['ok' => $ok]);
         exit;
     }
@@ -222,22 +234,6 @@ if (isset($_GET['action'])) {
     if ($action === 'clear') {
         header('Content-Type: application/json');
         file_put_contents($logFile, "");
-        echo json_encode(['ok' => true]);
-        exit;
-    }
-
-    if ($action === 'enable_auto') {
-        header('Content-Type: application/json');
-        shell_exec("(sudo crontab -l 2>/dev/null; echo " . escapeshellarg($cronCmd) . ") | sudo crontab -");
-        logMsg($logFile, ">>> Autoarranque ACTIVADO");
-        echo json_encode(['ok' => true]);
-        exit;
-    }
-
-    if ($action === 'disable_auto') {
-        header('Content-Type: application/json');
-        shell_exec("sudo crontab -l 2>/dev/null | grep -v 'AMBEserver' | sudo crontab -");
-        logMsg($logFile, ">>> Autoarranque DESACTIVADO");
         echo json_encode(['ok' => true]);
         exit;
     }
@@ -355,11 +351,6 @@ body { background: #0d0d0d; }
 <button class="btn btn-secondary" onclick="doAction('clear')">
 <i class="bi bi-trash me-1"></i>Clear Log
 </button>
-<button id="btnAuto" class="btn <?= $autoEnabled ? 'btn-outline-danger' : 'btn-outline-info' ?>" onclick="toggleAuto()">
-<?= $autoEnabled 
-    ? '<i class="bi bi-x-circle me-1"></i>Auto OFF' 
-    : '<i class="bi bi-lightning-charge me-1"></i>Auto ON' ?>
-</button>
 </div>
 </div>
 </div>
@@ -430,23 +421,6 @@ function refreshStatus() {
         const al = document.getElementById('autoLabel');
         al.textContent = data.auto ? 'ON' : 'OFF';
         al.className = 'fw-bold fs-5 ' + (data.auto ? 'text-info' : 'text-warning');
-        
-        const btn = document.getElementById('btnAuto');
-        if (data.auto) {
-            btn.className = 'btn btn-outline-danger';
-            btn.innerHTML = '<i class="bi bi-x-circle me-1"></i>Auto OFF';
-        } else {
-            btn.className = 'btn btn-outline-info';
-            btn.innerHTML = '<i class="bi bi-lightning-charge me-1"></i>Auto ON';
-        }
-    });
-}
-
-function toggleAuto() {
-    fetch('?action=status')
-    .then(r => r.json())
-    .then(data => {
-        doAction(data.auto ? 'disable_auto' : 'enable_auto');
     });
 }
 
