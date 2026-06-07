@@ -18,8 +18,6 @@ $INI_FILES = [
     'DMRGateway' => '/home/pi/DMRGateway/DMRGateway.ini',
     'YSFGateway' => '/home/pi/YSFClients/YSFGateway/YSFGateway.ini',
     'NXDNGateway' => '/home/pi/NXDNClients/NXDNGateway/NXDNGateway.ini',
-/home/pi/NXDNClients/NXDNGateway/NXDNGateway.ini
-
 
     
 ];
