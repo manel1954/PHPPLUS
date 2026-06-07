@@ -56,8 +56,6 @@ fi
 # 7. Permisos (ver nota de seguridad abajo)
 sudo chmod -R 777 "$TARGET_DIR"
 sudo chmod -R 777 "$WEB_DIR"
-sudo chmod 777 -R /home/pi/MMDVMHost
-sudo chmod 777 -R /home/pi/MMDVM_CM
 
 echo "🎉 Actualización completada con éxito."
 exit 0
