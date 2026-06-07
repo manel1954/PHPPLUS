@@ -18,7 +18,7 @@ $INI_FILES = [
     'DMRGateway' => '/home/pi/DMRGateway/DMRGateway.ini',
     'YSFGateway' => '/home/pi/YSFClients/YSFGateway/YSFGateway.ini',
     'NXDNGateway' => '/home/pi/NXDNClients/NXDNGateway/NXDNGateway.ini',
-
+/home/pi/NXDNClients/NXDNGateway/NXDNGateway.ini
 
 
     
@@ -72,6 +72,7 @@ $WRITE_MAP = [
         // ['DMR2YSF', 'Info', 'RXFrequency'],
         // ['YSF2DMR', 'Info', 'RXFrequency'],
         // ['DMR2NXDN', 'Info', 'RXFrequency'],
+        ['NXDNGateway', 'Info', 'RXFrequency'],
     ],
     'TXFrequency' => [
         ['MMDVMHost',  'Info', 'TXFrequency'],
@@ -84,6 +85,7 @@ $WRITE_MAP = [
         // ['DMR2YSF', 'Info', 'TXFrequency'],
         // ['YSF2DMR', 'Info', 'TXFrequency'],
         // ['DMR2NXDN', 'Info', 'TXFrequency'],
+        ['NXDNGateway', 'Info', 'TXFrequency'],
     ],
     'Latitude'    => [
         ['MMDVMHost',  'Info', 'Latitude'],
@@ -96,6 +98,7 @@ $WRITE_MAP = [
         // ['DMR2YSF', 'Info', 'Latitude'],
         // ['YSF2DMR', 'Info', 'Latitude'],
         // ['DMR2NXDN', 'Info', 'Latitude'],
+         ['NXDNGateway', 'Info', 'Latitude'],
     ],
     'Longitude'   => [
         ['MMDVMHost',  'Info', 'Longitude'],
@@ -108,7 +111,7 @@ $WRITE_MAP = [
         // ['DMR2YSF', 'Info', 'Longitude'],
         // ['YSF2DMR', 'Info', 'Longitude'],
         // ['DMR2NXDN', 'Info', 'Longitude'],
-    ],
+         ['NXDNGateway', 'Info', 'Longitude'],
     'Location'    => [
         ['MMDVMHost',  'Info', 'Location'],
         ['MMDVMYSF',   'Info', 'Location'],
@@ -120,6 +123,7 @@ $WRITE_MAP = [
         ['DMR2YSF', 'Info', 'Location'],
         ['YSF2DMR', 'Info', 'Location'],
         ['DMR2NXDN', 'Info', 'Location'],
+        ['NXDNGateway', 'Info', 'Location'],
     ],
         'URL'         => [
         ['MMDVMHost',  'Info', 'URL'],
@@ -132,6 +136,7 @@ $WRITE_MAP = [
         ['DMR2YSF', 'Info', 'URL'],
         ['YSF2DMR', 'Info', 'URL'],
         ['DMR2NXDN', 'Info', 'URL'],
+        ['NXDNGateway', 'Info', 'URL'],
     ],
 ];
 
