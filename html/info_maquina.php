@@ -2,7 +2,7 @@
 require_once __DIR__ . '/auth.php';
 header('X-Content-Type-Options: nosniff');
 
-$JSON_FILE = __DIR__ . '/info_maquina.json';
+$JSON_FILE = '/home/pi/.local/info_maquina.json';
 $action = $_GET['action'] ?? '';
 
 // ── API ───────────────────────────────────────────────────────────────────────
