@@ -893,34 +893,33 @@ button.btn-header { font-family: var(--font-mono); }
 <body>
 <header class="ctrl-header" style="background-color:#000000">
 <div class="ctrl-header-top">
-
-  <!-- Info máquina editable -->
-  <div id="infoMaquinaBlock" style="display:flex;flex-direction:column;gap:4px;margin-right:.8rem;min-width:160px;">
-    <div style="display:flex;align-items:center;gap:5px;">
-      <span style="font-family:'Share Tech Mono',monospace;font-size:.58rem;color:#4a5568;text-transform:uppercase;letter-spacing:.08em;min-width:32px;">IP</span>
-      <input id="infoIp" type="text" maxlength="100" spellcheck="false" autocomplete="off"
-        style="background:transparent;border:1px solid #1e3a5a;border-radius:3px;color:#00d4ff;font-family:'Share Tech Mono',monospace;font-size:.78rem;padding:2px 6px;outline:none;width:168px;"
-        onfocus="this.style.borderColor='#00d4ff'" onblur="this.style.borderColor='#1e3a5a';infoMaquinaAutoSave()"
-        onkeydown="if(event.key==='Enter')this.blur()" placeholder="192.168.1.x">
-    </div>
-    <div style="display:flex;align-items:center;gap:5px;">
-      <span style="font-family:'Share Tech Mono',monospace;font-size:.58rem;color:#4a5568;text-transform:uppercase;letter-spacing:.08em;min-width:32px;">NOM</span>
-      <input id="infoNombre" type="text" maxlength="80" spellcheck="false" autocomplete="off"
-        style="background:transparent;border:1px solid #1e3a5a;border-radius:3px;color:#a8b9cc;font-family:'Share Tech Mono',monospace;font-size:.78rem;padding:2px 6px;outline:none;width:168px;"
-        onfocus="this.style.borderColor='#00d4ff'" onblur="this.style.borderColor='#1e3a5a';infoMaquinaAutoSave()"
-        onkeydown="if(event.key==='Enter')this.blur()" placeholder="RPi-MMDVM">
-    </div>
-  </div>
-
   <a href="https://associacioader.com" target="_blank">
     <img src="Logo_Ader.png" alt="EA3EIZ" style="height:40px; width:auto;">
   </a>
   <span style="color:amber;font-size:1.9rem;font-family: Bebas Neue, sans-serif;">PANEL SISTEMAS DIGITALES</span>
   <span style="color:#ff8c00;font-size:1.9rem;font-family: Bebas Neue, sans-serif;">PARA RADIOAFICIONADOS</span>
   <span style="color:rgb(109,109,971);font-size:1.9rem;font-family: Bebas Neue, sans-serif;">PHPPLUS</span>
-
 </div>
 <div class="ctrl-header-btns">
+
+  <!-- Info máquina editable -->
+  <div id="infoMaquinaBlock" style="display:flex;flex-direction:column;gap:4px;margin-right:.4rem;">
+    <div style="display:flex;align-items:center;gap:5px;">
+      <span style="font-family:'Share Tech Mono',monospace;font-size:.58rem;color:#4a5568;text-transform:uppercase;letter-spacing:.08em;min-width:32px;">IP</span>
+      <input id="infoIp" type="text" maxlength="100" spellcheck="false" autocomplete="off"
+        style="background:transparent;border:1px solid #1e3a5a;border-radius:3px;color:#00d4ff;font-family:'Share Tech Mono',monospace;font-size:.78rem;padding:2px 6px;outline:none;width:244px;"
+        onfocus="this.style.borderColor='#00d4ff'" onblur="this.style.borderColor='#1e3a5a';infoMaquinaAutoSave()"
+        onkeydown="if(event.key==='Enter')this.blur()" placeholder="192.168.1.x">
+    </div>
+    <div style="display:flex;align-items:center;gap:5px;">
+      <span style="font-family:'Share Tech Mono',monospace;font-size:.58rem;color:#4a5568;text-transform:uppercase;letter-spacing:.08em;min-width:32px;">NOM</span>
+      <input id="infoNombre" type="text" maxlength="80" spellcheck="false" autocomplete="off"
+        style="background:transparent;border:1px solid #1e3a5a;border-radius:3px;color:#a8b9cc;font-family:'Share Tech Mono',monospace;font-size:.78rem;padding:2px 6px;outline:none;width:244px;"
+        onfocus="this.style.borderColor='#00d4ff'" onblur="this.style.borderColor='#1e3a5a';infoMaquinaAutoSave()"
+        onkeydown="if(event.key==='Enter')this.blur()" placeholder="RPi-MMDVM">
+    </div>
+  </div>
+
 <a href="editor_general_config.php" class="btn btn-primary btn-sm"> ✏️ Editor General </a>
 <a href="?action=backup-configs" class="btn btn-success btn-sm"> 💾 Hacer copia de seguridad </a>
 <button onclick="openRestore()" class="btn btn-info btn-sm"> 💿 Restaurar copia de seguridad </button>
