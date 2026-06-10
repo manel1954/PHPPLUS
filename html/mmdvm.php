@@ -892,18 +892,10 @@ button.btn-header { font-family: var(--font-mono); }
 </head>
 <body>
 <header class="ctrl-header" style="background-color:#000000">
-<div class="ctrl-header-top">
-  <a href="https://associacioader.com" target="_blank">
-    <img src="Logo_Ader.png" alt="EA3EIZ" style="height:40px; width:auto;">
-  </a>
-  <span style="color:amber;font-size:1.9rem;font-family: Bebas Neue, sans-serif;">PANEL SISTEMAS DIGITALES</span>
-  <span style="color:#ff8c00;font-size:1.9rem;font-family: Bebas Neue, sans-serif;">PARA RADIOAFICIONADOS</span>
-  <span style="color:rgb(109,109,971);font-size:1.9rem;font-family: Bebas Neue, sans-serif;">PHPPLUS</span>
-</div>
-<div class="ctrl-header-btns">
+<div style="display:flex;align-items:center;gap:1.2rem;width:100%;max-width:1400px;margin:0 auto;padding:1rem 2rem;box-sizing:border-box;">
 
-  <!-- Info máquina editable -->
-  <div id="infoMaquinaBlock" style="display:flex;flex-direction:column;gap:4px;margin-right:.4rem;">
+  <!-- Columna izquierda: IP / NOM -->
+  <div id="infoMaquinaBlock" style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">
     <div style="display:flex;align-items:center;gap:5px;">
       <span style="font-family:'Share Tech Mono',monospace;font-size:.58rem;color:#4a5568;text-transform:uppercase;letter-spacing:.08em;min-width:32px;">IP</span>
       <input id="infoIp" type="text" maxlength="100" spellcheck="false" autocomplete="off"
@@ -920,7 +912,18 @@ button.btn-header { font-family: var(--font-mono); }
     </div>
   </div>
 
-<a href="editor_general_config.php" class="btn btn-primary btn-sm"> ✏️ Editor General </a>
+  <!-- Columna derecha: logo+título arriba, botones abajo -->
+  <div style="display:flex;flex-direction:column;gap:.6rem;flex:1;">
+    <div class="ctrl-header-top">
+      <a href="https://associacioader.com" target="_blank">
+        <img src="Logo_Ader.png" alt="EA3EIZ" style="height:40px;width:auto;">
+      </a>
+      <span style="color:amber;font-size:1.9rem;font-family:Bebas Neue,sans-serif;">PANEL SISTEMAS DIGITALES</span>
+      <span style="color:#ff8c00;font-size:1.9rem;font-family:Bebas Neue,sans-serif;">PARA RADIOAFICIONADOS</span>
+      <span style="color:rgb(109,109,971);font-size:1.9rem;font-family:Bebas Neue,sans-serif;">PHPPLUS</span>
+    </div>
+    <div class="ctrl-header-btns" style="margin-top:0;justify-content:flex-start;">
+      <a href="editor_general_config.php" class="btn btn-primary btn-sm"> ✏️ Editor General </a>
 <a href="?action=backup-configs" class="btn btn-success btn-sm"> 💾 Hacer copia de seguridad </a>
 <button onclick="openRestore()" class="btn btn-info btn-sm"> 💿 Restaurar copia de seguridad </button>
 <div class="dropdown-wrap" id="dropActualizaciones">
@@ -936,7 +939,9 @@ button.btn-header { font-family: var(--font-mono); }
 <a href="extra.php" class="btn btn-warning btn-sm">⚙️ Menu Extra</a>
 <a href="bridge.php" class="btn btn-primary btn-sm"> 🔗 BRIDGES </a>
 <button id="btnReboot" class="btn btn-danger btn-sm" onclick="rebootPi()">⏻ Reiniciar Pi</button>
-</div>
+    </div><!-- /ctrl-header-btns -->
+  </div><!-- /columna derecha -->
+</div><!-- /flex wrapper -->
 </header>
 <main class="ctrl-body">
 <div class="station-card" style="justify-content:space-between;">
@@ -1496,69 +1501,3 @@ document.getElementById('xtInp').addEventListener('keydown',async function(e){
         xtApp('<span class="xt-out">Abriendo editor: '+xtEsc(fpath)+'</span>');
         feditOpen(fpath);return;
     }
-    if(/^\s*(sudo\s+su|su\s*$|top|htop|vim|vi|less|more)\s*/.test(cmd)){xtApp('<span class="xt-err">Comando interactivo no soportado. Usa: nano /ruta/fichero</span>');return;}
-    if(/^\s*cd(\s|$)/.test(cmd)){
-        var t=cmd.replace(/^\s*cd\s*/,'').trim()||'~';
-        if(t==='~'||t===''){xtCwd='/home/pi';}
-        else if(t.startsWith('/')){xtCwd=t;}
-        else if(t==='..'){var parts=xtCwd.split('/').filter(Boolean);parts.pop();xtCwd='/'+parts.join('/')||'/';}
-        else{xtCwd=xtCwd.replace(/\/$/,'')+'/'+t;}
-        document.getElementById('xtPr').textContent=xtPr();return;
-    }
-    try{
-        var resp=await fetch('?action=terminal',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'cmd='+encodeURIComponent('cd '+xtCwd+' && '+cmd)});
-        var dat=await resp.json();
-        if(dat.output){xtApp('<span class="xt-out">'+dat.output+'</span>');}
-    }catch(err){xtApp('<span class="xt-err">Error: '+xtEsc(err.message)+'</span>');}
-});
-})();
-
-
-// ── Bloque init ───────────────────────────────────────────────────────────────
-(async()=>{
-    await fetchStationInfo();
-    setInterval(fetchStationInfo,60000);
-    await checkStatus();
-    await checkYSFStatus();
-    await checkMMDVMYSFStatus();
-    await checkDStarStatus();
-    await checkNXDNStatus();
-    setInterval(checkStatus,10000);
-    setInterval(checkYSFStatus,8000);
-    setInterval(checkMMDVMYSFStatus,8000);
-    setInterval(checkDStarStatus,10000);
-    setInterval(checkNXDNStatus,10000);
-    if(!running){showIdle();fetchTransmission();}
-    showYSFIdle();
-    showNXDNIdle();
-    startYSFLogs();
-    startMMDVMYSFLogs();
-    startYSFTransmissionPoll();
-})();
-
-// ── Info Máquina ──────────────────────────────────────────────────────────────
-async function infoMaquinaLoad() {
-    try {
-        const r = await fetch('?action=info-maquina-read');
-        const d = await r.json();
-        if (d.ok) {
-            document.getElementById('infoIp').value     = d.ip     || '';
-            document.getElementById('infoNombre').value = d.nombre || '';
-        }
-    } catch(e) {}
-}
-async function infoMaquinaAutoSave() {
-    const ip     = document.getElementById('infoIp').value.trim();
-    const nombre = document.getElementById('infoNombre').value.trim();
-    try {
-        await fetch('?action=info-maquina-save', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ip, nombre }),
-        });
-    } catch(e) {}
-}
-infoMaquinaLoad();
-</script>
-</body>
-</html>
