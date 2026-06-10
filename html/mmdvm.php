@@ -904,7 +904,7 @@ button.btn-header { font-family: var(--font-mono); }
         onkeydown="if(event.key==='Enter')this.blur()" placeholder="192.168.1.x">
     </div>
     <div style="display:flex;align-items:center;gap:5px;">
-      <span style="font-family:'Share Tech Mono',monospace;font-size:.58rem;color:#999999;text-transform:uppercase;letter-spacing:.08em;min-width:32px;">Nombre de lamaquina:</span>
+      <span style="font-family:'Share Tech Mono',monospace;font-size:.58rem;color:#999999;text-transform:uppercase;letter-spacing:.08em;min-width:32px;">Nombre de la maquina:</span>
       <input id="infoNombre" type="text" maxlength="80" spellcheck="false" autocomplete="off"
         style="background:transparent;border:1px solid #1e3a5a;border-radius:3px;color:#00d4ff;font-family:'Share Tech Mono',monospace;font-size:.78rem;padding:2px 6px;outline:none;width:200px;"
         onfocus="this.style.borderColor='#00d4ff'" onblur="this.style.borderColor='#1e3a5a';infoMaquinaAutoSave()"
