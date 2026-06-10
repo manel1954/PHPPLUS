@@ -234,25 +234,6 @@ if ($action === 'mmdvmysf-start')  { saveState('ysf','on'); shell_exec('sudo sys
 if ($action === 'mmdvmysf-stop')   { saveState('ysf','off'); shell_exec('sudo systemctl stop ysfgateway 2>/dev/null'); sleep(1); shell_exec('sudo systemctl stop mmdvmysf 2>/dev/null'); shell_exec('sudo systemctl disable mmdvmysf ysfgateway 2>/dev/null'); header('Content-Type: application/json'); echo json_encode(['ok'=>true]); exit; }
 if ($action === 'mmdvmysf-logs')   { $lines = intval($_GET['lines']??15); $log = shell_exec("sudo journalctl -u mmdvmysf -n {$lines} --no-pager --output=short 2>/dev/null"); header('Content-Type: application/json'); echo json_encode(['mmdvmysf'=>htmlspecialchars($log??'')]); exit; }
 if ($action === 'reboot')          { shell_exec('sudo /usr/bin/systemctl reboot 2>/dev/null'); header('Content-Type: application/json'); echo json_encode(['ok'=>true]); exit; }
-
-// ── Info Máquina ──────────────────────────────────────────────────────────────
-if ($action === 'info-maquina-read') {
-    $f = '/home/pi/.local/info_maquina.json';
-    $data = file_exists($f) ? (json_decode(file_get_contents($f), true) ?: []) : [];
-    header('Content-Type: application/json');
-    echo json_encode(['ok'=>true,'ip'=>$data['ip']??'','nombre'=>$data['nombre']??'']);
-    exit;
-}
-if ($action === 'info-maquina-save') {
-    $raw    = json_decode(file_get_contents('php://input'), true);
-    $ip     = trim($raw['ip']     ?? '');
-    $nombre = trim($raw['nombre'] ?? '');
-    $f      = '/home/pi/.local/info_maquina.json';
-    $result = file_put_contents($f, json_encode(['ip'=>$ip,'nombre'=>$nombre], JSON_PRETTY_PRINT));
-    header('Content-Type: application/json');
-    echo json_encode(['ok'=>$result!==false,'msg'=>$result!==false?'Guardado':'Error al escribir']);
-    exit;
-}
 if ($action === 'display-restart') { shell_exec('sudo systemctl daemon-reload 2>/dev/null'); shell_exec('sudo systemctl enable displaydriver 2>/dev/null'); shell_exec('sudo systemctl restart displaydriver 2>/dev/null'); header('Content-Type: application/json'); echo json_encode(['ok'=>true]); exit; }
 if ($action === 'install-display') { $output = shell_exec('sudo /home/pi/A108/instalar_displaydriver.sh 2>&1'); header('Content-Type: application/json'); echo json_encode(['ok'=>true,'output'=>htmlspecialchars($output??'')]); exit; }
 
@@ -893,31 +874,12 @@ button.btn-header { font-family: var(--font-mono); }
 <body>
 <header class="ctrl-header" style="background-color:#000000">
 <div class="ctrl-header-top">
-
-  <!-- Info máquina editable -->
-  <div id="infoMaquinaBlock" style="display:flex;flex-direction:column;gap:4px;margin-right:.8rem;min-width:160px;">
-    <div style="display:flex;align-items:center;gap:5px;">
-      <span style="font-family:'Share Tech Mono',monospace;font-size:.58rem;color:#4a5568;text-transform:uppercase;letter-spacing:.08em;min-width:32px;">IP</span>
-      <input id="infoIp" type="text" maxlength="100" spellcheck="false" autocomplete="off"
-        style="background:transparent;border:1px solid #1e3a5a;border-radius:3px;color:#00d4ff;font-family:'Share Tech Mono',monospace;font-size:.78rem;padding:2px 6px;outline:none;width:168px;"
-        onfocus="this.style.borderColor='#00d4ff'" onblur="this.style.borderColor='#1e3a5a';infoMaquinaAutoSave()"
-        onkeydown="if(event.key==='Enter')this.blur()" placeholder="192.168.1.x">
-    </div>
-    <div style="display:flex;align-items:center;gap:5px;">
-      <span style="font-family:'Share Tech Mono',monospace;font-size:.58rem;color:#4a5568;text-transform:uppercase;letter-spacing:.08em;min-width:32px;">NOM</span>
-      <input id="infoNombre" type="text" maxlength="80" spellcheck="false" autocomplete="off"
-        style="background:transparent;border:1px solid #1e3a5a;border-radius:3px;color:#a8b9cc;font-family:'Share Tech Mono',monospace;font-size:.78rem;padding:2px 6px;outline:none;width:168px;"
-        onfocus="this.style.borderColor='#00d4ff'" onblur="this.style.borderColor='#1e3a5a';infoMaquinaAutoSave()"
-        onkeydown="if(event.key==='Enter')this.blur()" placeholder="RPi-MMDVM">
-    </div>
-  </div>
-
-  <a href="https://associacioader.com" target="_blank">
-    <img src="Logo_Ader.png" alt="EA3EIZ" style="height:40px; width:auto;">
-  </a>
-  <span style="color:amber;font-size:1.9rem;font-family: Bebas Neue, sans-serif;">PANEL SISTEMAS DIGITALES</span>
-  <span style="color:#ff8c00;font-size:1.9rem;font-family: Bebas Neue, sans-serif;">PARA RADIOAFICIONADOS</span>
-  <span style="color:rgb(109,109,971);font-size:1.9rem;font-family: Bebas Neue, sans-serif;">PHPPLUS</span>
+<a href="https://associacioader.com" target="_blank">
+  <img src="Logo_Ader.png" alt="EA3EIZ" style="height:40px; width:auto;">
+</a>
+<span style="color:amber;font-size:1.9rem;font-family: Bebas Neue, sans-serif;">PANEL SISTEMAS DIGITALES</span>
+<span style="color:#ff8c00;font-size:1.9rem;font-family: Bebas Neue, sans-serif;">PARA RADIOAFICIONADOS</span>
+<span style="color:rgb(109,109,971);font-size:1.9rem;font-family: Bebas Neue, sans-serif;">PHPPLUS</span>
 
 </div>
 <div class="ctrl-header-btns">
@@ -1536,30 +1498,6 @@ document.getElementById('xtInp').addEventListener('keydown',async function(e){
     startMMDVMYSFLogs();
     startYSFTransmissionPoll();
 })();
-
-// ── Info Máquina ──────────────────────────────────────────────────────────────
-async function infoMaquinaLoad() {
-    try {
-        const r = await fetch('?action=info-maquina-read');
-        const d = await r.json();
-        if (d.ok) {
-            document.getElementById('infoIp').value     = d.ip     || '';
-            document.getElementById('infoNombre').value = d.nombre || '';
-        }
-    } catch(e) {}
-}
-async function infoMaquinaAutoSave() {
-    const ip     = document.getElementById('infoIp').value.trim();
-    const nombre = document.getElementById('infoNombre').value.trim();
-    try {
-        await fetch('?action=info-maquina-save', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ip, nombre }),
-        });
-    } catch(e) {}
-}
-infoMaquinaLoad();
 </script>
 </body>
 </html>
