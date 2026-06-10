@@ -22,13 +22,6 @@ if ($action === 'save') {
     $ip     = trim($raw['ip']     ?? '');
     $nombre = trim($raw['nombre'] ?? '');
 
-    // Validación básica IP
-    if ($ip !== '' && !filter_var($ip, FILTER_VALIDATE_IP)) {
-        header('Content-Type: application/json');
-        echo json_encode(['ok' => false, 'msg' => 'Dirección IP no válida']);
-        exit;
-    }
-
     $payload = [
         'ip'     => $ip,
         'nombre' => $nombre,
@@ -211,9 +204,9 @@ body {
     <div>
       <label class="field-label" for="fIp">Dirección IP</label>
       <input class="field-input" type="text" id="fIp"
-             placeholder="192.168.1.126" maxlength="39"
+             placeholder="192.168.1.126" maxlength="100"
              autocomplete="off" spellcheck="false">
-      <div class="field-hint">IPv4 o IPv6 de la Raspberry Pi en la red local</div>
+      <div class="field-hint">IP o nombre de host de la Raspberry Pi</div>
     </div>
 
     <div>
