@@ -899,15 +899,15 @@ button.btn-header { font-family: var(--font-mono); }
     <div style="display:flex;align-items:center;gap:5px;">
       <span style="font-family:'Share Tech Mono',monospace;font-size:.58rem;color:#4a5568;text-transform:uppercase;letter-spacing:.08em;min-width:32px;">IP</span>
       <input id="infoIp" type="text" maxlength="100" spellcheck="false" autocomplete="off"
-        style="background:transparent;border:none;border-bottom:1px solid #1e3a5a;color:#00d4ff;font-family:'Share Tech Mono',monospace;font-size:.78rem;padding:1px 3px;outline:none;width:130px;"
-        onfocus="this.style.borderBottomColor='#00d4ff'" onblur="this.style.borderBottomColor='#1e3a5a';infoMaquinaAutoSave()"
+        style="background:transparent;border:1px solid #1e3a5a;border-radius:3px;color:#00d4ff;font-family:'Share Tech Mono',monospace;font-size:.78rem;padding:2px 6px;outline:none;width:168px;"
+        onfocus="this.style.borderColor='#00d4ff'" onblur="this.style.borderColor='#1e3a5a';infoMaquinaAutoSave()"
         onkeydown="if(event.key==='Enter')this.blur()" placeholder="192.168.1.x">
     </div>
     <div style="display:flex;align-items:center;gap:5px;">
       <span style="font-family:'Share Tech Mono',monospace;font-size:.58rem;color:#4a5568;text-transform:uppercase;letter-spacing:.08em;min-width:32px;">NOM</span>
       <input id="infoNombre" type="text" maxlength="80" spellcheck="false" autocomplete="off"
-        style="background:transparent;border:none;border-bottom:1px solid #1e3a5a;color:#a8b9cc;font-family:'Share Tech Mono',monospace;font-size:.78rem;padding:1px 3px;outline:none;width:130px;"
-        onfocus="this.style.borderBottomColor='#00d4ff'" onblur="this.style.borderBottomColor='#1e3a5a';infoMaquinaAutoSave()"
+        style="background:transparent;border:1px solid #1e3a5a;border-radius:3px;color:#a8b9cc;font-family:'Share Tech Mono',monospace;font-size:.78rem;padding:2px 6px;outline:none;width:168px;"
+        onfocus="this.style.borderColor='#00d4ff'" onblur="this.style.borderColor='#1e3a5a';infoMaquinaAutoSave()"
         onkeydown="if(event.key==='Enter')this.blur()" placeholder="RPi-MMDVM">
     </div>
   </div>
