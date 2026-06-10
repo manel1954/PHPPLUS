@@ -37,5 +37,5 @@ else
 fi
 
 # Finalización
-printf "🎉 DMR IDsxx actualizadas correctamente.\n"
+printf "🎉 DMR IDs actualizadas correctamente.\n"
 sleep 3
