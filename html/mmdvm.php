@@ -897,7 +897,7 @@ button.btn-header { font-family: var(--font-mono); }
   <!-- Info máquina editable -->
   <div id="infoMaquinaBlock" style="display:flex;flex-direction:column;gap:4px;margin-right:.8rem;min-width:160px;">
     <div style="display:flex;align-items:center;gap:5px;">
-      <span style="font-family:'Share Tech Mono',monospace;font-size:.58rem;color:#4a5568;text-transform:uppercase;letter-spacing:.08em;min-width:32px;">IP maquina:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+      <span style="font-family:'Share Tech Mono',monospace;font-size:.58rem;color:#4a5568;text-transform:uppercase;letter-spacing:.08em;min-width:32px;">IP maquina:&nbsp;&nbsp;&nbsp;&nbsp;</span>
       <input id="infoIp" type="text" maxlength="100" spellcheck="false" autocomplete="off"
         style="background:transparent;border:1px solid #1e3a5a;border-radius:3px;color:#00d4ff;font-family:'Share Tech Mono',monospace;font-size:.78rem;padding:2px 6px;outline:none;width:200px;"
         onfocus="this.style.borderColor='#00d4ff'" onblur="this.style.borderColor='#1e3a5a';infoMaquinaAutoSave()"
