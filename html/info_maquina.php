@@ -11,9 +11,9 @@ if (empty($auto_ip)) {
     $auto_ip = $_SERVER['SERVER_ADDR'] ?? '127.0.0.1';
 }
 
-// 2. Inicializar datos por defecto con el nombre solicitado: Orangepi Casa
+// 2. Inicializar datos por defecto con el nombre solicitado: Raspberry Casa
 $data = [
-    'nombre' => 'Orangepi Casa',
+    'nombre' => 'Raspberry Casa',
     'ip' => $auto_ip
 ];
 
@@ -222,7 +222,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <form method="POST" action="">
         <div class="form-group">
             <label for="nombre">Nombre de la máquina</label>
-            <input type="text" id="nombre" name="nombre" value="<?php echo htmlspecialchars($data['nombre']); ?>" required placeholder="Ej: Orangepi Casa">
+            <input type="text" id="nombre" name="nombre" value="<?php echo htmlspecialchars($data['nombre']); ?>" required placeholder="Ej: Raspberry Casa">
         </div>
 
         <div class="form-group">
