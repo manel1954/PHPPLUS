@@ -682,7 +682,7 @@ body {   background-image: url("fondo_02.png");
     font-size: 0.9rem;
 }
 
-.ctrl-header-top { display: flex; align-items: center; gap: .8rem; }
+.ctrl-header-top { display: flex; align-items: center; justify-content: center; gap: 1.5rem; width: 100%; flex-wrap: wrap; }
 .ctrl-header-top h1 { font-family: var(--font-ui); font-weight: 700; font-size: 1.5rem; letter-spacing: .08em; color: #e2eaf5; margin: 0; text-transform: uppercase; }
 .ctrl-header-btns { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; justify-content: center; margin-top: .9rem; }
 .btn-header { font-family: var(--font-mono); font-size: .65rem; letter-spacing: .08em; text-transform: uppercase; background: transparent; border-radius: 4px; padding: .28rem .75rem; cursor: pointer; transition: background .2s; text-decoration: none; display: inline-block; }
