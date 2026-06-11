@@ -3,6 +3,21 @@ require_once __DIR__ . '/auth.php';
 header('X-Content-Type-Options: nosniff');
 $action = $_GET['action'] ?? '';
 
+// ─────────────────────────────────────────────────────
+$maquina_json_path = '/var/www/html/maquina.json';
+$maquina_nombre = 'Orangepi Salón'; 
+$maquina_ip = '—';                 
+
+if (file_exists($maquina_json_path)) {
+    $maquina_conte = file_get_contents($maquina_json_path);
+    $maquina_data = json_decode($maquina_conte, true);
+    if (json_last_error() === JSON_ERROR_NONE && is_array($maquina_data)) {
+        $maquina_nombre = $maquina_data['nombre'] ?? $maquina_nombre;
+        $maquina_ip = $maquina_data['ip'] ?? $maquina_ip;
+    }
+}
+// ────────────────────────────────────────────────────────
+
 function saveState($key, $value) {
     $file = '/var/lib/mmdvm-state';
     $lines = file_exists($file) ? file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) : [];
@@ -234,25 +249,6 @@ if ($action === 'mmdvmysf-start')  { saveState('ysf','on'); shell_exec('sudo sys
 if ($action === 'mmdvmysf-stop')   { saveState('ysf','off'); shell_exec('sudo systemctl stop ysfgateway 2>/dev/null'); sleep(1); shell_exec('sudo systemctl stop mmdvmysf 2>/dev/null'); shell_exec('sudo systemctl disable mmdvmysf ysfgateway 2>/dev/null'); header('Content-Type: application/json'); echo json_encode(['ok'=>true]); exit; }
 if ($action === 'mmdvmysf-logs')   { $lines = intval($_GET['lines']??15); $log = shell_exec("sudo journalctl -u mmdvmysf -n {$lines} --no-pager --output=short 2>/dev/null"); header('Content-Type: application/json'); echo json_encode(['mmdvmysf'=>htmlspecialchars($log??'')]); exit; }
 if ($action === 'reboot')          { shell_exec('sudo /usr/bin/systemctl reboot 2>/dev/null'); header('Content-Type: application/json'); echo json_encode(['ok'=>true]); exit; }
-
-// ── Info Máquina ──────────────────────────────────────────────────────────────
-if ($action === 'info-maquina-read') {
-    $f = '/home/pi/.local/info_maquina.json';
-    $data = file_exists($f) ? (json_decode(file_get_contents($f), true) ?: []) : [];
-    header('Content-Type: application/json');
-    echo json_encode(['ok'=>true,'ip'=>$data['ip']??'','nombre'=>$data['nombre']??'']);
-    exit;
-}
-if ($action === 'info-maquina-save') {
-    $raw    = json_decode(file_get_contents('php://input'), true);
-    $ip     = trim($raw['ip']     ?? '');
-    $nombre = trim($raw['nombre'] ?? '');
-    $f      = '/home/pi/.local/info_maquina.json';
-    $result = file_put_contents($f, json_encode(['ip'=>$ip,'nombre'=>$nombre], JSON_PRETTY_PRINT));
-    header('Content-Type: application/json');
-    echo json_encode(['ok'=>$result!==false,'msg'=>$result!==false?'Guardado':'Error al escribir']);
-    exit;
-}
 if ($action === 'display-restart') { shell_exec('sudo systemctl daemon-reload 2>/dev/null'); shell_exec('sudo systemctl enable displaydriver 2>/dev/null'); shell_exec('sudo systemctl restart displaydriver 2>/dev/null'); header('Content-Type: application/json'); echo json_encode(['ok'=>true]); exit; }
 if ($action === 'install-display') { $output = shell_exec('sudo /home/pi/A108/instalar_displaydriver.sh 2>&1'); header('Content-Type: application/json'); echo json_encode(['ok'=>true,'output'=>htmlspecialchars($output??'')]); exit; }
 
@@ -638,6 +634,54 @@ body {   background-image: url("fondo_02.png");
 
 .ctrl-header { border-bottom: 2px solid #ffffff; padding: 1rem 2rem; display: flex; flex-direction: column; align-items: center; gap: .6rem; }
 
+.maquina-info-box {
+    display: flex;
+    align-items: center;
+    background: rgba(17, 23, 32, 0.6); 
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;   
+    position: relative;
+    margin: 0;
+    order: 2;
+}
+.maquina-info-box:hover {
+    border-color: var(--cyan);
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+    background: rgba(30, 45, 61, 0.7);
+}
+.maquina-badge {
+    background-color: var(--green);
+    color: #000;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: bold;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    margin-right: 0.8rem;
+    letter-spacing: 1px;
+    box-shadow: 0 0 8px var(--green);
+}
+.maquina-detalles {
+    display: flex;
+    flex-direction: column;
+}
+.maquina-nom {
+    font-family: var(--font-ui);
+    font-weight: 700;
+    color: #ffffff;
+    font-size: 1.1rem;
+    line-height: 1.2;
+    text-transform: uppercase;
+}
+.maquina-dir-ip {
+    font-family: var(--font-mono);
+    color: var(--cyan);
+    font-size: 0.9rem;
+}
+
 .ctrl-header-top { display: flex; align-items: center; gap: .8rem; }
 .ctrl-header-top h1 { font-family: var(--font-ui); font-weight: 700; font-size: 1.5rem; letter-spacing: .08em; color: #e2eaf5; margin: 0; text-transform: uppercase; }
 .ctrl-header-btns { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; justify-content: center; margin-top: .9rem; }
@@ -893,31 +937,27 @@ button.btn-header { font-family: var(--font-mono); }
 <body>
 <header class="ctrl-header" style="background-color:#000000">
 <div class="ctrl-header-top">
+<a href="https://associacioader.com" target="_blank">
+  <img src="Logo_Ader.png" alt="EA3EIZ" style="height:40px; width:auto;">
+</a>
 
-  <!-- Info máquina editable -->
-  <div id="infoMaquinaBlock" style="display:flex;flex-direction:column;gap:4px;margin-right:.8rem;min-width:160px;">
-    <div style="display:flex;align-items:center;gap:5px;">
-      <span style="font-family:'Share Tech Mono',monospace;font-size:.58rem;color:#999999;text-transform:uppercase;letter-spacing:.08em;min-width:32px;">IP de la maquina:&nbsp;&nbsp;&nbsp;&nbsp;</span>
-      <input id="infoIp" type="text" maxlength="100" spellcheck="false" autocomplete="off"
-        style="background:transparent;border:1px solid #1e3a5a;border-radius:3px;color:#00d4ff;font-family:'Share Tech Mono',monospace;font-size:.78rem;padding:2px 6px;outline:none;width:200px;"
-        onfocus="this.style.borderColor='#00d4ff'" onblur="this.style.borderColor='#1e3a5a';infoMaquinaAutoSave()"
-        onkeydown="if(event.key==='Enter')this.blur()" placeholder="192.168.1.x">
+        <a href="info_maquina.php" style="text-decoration: none; color: inherit; order: 2;" title="Configurar equipo">
+    <div class="maquina-info-box">
+        <span class="maquina-badge">ONLINE</span>
+        
+        <div class="maquina-detalles" style="display: flex; flex-direction: column; align-items: center; text-align: center;">
+            
+            <div class="maquina-nom"><?php echo htmlspecialchars($maquina_nombre); ?></div>
+            
+            <div class="maquina-dir-ip"><?php echo htmlspecialchars($maquina_ip); ?></div>
+        </div>
+        
     </div>
-    <div style="display:flex;align-items:center;gap:5px;">
-      <span style="font-family:'Share Tech Mono',monospace;font-size:.58rem;color:#999999;text-transform:uppercase;letter-spacing:.08em;min-width:32px;">Nombre de la maquina:</span>
-      <input id="infoNombre" type="text" maxlength="80" spellcheck="false" autocomplete="off"
-        style="background:transparent;border:1px solid #1e3a5a;border-radius:3px;color:#00d4ff;font-family:'Share Tech Mono',monospace;font-size:.78rem;padding:2px 6px;outline:none;width:200px;"
-        onfocus="this.style.borderColor='#00d4ff'" onblur="this.style.borderColor='#1e3a5a';infoMaquinaAutoSave()"
-        onkeydown="if(event.key==='Enter')this.blur()" placeholder="RPi-MMDVM">
-    </div>
-  </div>
+</a>
 
-  <a href="https://associacioader.com" target="_blank">
-    <img src="Logo_Ader.png" alt="EA3EIZ" style="height:40px; width:auto;">
-  </a>
-  <span style="color:amber;font-size:1.9rem;font-family: Bebas Neue, sans-serif;">PANEL SISTEMAS DIGITALES</span>
-  <span style="color:#ff8c00;font-size:1.9rem;font-family: Bebas Neue, sans-serif;">PARA RADIOAFICIONADOS</span>
-  <span style="color:rgb(109,109,971);font-size:1.9rem;font-family: Bebas Neue, sans-serif;">PHPPLUS</span>
+<span style="color:amber;font-size:1.9rem;font-family: Bebas Neue, sans-serif;">PANEL SISTEMAS DIGITALES</span>
+<span style="color:#ff8c00;font-size:1.9rem;font-family: Bebas Neue, sans-serif;">PARA RADIOAFICIONADOS</span>
+<span style="color:rgb(109,109,971);font-size:1.9rem;font-family: Bebas Neue, sans-serif;">PHPPLUS</span>
 
 </div>
 <div class="ctrl-header-btns">
@@ -1536,30 +1576,6 @@ document.getElementById('xtInp').addEventListener('keydown',async function(e){
     startMMDVMYSFLogs();
     startYSFTransmissionPoll();
 })();
-
-// ── Info Máquina ──────────────────────────────────────────────────────────────
-async function infoMaquinaLoad() {
-    try {
-        const r = await fetch('?action=info-maquina-read');
-        const d = await r.json();
-        if (d.ok) {
-            document.getElementById('infoIp').value     = d.ip     || '';
-            document.getElementById('infoNombre').value = d.nombre || '';
-        }
-    } catch(e) {}
-}
-async function infoMaquinaAutoSave() {
-    const ip     = document.getElementById('infoIp').value.trim();
-    const nombre = document.getElementById('infoNombre').value.trim();
-    try {
-        await fetch('?action=info-maquina-save', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ip, nombre }),
-        });
-    } catch(e) {}
-}
-infoMaquinaLoad();
 </script>
 </body>
 </html>
