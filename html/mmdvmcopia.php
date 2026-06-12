@@ -822,7 +822,7 @@ button.btn-header { font-family: var(--font-mono); }
 .nx-topbar.nxdn-bar .nx-mode { color: #ffd700; opacity: .8; }
 .nx-botbar.nxdn-bar { background: #0e0e06; border-top: 1px solid #4a4a00; color: #707000; }
 .nx-infobar-nxdn { background: rgba(0,0,0,.4); border-bottom: 1px solid #303000; }
-.lh-panel { background: var(--surface); border: 3px solid #1a3a4a; border-radius: 6px; display: flex; flex-direction: column; }
+.lh-panel { background: var(--surface); border: 3px solid #1a3a4a; border-radius: 6px; display: flex; flex-direction: column; height: 240px; overflow: hidden; }
 .lh-header { background: #1c1c24; border-bottom: 1px solid var(--border); padding: .4rem 1rem; display: grid; grid-template-columns: 1.1fr 1.5fr .7fr .7fr .5fr; gap: .3rem; font-family: var(--font-mono); font-size: .6rem; color: var(--text-dim); letter-spacing: .1em; text-transform: uppercase; }
 .lh-body { flex: 1; overflow-y: auto; }
 .lh-body::-webkit-scrollbar { width: 3px; }
@@ -841,7 +841,7 @@ button.btn-header { font-family: var(--font-mono); }
 .lh-src.rf { color: var(--green); }
 .lh-src.net { color: var(--cyan); }
 .lh-empty { padding: 1.5rem 1rem; font-family: var(--font-mono); font-size: .72rem; color: var(--text-dim); text-align: center; }
-.lh-panel-ysf { background: var(--surface); border: 3px solid #2d1a4a; border-radius: 6px; display: flex; flex-direction: column; }
+.lh-panel-ysf { background: var(--surface); border: 3px solid #2d1a4a; border-radius: 6px; display: flex; flex-direction: column; height: 240px; overflow: hidden; }
 .lh-header-ysf { background: #1a1424; border-bottom: 1px solid #2d1a4a; padding: .4rem 1rem; display: grid; grid-template-columns: 1.2fr 1.8fr 1fr .6fr; gap: .3rem; font-family: var(--font-mono); font-size: .6rem; color: #4a2a7a; letter-spacing: .1em; text-transform: uppercase; }
 .lh-row-ysf { display: grid; grid-template-columns: 1.2fr 1.8fr 1fr .6fr; gap: .3rem; padding: .45rem 1rem; border-bottom: 1px solid rgba(45,26,74,.5); align-items: center; transition: background .2s; }
 .lh-row-ysf:last-child { border-bottom: none; }
@@ -849,7 +849,7 @@ button.btn-header { font-family: var(--font-mono); }
 .lh-row-ysf.lh-active { background: rgba(181,122,255,.08); }
 .lh-tx-dot-ysf { width: 6px; height: 6px; border-radius: 50%; background: var(--violet); box-shadow: 0 0 6px var(--violet); animation: pulse 1s infinite; flex-shrink: 0; }
 .lh-call-ysf { font-family: var(--font-mono); font-size: .82rem; color: var(--violet); letter-spacing: .05em; font-weight: bold; }
-.lh-panel-nxdn { background: var(--surface); border: 3px solid #4a4a00; border-radius: 6px; display: flex; flex-direction: column; }
+.lh-panel-nxdn { background: var(--surface); border: 3px solid #4a4a00; border-radius: 6px; display: flex; flex-direction: column; height: 240px; overflow: hidden; }
 .lh-header-nxdn { background: #1a1a0a; border-bottom: 1px solid #4a4a00; padding: .4rem 1rem; display: grid; grid-template-columns: 1.2fr 1.8fr .8fr 1fr .6fr; gap: .3rem; font-family: var(--font-mono); font-size: .6rem; color: #707000; letter-spacing: .1em; text-transform: uppercase; }
 .lh-row-nxdn { display: grid; grid-template-columns: 1.2fr 1.8fr .8fr 1fr .6fr; gap: .3rem; padding: .45rem 1rem; border-bottom: 1px solid rgba(74,74,0,.5); align-items: center; transition: background .2s; }
 .lh-row-nxdn:last-child { border-bottom: none; }
@@ -857,7 +857,7 @@ button.btn-header { font-family: var(--font-mono); }
 .lh-row-nxdn.lh-active { background: rgba(255,215,0,.08); }
 .lh-tx-dot-nxdn { width: 6px; height: 6px; border-radius: 50%; background: #ffd700; box-shadow: 0 0 6px #ffd700; animation: pulse 1s infinite; flex-shrink: 0; }
 .lh-call-nxdn { font-family: var(--font-mono); font-size: .82rem; color: #ffd700; letter-spacing: .05em; font-weight: bold; }
-.log-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+.log-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; margin-top: 1rem; }
 @media (max-width:900px) { .log-grid { grid-template-columns: 1fr; } }
 .log-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
 .log-panel-header { display: flex; align-items: center; justify-content: space-between; padding: .5rem 1rem; border-bottom: 1px solid var(--border); background: rgba(0,0,0,.3); }
@@ -1112,6 +1112,10 @@ button.btn-header { font-family: var(--font-mono); }
     </div>
   </div>
 </div>
+<div class="log-grid" id="dmrLogPanels">
+<div class="log-panel"><div class="log-panel-header"><span class="svc-name">▸ MMDVMHost</span><button class="btn-clear" onclick="clearLog('logMmd')">limpiar</button></div><div class="log-output" id="logMmd">Esperando servicios…</div></div>
+<div class="log-panel"><div class="log-panel-header"><span class="svc-name gw">▸ DMRGateway</span><button class="btn-clear" onclick="clearLog('logGw')">limpiar</button></div><div class="log-output" id="logGw">Esperando servicios…</div></div>
+</div>
 <div class="display-row" style="margin-top:1.2rem;">
   <div id="ysfDisplayPanel">
     <div class="panel-label ysf-label">▸ C4FM Display</div>
@@ -1131,6 +1135,10 @@ button.btn-header { font-family: var(--font-mono); }
       <div class="lh-body" id="ysfLhBody"><div class="lh-empty">Sin actividad C4FM</div></div>
     </div>
   </div>
+</div>
+<div class="log-grid" id="ysfLogPanels">
+<div class="log-panel"><div class="log-panel-header"><span class="svc-name" style="color:#26c6da">▸ MMDVMHost YSF</span><button class="btn-clear" onclick="clearLog('logMmdvmYsf')">limpiar</button></div><div class="log-output" id="logMmdvmYsf">Esperando MMDVMHost YSF…</div></div>
+<div class="log-panel"><div class="log-panel-header"><span class="svc-name ysf">▸ YSFGateway</span><button class="btn-clear" onclick="clearLog('logYsf')">limpiar</button></div><div class="log-output" id="logYsf">Esperando YSFGateway…</div></div>
 </div>
 <div class="display-row" style="margin-top:1.2rem;">
   <div id="dstarDisplayPanel">
@@ -1154,6 +1162,10 @@ button.btn-header { font-family: var(--font-mono); }
     </div>
   </div>
 </div>
+<div class="log-grid" id="dstarLogPanels" style="display:none;">
+<div id="dstarPanelMmd" class="log-panel"><div class="log-panel-header"><span class="svc-name" style="color:#80f0ff;">▸ MMDVMHost DStar</span><button class="btn-clear" onclick="clearLog('logDstarMmd')">limpiar</button></div><div class="log-output" id="logDstarMmd">Esperando MMDVMHost DStar…</div></div>
+<div id="dstarPanelGw" class="log-panel"><div class="log-panel-header"><span class="svc-name" style="color:#00e5ff;">▸ DStarGateway</span><button class="btn-clear" onclick="clearLog('logDstarGw')">limpiar</button></div><div class="log-output" id="logDstarGw">Esperando DStarGateway…</div></div>
+</div>
 <div class="display-row" style="margin-top:1.2rem;">
   <div id="nxdnDisplayPanel">
     <div class="panel-label" style="color:#ffd700;">▸ NXDN Display</div>
@@ -1173,18 +1185,6 @@ button.btn-header { font-family: var(--font-mono); }
       <div class="lh-body" id="nxdnLhBody"><div class="lh-empty">Sin actividad NXDN</div></div>
     </div>
   </div>
-</div>
-<div class="log-grid" id="dmrLogPanels">
-<div class="log-panel"><div class="log-panel-header"><span class="svc-name">▸ MMDVMHost</span><button class="btn-clear" onclick="clearLog('logMmd')">limpiar</button></div><div class="log-output" id="logMmd">Esperando servicios…</div></div>
-<div class="log-panel"><div class="log-panel-header"><span class="svc-name gw">▸ DMRGateway</span><button class="btn-clear" onclick="clearLog('logGw')">limpiar</button></div><div class="log-output" id="logGw">Esperando servicios…</div></div>
-</div>
-<div class="log-grid" id="ysfLogPanels">
-<div class="log-panel"><div class="log-panel-header"><span class="svc-name" style="color:#26c6da">▸ MMDVMHost YSF</span><button class="btn-clear" onclick="clearLog('logMmdvmYsf')">limpiar</button></div><div class="log-output" id="logMmdvmYsf">Esperando MMDVMHost YSF…</div></div>
-<div class="log-panel"><div class="log-panel-header"><span class="svc-name ysf">▸ YSFGateway</span><button class="btn-clear" onclick="clearLog('logYsf')">limpiar</button></div><div class="log-output" id="logYsf">Esperando YSFGateway…</div></div>
-</div>
-<div class="log-grid" id="dstarLogPanels" style="display:none;">
-<div id="dstarPanelMmd" class="log-panel"><div class="log-panel-header"><span class="svc-name" style="color:#80f0ff;">▸ MMDVMHost DStar</span><button class="btn-clear" onclick="clearLog('logDstarMmd')">limpiar</button></div><div class="log-output" id="logDstarMmd">Esperando MMDVMHost DStar…</div></div>
-<div id="dstarPanelGw" class="log-panel"><div class="log-panel-header"><span class="svc-name" style="color:#00e5ff;">▸ DStarGateway</span><button class="btn-clear" onclick="clearLog('logDstarGw')">limpiar</button></div><div class="log-output" id="logDstarGw">Esperando DStarGateway…</div></div>
 </div>
 <div class="log-grid" id="nxdnLogPanels" style="display:none;">
 <div id="nxdnPanelMmd" class="log-panel"><div class="log-panel-header"><span class="svc-name" style="color:#ffd700;">▸ MMDVMHost NXDN</span><button class="btn-clear" onclick="clearLog('logNxdnMmd')">limpiar</button></div><div class="log-output" id="logNxdnMmd">Esperando MMDVMHost NXDN…</div></div>
@@ -1562,4 +1562,3 @@ document.getElementById('xtInp').addEventListener('keydown',async function(e){
     await checkStatus();
     await checkYSFStatus();
     await checkMMDVMYSFStatus();
-    await checkDStarStatus();
