@@ -1104,6 +1104,15 @@ button.btn-header { font-family: var(--font-mono); }
       <div class="nx-botbar"><span class="nx-dmrid" id="nxDmrid">—</span><span>DMR · DIGITAL VOICE</span><span id="nxSlot" style="display:none">—</span><span class="nx-source" id="nxSource"></span></div>
     </div>
   </div>
+  <div id="dmrLastHeardPanel">
+    <div class="panel-label">▸ Últimos escuchados DMR</div>
+    <div class="lh-panel">
+      <div class="lh-header"><span>Indicativo</span><span>Nombre</span><span>TG</span><span>Hora</span><span>Src</span></div>
+      <div class="lh-body" id="lhBody"><div class="lh-empty">Sin actividad reciente</div></div>
+    </div>
+  </div>
+</div>
+<div class="display-row" style="margin-top:1.2rem;">
   <div id="ysfDisplayPanel">
     <div class="panel-label ysf-label">▸ C4FM Display</div>
     <div class="nextion-ysf">
@@ -1113,6 +1122,13 @@ button.btn-header { font-family: var(--font-mono); }
       <div class="nx-center" id="ysfNxCenter"><div class="nx-clock" id="ysfNxClock" style="color:#c084ff;">00:00:00</div><div class="nx-date" id="ysfNxDate" style="color:#9b59d4;">—</div></div>
       <div class="nx-txbar" id="ysfTxBar"></div>
       <div class="nx-botbar ysf-bar"><span style="color:#5a3a8a;font-family:var(--font-mono);font-size:.65rem;" id="ysfProto">C4FM . DIGITAL VOICE</span><span style="color:#5a3a8a;font-family:var(--font-mono);font-size:.65rem;"><?php $ysfGwIni=parseMMDVMIni('/home/pi/YSFClients/YSFGateway/YSFGateway.ini');$ysfRefStart=trim($ysfGwIni['Network']['Startup']??'—');echo "Reflector: " . htmlspecialchars($ysfRefStart); ?></span><span class="nx-source" id="ysfSource"></span></div>
+    </div>
+  </div>
+  <div id="ysfLastHeardPanel">
+    <div class="panel-label ysf-label">▸ Últimos escuchados C4FM</div>
+    <div class="lh-panel-ysf">
+      <div class="lh-header-ysf"><span>Indicativo</span><span>Nombre</span><span>Hora</span><span>Src</span></div>
+      <div class="lh-body" id="ysfLhBody"><div class="lh-empty">Sin actividad C4FM</div></div>
     </div>
   </div>
 </div>
@@ -1128,6 +1144,17 @@ button.btn-header { font-family: var(--font-mono); }
       <div class="nx-botbar dstar-bar"><span style="color:#006070;font-family:var(--font-mono);font-size:.65rem;">D-STAR · DIGITAL VOICE</span><span style="color:green;font-family:var(--font-mono);font-size:.65rem;"><?php $dgwIni=parseMMDVMIni('/home/pi/DStarGateway/DStarGateway.ini');$dstarRef=trim($dgwIni['Repeater 1']['Reflector']??'—');echo "Reflector: " . htmlspecialchars($dstarRef); ?></span><span class="nx-source" id="dstarSource"></span></div>
     </div>
   </div>
+  <div id="dstarLastHeardPanel">
+    <div class="panel-label" style="color:#00e5ff;">▸ Últimos escuchados D-STAR</div>
+    <div class="lh-panel" style="border-color:#004a4a;">
+      <div class="lh-header" style="background:#0a1a1a;border-bottom-color:#004a4a;color:#006070;">
+        <span>Indicativo</span><span>Nombre</span><span>Hora</span><span>Src</span>
+      </div>
+      <div class="lh-body" id="dstarLhBody"><div class="lh-empty">Sin actividad D-STAR</div></div>
+    </div>
+  </div>
+</div>
+<div class="display-row" style="margin-top:1.2rem;">
   <div id="nxdnDisplayPanel">
     <div class="panel-label" style="color:#ffd700;">▸ NXDN Display</div>
     <div class="nextion-nxdn">
@@ -1137,33 +1164,6 @@ button.btn-header { font-family: var(--font-mono); }
       <div class="nx-center" id="nxdnNxCenter"><div class="nx-clock" id="nxdnNxClock" style="color:#ffd700;">00:00:00</div><div class="nx-date" id="nxdnNxDate" style="color:#b8a000;">—</div></div>
       <div class="nx-txbar" id="nxdnTxBar"></div>
       <div class="nx-botbar nxdn-bar"><span style="color:#707000;font-family:var(--font-mono);font-size:.65rem;">NXDN · DIGITAL VOICE</span><span style="color:#ff0;font-family:var(--font-mono);font-size:.65rem;"><?php $nxdnGwIni=parseMMDVMIni('/home/pi/NXDNClients/NXDNGateway/NXDNGateway.ini');$nxdnRef=trim($nxdnGwIni['Network']['Static']??'—');echo 'Reflector: ' . htmlspecialchars($nxdnRef); ?></span><span class="nx-source" id="nxdnSource"></span></div>
-    </div>
-  </div>
-</div>
-<div class="display-row" style="margin-top:1rem;">
-  <div id="dmrLastHeardPanel">
-    <div class="panel-label">▸ Últimos escuchados DMR</div>
-    <div class="lh-panel">
-      <div class="lh-header"><span>Indicativo</span><span>Nombre</span><span>TG</span><span>Hora</span><span>Src</span></div>
-      <div class="lh-body" id="lhBody"><div class="lh-empty">Sin actividad reciente</div></div>
-    </div>
-  </div>
-  <div id="ysfLastHeardPanel">
-    <div class="panel-label ysf-label">▸ Últimos escuchados C4FM</div>
-    <div class="lh-panel-ysf">
-      <div class="lh-header-ysf"><span>Indicativo</span><span>Nombre</span><span>Hora</span><span>Src</span></div>
-      <div class="lh-body" id="ysfLhBody"><div class="lh-empty">Sin actividad C4FM</div></div>
-    </div>
-  </div>
-</div>
-<div class="display-row" style="margin-top:1rem;">
-  <div id="dstarLastHeardPanel">
-    <div class="panel-label" style="color:#00e5ff;">▸ Últimos escuchados D-STAR</div>
-    <div class="lh-panel" style="border-color:#004a4a;">
-      <div class="lh-header" style="background:#0a1a1a;border-bottom-color:#004a4a;color:#006070;">
-        <span>Indicativo</span><span>Nombre</span><span>Hora</span><span>Src</span>
-      </div>
-      <div class="lh-body" id="dstarLhBody"><div class="lh-empty">Sin actividad D-STAR</div></div>
     </div>
   </div>
   <div id="nxdnLastHeardPanel">
@@ -1563,19 +1563,3 @@ document.getElementById('xtInp').addEventListener('keydown',async function(e){
     await checkYSFStatus();
     await checkMMDVMYSFStatus();
     await checkDStarStatus();
-    await checkNXDNStatus();
-    setInterval(checkStatus,10000);
-    setInterval(checkYSFStatus,8000);
-    setInterval(checkMMDVMYSFStatus,8000);
-    setInterval(checkDStarStatus,10000);
-    setInterval(checkNXDNStatus,10000);
-    if(!running){showIdle();fetchTransmission();}
-    showYSFIdle();
-    showNXDNIdle();
-    startYSFLogs();
-    startMMDVMYSFLogs();
-    startYSFTransmissionPoll();
-})();
-</script>
-</body>
-</html>
