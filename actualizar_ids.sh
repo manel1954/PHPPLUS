@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # ==========================================================
-# Actualización de DMR IDs para MMDVM
+# Actualización de DMR IDs para MMDVM y NXDN.csv para NXDN
 # ==========================================================
 
-printf "🔄 Iniciando actualización de DMR IDs...\n"
+printf "🔄 Iniciando actualización de DMR IDs y NXDN IDs...\n"
 
 # Ajuste de permisos
 printf "🔧 Ajustando permisos en directorios MMDVM...\n"
