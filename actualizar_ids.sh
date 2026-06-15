@@ -49,4 +49,5 @@ fi
 
 # Finalización
 printf "🎉 DMR IDs actualizadas correctamente.\n"
+printf "🎉 NXDN IDs actualizadas correctamente.\n"
 sleep 3
