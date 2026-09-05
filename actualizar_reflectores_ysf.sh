@@ -2,6 +2,7 @@
 
 printf "🔄 Iniciando actualización de YSFHosts...\n"
 
+
 # Ajuste de permisos previos (solo en /home/pi)
 printf "🔧 Ajustando permisos en directorios locales...\n"
 sudo chmod 777 -R /home/pi/YSFClients > /dev/null 2>&1
